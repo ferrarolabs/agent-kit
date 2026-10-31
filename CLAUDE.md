@@ -17,6 +17,7 @@ This repo is the **kit**, not an application. It holds the plan and, over time, 
 - An issue that needs my approval is atomic: one question or one task, readable in under a minute. Bigger work becomes a parent issue with sub-issues.
 - Nothing deferred lives only in chat: it becomes an issue.
 - When something fails, recover before asking: read the real error, try the alternatives, fix what's reversible. Ask only for what only I can do, and come with options and a recommendation (ADR 0010).
+- A PR you open is yours until it is merged or closed: follow it in the same turn, without asking, and drive it to green (ADR 0012).
 
 ## Definition of done
 - The current phase's checklist in `docs/ROADMAP.md` is updated.
