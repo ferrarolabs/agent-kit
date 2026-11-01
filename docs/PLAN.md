@@ -79,7 +79,8 @@ agent-kit/
 │   ├── CLAUDE.md             # always-on rules, installed as ~/.claude/CLAUDE.md
 │   ├── settings.json         # deny floor + SessionStart hook, as ~/.claude/settings.json
 │   ├── hooks/                # account-level hooks
-│   └── install.sh            # installs the three into ~/.claude
+│   ├── merge-settings.js     # merges the floor into an existing settings.json
+│   └── install.sh            # installs the three into ~/.claude, merging settings.json
 ├── account-skills/           # sources of the skills to enable on the account
 ├── evals/                    # tests for the harness itself
 └── scripts/

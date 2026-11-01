@@ -11,8 +11,8 @@
 # AGENT_KIT_REF picks the branch or commit to download from (default: main).
 #
 # CLAUDE.md and the hook are always replaced: edit them in agent-kit, never in place.
-# An existing settings.json that differs is never overwritten: the kit's copy is written
-# next to it as settings.kit.json, and the script says so. Merge by hand.
+# An existing settings.json is never overwritten: the kit's floor is merged into it
+# (account/merge-settings.js), with a backup. Lists add up; a value you set stays yours.
 set -eu
 
 dest=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
@@ -31,7 +31,7 @@ mkdir -p "$dest/hooks"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
-for f in CLAUDE.md settings.json hooks/project-rules-check.js; do
+for f in CLAUDE.md settings.json merge-settings.js hooks/project-rules-check.js; do
   mkdir -p "$tmp/$(dirname "$f")"
   fetch "$f" "$tmp/$f"
 done
@@ -41,8 +41,10 @@ cp "$tmp/hooks/project-rules-check.js" "$dest/hooks/project-rules-check.js"
 
 if [ ! -f "$dest/settings.json" ] || cmp -s "$tmp/settings.json" "$dest/settings.json"; then
   cp "$tmp/settings.json" "$dest/settings.json"
-  echo "agent-kit account layer installed in $dest"
+elif command -v node >/dev/null 2>&1; then
+  node "$tmp/merge-settings.js" "$dest/settings.json" "$tmp/settings.json"
 else
   cp "$tmp/settings.json" "$dest/settings.kit.json"
-  echo "agent-kit: $dest/settings.json exists and differs; kept it. The kit's floor is in $dest/settings.kit.json: merge it by hand." >&2
+  echo "agent-kit: node not found, so $dest/settings.json was kept as it is. The kit's floor is in $dest/settings.kit.json: merge it by hand." >&2
 fi
+echo "agent-kit account layer installed in $dest"
