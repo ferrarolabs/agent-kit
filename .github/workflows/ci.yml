@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # The main ruleset requires this check by name: rename it there too.
+    name: Docs, links, JSON, scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Markdown lint
+        run: npx --yes markdownlint-cli2@0.18.1
+
+      - name: Relative links and anchors
+        run: node scripts/check/check-links.js
+
+      - name: JSON parses
+        run: |
+          status=0
+          for f in $(git ls-files '*.json'); do
+            node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"))' "$f" \
+              || { echo "::error file=$f::invalid JSON"; status=1; }
+          done
+          exit $status
+
+      - name: Scripts parse
+        run: |
+          status=0
+          for f in $(git ls-files 'scripts/**/*.js'); do
+            node --check "$f" || status=1
+          done
+          exit $status
+
+      - name: Unit tests
+        run: node --test
