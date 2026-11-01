@@ -30,6 +30,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] `account/CLAUDE.md` installed by the cloud setup script (2026-10-31). A session started with the file in `~/.claude/` loads it as global instructions
 - [ ] [Org first, then sync](https://github.com/ferrarolabs/agent-kit/issues/85): settings at org level, the rest synced from agent-kit (ADR 0011, proposed)
 - [ ] Cloud environment configured: setup script, network allowlist, no Supabase credentials
+- [x] [Sessions open from the repo root](https://github.com/ferrarolabs/agent-kit/issues/3): [guide](guides/open-sessions-from-the-repo-root.md), proven by a headless probe. Multi-repo cloud sessions [load no project deny rules](https://github.com/ferrarolabs/agent-kit/issues/103)
 
 **Exit:** a real issue implemented by a cloud session started from my phone, with a PR and green CI, without me writing code.
 
