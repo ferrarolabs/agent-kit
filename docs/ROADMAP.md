@@ -1,6 +1,6 @@
 # Roadmap
 
-Each phase is useful on its own and has a verifiable **exit criterion**. We don't move to the next phase until it's met. The pilot is **jamly**: phases 1–3 are built there, phase 4 extracts what's generic into this repo.
+Each phase is useful on its own and has a verifiable **exit criterion**. We don't move to the next phase until it's met. The pilot is **jamly**: pieces are built there, and the generic ones are ported into this repo at every harness merge (ADR 0014). Phase 4 adds the scripts and a second project.
 
 ## Phase 0 · Plan ✅
 - [x] Goal, principles and architecture in [PLAN.md](PLAN.md)
@@ -30,6 +30,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] `account/CLAUDE.md` installed by the cloud setup script (2026-10-31). A session started with the file in `~/.claude/` loads it as global instructions
 - [ ] [Org first, then sync](https://github.com/ferrarolabs/agent-kit/issues/85): settings at org level, the rest synced from agent-kit (ADR 0011, proposed)
 - [ ] Cloud environment configured: setup script, network allowlist, no Supabase credentials
+- [ ] [Kit aligned with jamly at every harness merge](https://github.com/ferrarolabs/agent-kit/issues/101) (ADR 0014): [inventory](inventory.md) of every harness piece on jamly
 
 **Exit:** a real issue implemented by a cloud session started from my phone, with a PR and green CI, without me writing code.
 
@@ -53,8 +54,8 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 **Exit:** a feature moves forward for 24 hours without me, across at least one usage limit.
 
 ## Phase 4 · Extraction into the kit
-- [ ] Split jamly's generic files from its project-specific ones
-- [ ] Fill `template/` in this repo, including the generic labels (type, agent state, priority) and the board spec
+- [ ] Split jamly's generic files from its project-specific ones: done along the way in the [inventory](inventory.md) (ADR 0014)
+- [ ] Fill `template/` in this repo, including the generic labels (type, agent state) and the board spec: done along the way, one port per harness merge (ADR 0014)
 - [ ] `scripts/bootstrap.sh` and `scripts/sync-kit.sh`
 - [ ] Account-level skills: `write-spec`, `critic`, `explain-feature`
 - [ ] This repo set up as a GitHub template repository

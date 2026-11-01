@@ -1,6 +1,6 @@
 # 0001 · A separate kit repo, built on a real pilot
 
-**Status:** accepted · 2026-10-30
+**Status:** accepted · 2026-10-30 · *when* extraction happens superseded by [ADR 0014](0014-kit-aligned-at-every-harness-merge.md)
 
 ## Context
 I want an agentic system I can reuse across all my repos. Designing an abstract kit before using it almost always means redoing it: you don't yet know what's generic and what's project-specific.
