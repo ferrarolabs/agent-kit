@@ -37,7 +37,7 @@ Checked against jamly `dev` at `6e28048` (2026-11-01).
 | `.claude/settings.json` · ask before editing workflows | generic | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) | `.claude/settings.json` · to port | |
 | `.claude/settings.json` · deny Supabase and EAS writes, ask on `config.toml` and `eas.json` | jamly | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) (D42) | — | The pattern is generic: deny the project's irreversible commands |
 | `.claude/settings.json` · allow npm checks, Expo plugin | jamly | — | — | |
-| Deny-rule probe | generic | [jamly#5](https://github.com/ferrarolabs/jamly/pull/5) | `scripts/probe-deny-rules` · **lost** | The script was never committed. Rebuilt in [Probe for deny rules as a reusable Sensor](https://github.com/ferrarolabs/agent-kit/issues/2) |
+| Deny-rule probe | generic | [jamly#5](https://github.com/ferrarolabs/jamly/pull/5); rebuilt and seen failing in [Probe for deny rules as a reusable Sensor](https://github.com/ferrarolabs/agent-kit/issues/2) | `scripts/probe/` in the kit · ported | The first script was never committed. The rebuild lives in the kit, not in `template/`: it runs from the kit against any project ([README](../scripts/probe/README.md)) |
 
 ## CI and GitHub
 
