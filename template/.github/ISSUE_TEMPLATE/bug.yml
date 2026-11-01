@@ -1,0 +1,42 @@
+# From agent-kit.
+name: Bug
+description: Something that behaves wrongly.
+labels: [type:bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should have happened
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. …
+        2. …
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Where
+      description: Platform, browser or device, version.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs, errors, screenshots
+  - type: textarea
+    id: fixed-when
+    attributes:
+      label: Fixed when
+      description: The check that proves it's fixed. It should become a regression test.
+    validations:
+      required: true
