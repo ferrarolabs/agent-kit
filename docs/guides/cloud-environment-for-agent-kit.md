@@ -18,7 +18,8 @@ set -eu
 # The account layer: rules, deny floor, SessionStart hook (ADR 0010, ADR 0017).
 curl -fsSL https://raw.githubusercontent.com/ferrarolabs/agent-kit/main/account/install.sh | sh
 # Warm the npm cache for the markdown lint CI runs, so "before saying done" is fast.
-npx --yes markdownlint-cli2@0.18.1 --help > /dev/null
+# Not `markdownlint-cli2 --help`: it exits 2, and set -e fails the whole script.
+npm cache add markdownlint-cli2@0.18.1
 ```
 
 Node 22, `git`, `gh` and the `claude` CLI are already in the cloud image.
