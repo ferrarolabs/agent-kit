@@ -31,8 +31,9 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] `account/CLAUDE.md` installed by the cloud setup script (2026-10-31). A session started with the file in `~/.claude/` loads it as global instructions
 - [ ] [Org first, then sync](https://github.com/ferrarolabs/agent-kit/issues/85): settings at org level, the rest synced from agent-kit (ADR 0011, proposed)
 - [ ] Cloud environment configured: setup script, network allowlist (`*.supabase.co` allowed), no Supabase secret keys. Until real users, the live project's URL, publishable key and a test account are allowed for agent tests (ADR 0016)
-- [ ] [Kit aligned with jamly at every harness merge](https://github.com/ferrarolabs/agent-kit/issues/101) (ADR 0014): [inventory](inventory.md) of every harness piece on jamly
+- [x] [Kit aligned with jamly at every harness merge](https://github.com/ferrarolabs/agent-kit/issues/101) (ADR 0014): [inventory](inventory.md) of every harness piece on jamly
 - [x] [Sessions open from the repo root](https://github.com/ferrarolabs/agent-kit/issues/3): [guide](guides/open-sessions-from-the-repo-root.md), proven by a headless probe. Multi-repo cloud sessions [load no project deny rules](https://github.com/ferrarolabs/agent-kit/issues/103)
+- [ ] [Account deny floor](https://github.com/ferrarolabs/agent-kit/issues/103) (ADR 0017): `account/settings.json` and a SessionStart hook, installed by `account/install.sh`. Probed: 19 of 19 push cases and `rm -rf` denied with only the floor loaded. Checked once the setup script runs the installer and a two-repo cloud session denies `rm -rf` and says the project rules didn't load
 
 **Exit:** a real issue implemented by a cloud session started from my phone, with a PR and green CI, without me writing code.
 

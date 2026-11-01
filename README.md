@@ -26,7 +26,7 @@ A cloud session sees only what is committed to the repo it works on, plus what i
 
 | Level | Location | Contents |
 |---|---|---|
-| **Account** | `account/CLAUDE.md`, installed in every session | Rules that apply everywhere: recover before escalating, own a PR to the end, ship a learn note |
+| **Account** | `account/`, installed in every session by `account/install.sh` | Rules that apply everywhere: recover before escalating, own a PR to the end, ship a learn note. A deny floor that holds wherever a session starts |
 | **Kit** | `template/` in this repo, copied into each project | Generic pieces: permissions, CI, issue templates, labels, the `CLAUDE.md` skeleton |
 | **Project** | The project's own repo | What only that project knows: its stack, its irreversible commands, its decisions |
 
@@ -82,4 +82,5 @@ Planned in later phases of the [roadmap](docs/ROADMAP.md), not claimed here:
 | [docs/decisions/](docs/decisions/) | Architecture decision records, one per file |
 | [docs/inventory.md](docs/inventory.md) | Every harness piece on jamly and where it stands in the kit |
 | [account/CLAUDE.md](account/CLAUDE.md) | The rules every session receives |
+| [account/settings.json](account/settings.json) | The account deny floor and its SessionStart hook ([ADR 0017](docs/decisions/0017-account-deny-floor.md)) |
 | [template/](template/) | The generic files copied into projects |

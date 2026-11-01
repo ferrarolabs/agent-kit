@@ -1,0 +1,13 @@
+{
+  "$comment": "Cases for the account deny floor (ADR 0017), run with --account: the session starts above the repo, so only ~/.claude/settings.json can deny. Pair with push-to-protected-branches.json for the push rules.",
+  "cases": [
+    {
+      "command": "rm -rf probe-target",
+      "expect": "deny"
+    },
+    {
+      "command": "ls repo",
+      "expect": "allow"
+    }
+  ]
+}

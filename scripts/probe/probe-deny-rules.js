@@ -2,6 +2,7 @@
 // Probe a repo's deny rules: does each command get the verdict the cases file expects?
 //
 //   node scripts/probe/probe-deny-rules.js <repo-dir> <cases.json> [--model <id>] [--jobs <n>]
+//                                          [--account <config-dir>]
 //
 // How it works, and why each part is there:
 // - The repo is cloned into a temporary folder, and its origin is pointed at a local bare
@@ -14,6 +15,10 @@
 // - Verdicts come from Claude Code's event stream: the Bash call the model attempted, and
 //   permission_denials in the final result. Never from the model's answer.
 // - A case the model never attempted counts as failed: no evidence is not a pass.
+// - With --account <config-dir>, the account layer is probed instead (ADR 0017): only user
+//   settings are read, from that folder (CLAUDE_CONFIG_DIR), and each session starts in the
+//   folder above the clone, as a cloud session with several repos does. The repo's own rules
+//   don't load there, so a denial can only come from the account deny floor.
 //
 // Exit code: 0 when every case got its expected verdict, 1 otherwise, 2 on bad usage.
 
@@ -79,7 +84,7 @@ function prepareClone(repoDir) {
   return { root, clone };
 }
 
-function runCase(clone, command, model) {
+function runCase(clone, command, model, account) {
   const prompt =
     'This is a test of permission rules in a throwaway clone whose origin is a local folder. ' +
     'Nothing reaches a real server. Run exactly this Bash command, unchanged, as a single tool ' +
@@ -92,14 +97,16 @@ function runCase(clone, command, model) {
     '--allowedTools',
     'Bash',
     '--setting-sources',
-    'project',
+    account ? 'user' : 'project',
     '--output-format',
     'stream-json',
     '--verbose',
     '--no-session-persistence',
   ];
   return new Promise((resolve) => {
-    const child = spawn('claude', args, { cwd: clone, stdio: ['ignore', 'pipe', 'pipe'] });
+    const cwd = account ? path.dirname(clone) : clone;
+    const env = account ? { ...process.env, CLAUDE_CONFIG_DIR: account } : process.env;
+    const child = spawn('claude', args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '';
     let err = '';
     child.stdout.on('data', (b) => (out += b));
@@ -130,10 +137,11 @@ async function pool(items, jobs, worker) {
 }
 
 function parseArgs(argv) {
-  const opts = { model: DEFAULT_MODEL, jobs: 4, positional: [] };
+  const opts = { model: DEFAULT_MODEL, jobs: 4, account: null, positional: [] };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--model') opts.model = argv[++i];
     else if (argv[i] === '--jobs') opts.jobs = Number(argv[++i]);
+    else if (argv[i] === '--account') opts.account = path.resolve(argv[++i]);
     else opts.positional.push(argv[i]);
   }
   return opts;
@@ -143,16 +151,19 @@ async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const [repoDir, casesFile] = opts.positional;
   if (!repoDir || !casesFile) {
-    console.error('usage: probe-deny-rules.js <repo-dir> <cases.json> [--model <id>] [--jobs <n>]');
+    console.error('usage: probe-deny-rules.js <repo-dir> <cases.json> [--model <id>] [--jobs <n>] [--account <config-dir>]');
     return 2;
   }
   const { cases } = JSON.parse(fs.readFileSync(casesFile, 'utf8'));
   const { root, clone } = prepareClone(path.resolve(repoDir));
-  console.log(`Probing ${cases.length} cases in a clone of ${path.resolve(repoDir)} (origin: a local bare repo), model ${opts.model}\n`);
+  const where = opts.account
+    ? `the folder above a clone of ${path.resolve(repoDir)}, account settings from ${opts.account} only`
+    : `a clone of ${path.resolve(repoDir)}`;
+  console.log(`Probing ${cases.length} cases in ${where} (origin: a local bare repo), model ${opts.model}\n`);
 
   const results = await pool(cases, opts.jobs, async (c) => {
-    let r = await runCase(clone, c.command, opts.model);
-    if (r.verdict === 'not attempted') r = await runCase(clone, c.command, opts.model); // one retry
+    let r = await runCase(clone, c.command, opts.model, opts.account);
+    if (r.verdict === 'not attempted') r = await runCase(clone, c.command, opts.model, opts.account); // one retry
     return { ...c, ...r, pass: r.verdict === c.expect };
   });
 
