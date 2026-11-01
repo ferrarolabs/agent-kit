@@ -51,7 +51,7 @@ The kit is distributed like a library: **this repo is the original**, each proje
 
 ### Final layout of this repo
 
-```
+```text
 agent-kit/
 ├── CLAUDE.md                 # how to work on this repo
 ├── docs/
@@ -97,7 +97,7 @@ agent-kit/
 
 ## 5. The flow of a feature
 
-```
+```text
 idea → [spec writer] → issue → [planner] → plan ──(I approve)──▶
 [implementer + test writer] ⇄ hooks/CI ⇄ [critic] → green PR ──(I merge)──▶
 [explainer] → docs/learn

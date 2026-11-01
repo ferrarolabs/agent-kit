@@ -1,0 +1,39 @@
+# Generic labels for every repo that uses agent-kit.
+# A repo adds its own labels (for example epic:*) in its own file, on top.
+#
+# Agents read labels: a cloud session reaches issues and labels over REST, not Projects.
+# Priority is not a label: it is the org number field (agent-kit ADR 0008).
+# agent:* and needs:* are due to be replaced by the Stage issue field (agent-kit ADR 0009).
+
+# --- Type: what kind of work. Exactly one per issue.
+- name: 'type:feature'
+  color: '1f6feb'
+  description: Something a user can use
+- name: 'type:bug'
+  color: 'd73a4a'
+  description: Something that behaves wrongly
+- name: 'type:chore'
+  color: '6e7781'
+  description: Tooling, CI, dependencies, repo setup — nothing user-visible
+- name: 'type:docs'
+  color: '0075ca'
+  description: Documentation only
+- name: 'type:audit'
+  color: 'bf8700'
+  description: Raised by the codebase auditor — a proposal, not yet accepted
+
+# --- Agent state: the handshake between the owner and the agents.
+- name: 'agent:ready'
+  color: '2da44e'
+  description: Spec is complete; an agent may pick this up
+- name: 'agent:working'
+  color: 'fbca04'
+  description: An agent is on it — don't start a second one
+- name: 'needs:elia'
+  color: 'e99695'
+  description: Blocked on Elia — a decision, an approval or a review
+
+# --- Area outside the product.
+- name: 'area:harness'
+  color: '5319e7'
+  description: How agents work on this repo — CLAUDE.md, permissions, hooks, CI

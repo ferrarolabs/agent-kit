@@ -8,7 +8,7 @@
 
 ## How the code is layered
 
-```
+```text
 main()                         args → clone → run every case → table → exit code
 ├─ prepareClone()              temp clone; origin = a local bare repo; settings copied from disk
 ├─ pool()                      runs N cases at a time (default 4)

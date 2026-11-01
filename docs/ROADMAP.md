@@ -22,6 +22,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] Claude GitHub App on the `ferrarolabs` org, all repos: a cloud session pushed a branch and opened a PR (2026-10-31)
 - [x] [`gh` working in cloud sessions](https://github.com/ferrarolabs/agent-kit/issues/70) with an org token: REST only; GraphQL and org paths are blocked, so project scripts go through [an Action](https://github.com/ferrarolabs/agent-kit/issues/83)
 - [x] Branch protection on `dev`, `staging`, `main`: PR + green CI required. Proven: a direct push is rejected, a red PR is blocked, a green one merges ([jamly#2](https://github.com/ferrarolabs/jamly/issues/2))
+- [ ] [Merge queue on `main`](https://github.com/ferrarolabs/agent-kit/issues/111) (ADR 0015): CI runs on `merge_group`. Proven once a PR leaves the queue on red and `main` stays green
 - [x] Push deny rules probed: 12 ways to push to a protected branch denied, feature branches allowed ([jamly#5](https://github.com/ferrarolabs/jamly/pull/5)). The probe is now a kit script, [scripts/probe/](../scripts/probe/README.md): its first run found `--force-with-lease` not denied
 - [x] Repos public (rulesets need it on Free), under the `ferrarolabs` organization (ADR 0005, ADR 0006)
 - [x] Agents recover before they escalate (ADR 0010): in this repo's `CLAUDE.md` and in `account/CLAUDE.md`

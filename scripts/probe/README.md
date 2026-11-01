@@ -8,7 +8,7 @@ node scripts/probe/probe-deny-rules.js <repo-dir> scripts/probe/push-to-protecte
 
 Exit code 0 when every case got its expected verdict, 1 otherwise. One line per case:
 
-```
+```text
 PASS  expect deny   got deny           git push origin HEAD:dev
 FAIL  expect deny   got allow          git push --force-with-lease origin probe-deny-rules
 PASS  expect allow  got allow          git push -u origin feat/0-domain
@@ -22,7 +22,7 @@ It needs the `claude` CLI, signed in. Each case is one short headless session on
 
 ## How it works, and why
 - **A throwaway clone.** The repo is cloned to a temporary folder and its `origin` points at a local bare repo. If a rule fails, the push lands there, never on GitHub. The repo's `.claude/settings.json` is copied as it is on disk, so uncommitted rules are tested too.
-- **One session per case**, started in the clone's root. Project settings load only from the folder a session starts in ([guide](../../docs/guides/open-sessions-from-the-repo-root.md)). One per case because a long list made the model refuse some commands on its own.
+- **One session per case**, started in the clone's root. Project settings load only from the folder a session starts in ([Guide: open sessions from the repo root](https://github.com/ferrarolabs/agent-kit/issues/3)). One per case because a long list made the model refuse some commands on its own.
 - **Only the deny rules can block.** Every Bash command is allowed on the command line (`--allowedTools Bash`), and only project settings are read (`--setting-sources project`). Deny beats allow.
 - **Evidence, not the model's word.** The verdict comes from Claude Code's event stream: the Bash call attempted, and `permission_denials` in the result.
 - **No evidence is a failure.** A case the model never attempted is retried once, then counts as failed.

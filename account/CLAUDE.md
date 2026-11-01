@@ -28,4 +28,3 @@ Elia owns the feature, not every line, and learns from each one ([ADR 0013](http
 2. **What it covers:** the feature in one paragraph; how the code is layered; the concepts and technologies behind it, each with what it is and why it is used here; the decisions taken, linked; the alternatives rejected; what testing or running the app found; where to look in the code.
 3. **Who it is for:** a developer who knows the stack's basics and wants to grow. Explain the why, not only the what. Short sentences, real snippets, no filler.
 4. **Keep it true.** When review changes the code, update the note in the same push.
-
