@@ -26,6 +26,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] Repos public (rulesets need it on Free), under the `ferrarolabs` organization (ADR 0005, ADR 0006)
 - [x] Agents recover before they escalate (ADR 0010): in this repo's `CLAUDE.md` and in `account/CLAUDE.md`
 - [ ] [Agents own their PR to the end](https://github.com/ferrarolabs/agent-kit/issues/89) (ADR 0012): rule written in `account/CLAUDE.md` and this repo's `CLAUDE.md`. Checked once a session subscribes to its PR unasked
+- [ ] [Every feature PR ships a learn note](https://github.com/ferrarolabs/agent-kit/issues/91) (ADR 0013): rule written in `account/CLAUDE.md`. Checked once Elia says the format works on a note he didn't ask for
 - [x] `account/CLAUDE.md` installed by the cloud setup script (2026-10-31). A session started with the file in `~/.claude/` loads it as global instructions
 - [ ] [Org first, then sync](https://github.com/ferrarolabs/agent-kit/issues/85): settings at org level, the rest synced from agent-kit (ADR 0011, proposed)
 - [ ] Cloud environment configured: setup script, network allowlist, no Supabase credentials
