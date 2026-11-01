@@ -11,7 +11,7 @@ Until `sync-kit` exists, jamly holds the original. Don't change a file here dire
 | File | Proven | Notes |
 |---|---|---|
 | `CLAUDE.md.template` | [jamly PR 1](https://github.com/ferrarolabs/jamly/pull/1), [jamly PR 5](https://github.com/ferrarolabs/jamly/pull/5), [jamly PR 14](https://github.com/ferrarolabs/jamly/pull/14) | "Working as an agent" and the definition of done with who holds each line |
-| `.claude/settings.json` | [jamly PR 1](https://github.com/ferrarolabs/jamly/pull/1), [jamly PR 5](https://github.com/ferrarolabs/jamly/pull/5) | Deny secrets, force-push, pushes to `dev`/`staging`/`main`, `rm -rf`; ask before editing workflows. A project adds its own irreversible commands. Run the [probe](../scripts/probe/README.md) after any change |
+| `.claude/settings.json` | [jamly PR 1](https://github.com/ferrarolabs/jamly/pull/1), [jamly PR 5](https://github.com/ferrarolabs/jamly/pull/5) | Deny secrets, force-push, pushes to `dev`/`staging`/`main`, `rm -rf`; ask before editing workflows. A project adds its own irreversible commands. Run the deny-rule probe after any change, once [Probe for deny rules as a reusable Sensor](https://github.com/ferrarolabs/agent-kit/issues/2) rebuilds it |
 | `.github/workflows/ci.yml` | [jamly PR 1](https://github.com/ferrarolabs/jamly/pull/1), [jamly PR 15](https://github.com/ferrarolabs/jamly/pull/15) | Typecheck, lint, format, test; replace the commands |
 | `.github/ISSUE_TEMPLATE/feature.yml`, `bug.yml` | [jamly PR 1](https://github.com/ferrarolabs/jamly/pull/1) | |
 | `.github/labels.yml` | [jamly PR 1](https://github.com/ferrarolabs/jamly/pull/1) | No `priority:*` (ADR 0008); `needs:device-check` waits on [Decide: is "Device check" a generic Status?](https://github.com/ferrarolabs/agent-kit/issues/73) |
