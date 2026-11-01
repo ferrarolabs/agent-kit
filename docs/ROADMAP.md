@@ -30,7 +30,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [ ] [Every feature PR ships a learn note](https://github.com/ferrarolabs/agent-kit/issues/91) (ADR 0013): rule written in `account/CLAUDE.md`. Checked once Elia says the format works on a note he didn't ask for
 - [x] `account/CLAUDE.md` installed by the cloud setup script (2026-10-31). A session started with the file in `~/.claude/` loads it as global instructions
 - [ ] [Org first, then sync](https://github.com/ferrarolabs/agent-kit/issues/85): settings at org level, the rest synced from agent-kit (ADR 0011, proposed)
-- [ ] Cloud environment configured: setup script, network allowlist, no Supabase credentials
+- [ ] Cloud environment configured: setup script, network allowlist (`*.supabase.co` allowed), no Supabase secret keys. Until real users, the live project's URL, publishable key and a test account are allowed for agent tests (ADR 0016)
 - [ ] [Kit aligned with jamly at every harness merge](https://github.com/ferrarolabs/agent-kit/issues/101) (ADR 0014): [inventory](inventory.md) of every harness piece on jamly
 - [x] [Sessions open from the repo root](https://github.com/ferrarolabs/agent-kit/issues/3): [guide](guides/open-sessions-from-the-repo-root.md), proven by a headless probe. Multi-repo cloud sessions [load no project deny rules](https://github.com/ferrarolabs/agent-kit/issues/103)
 
