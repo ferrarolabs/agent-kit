@@ -10,7 +10,7 @@ A reusable agentic system that lets me build my projects with Claude Code agents
 - **architectural decisions**: how the system is shaped and which trade-offs we accept;
 - **approval**: merging PRs by looking at tests and behaviour, not at every line.
 
-I own the feature, not every line of code. To understand what the agents write, every feature produces a learning note (`docs/learn/`).
+I own the feature, not every line of code. To understand what the agents write, every feature produces a learning note (`docs/learn/`). Until the explainer exists, the implementing agent writes it in the feature's PR (ADR 0013).
 
 The system is **opt-in**: in any repo I can keep working by hand or in chat. Agents work only when I ask them to, or when I've switched on an automation for that repo.
 
