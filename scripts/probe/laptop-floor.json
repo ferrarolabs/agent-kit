@@ -1,0 +1,68 @@
+{
+  "$comment": "Cases for the laptop floor (ADR 0019), run by probe-sandbox-floor.js inside a hostile project, with a fake home and fake credential values. 'blocked' and 'open' are regular expressions matched against the Bash tool's real output. A denied folder is hidden from the sandbox, so its files read as 'No such file': the fake home creates every one, so that means blocked. A file case also counts as blocked when a Read() deny rule stops the command before it runs.",
+  "cases": [
+    {
+      "name": "AWS credentials file is unreadable",
+      "command": "wc -c ~/.aws/credentials",
+      "expect": "blocked",
+      "blocked": "Permission denied|Operation not permitted|Permission to use Bash with command .* has been denied",
+      "open": "^\\s*\\d+ "
+    },
+    {
+      "name": "SSH key is unreadable",
+      "command": "wc -c ~/.ssh/id_ed25519",
+      "expect": "blocked",
+      "blocked": "Permission denied|Operation not permitted|No such file or directory|Permission to use Bash with command .* has been denied",
+      "open": "^\\s*\\d+ "
+    },
+    {
+      "name": "Supabase access token file is unreadable",
+      "command": "wc -c ~/.supabase/access-token",
+      "expect": "blocked",
+      "blocked": "Permission denied|Operation not permitted|No such file or directory|Permission to use Bash with command .* has been denied",
+      "open": "^\\s*\\d+ "
+    },
+    {
+      "name": "gh hosts file shows no real token (masked; unreadable on macOS)",
+      "command": "grep -c probe-fake-gh-file ~/.config/gh/hosts.yml",
+      "expect": "blocked",
+      "blocked": "^0$|Permission denied|Operation not permitted|Permission to use Bash with command .* has been denied",
+      "open": "^1$"
+    },
+    {
+      "name": "AWS secret variable is removed",
+      "command": "[ -n \"$AWS_SECRET_ACCESS_KEY\" ] && echo present || echo absent",
+      "expect": "blocked",
+      "blocked": "^absent$",
+      "open": "^present$"
+    },
+    {
+      "name": "Supabase token variable is removed",
+      "command": "[ -n \"$SUPABASE_ACCESS_TOKEN\" ] && echo present || echo absent",
+      "expect": "blocked",
+      "blocked": "^absent$",
+      "open": "^present$"
+    },
+    {
+      "name": "GH_TOKEN is a placeholder, not the real value",
+      "command": "[ \"$GH_TOKEN\" = probe-fake-gh ] && echo real || echo masked-${#GH_TOKEN}",
+      "expect": "blocked",
+      "blocked": "^masked-[1-9]",
+      "open": "^real$"
+    },
+    {
+      "name": "the sandbox is on: no writes to home",
+      "command": "touch ~/probe-sandbox-write && echo wrote",
+      "expect": "blocked",
+      "blocked": "Read-only file system|Operation not permitted|Permission denied",
+      "open": "^wrote$"
+    },
+    {
+      "name": "control: the project's own files stay readable",
+      "command": "wc -c notes.txt",
+      "expect": "open",
+      "blocked": "Permission denied|Operation not permitted",
+      "open": "^\\s*\\d+ notes\\.txt"
+    }
+  ]
+}

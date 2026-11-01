@@ -49,3 +49,22 @@ A JSON file: `{ "cases": [{ "command": "...", "expect": "deny" | "allow" }] }`.
 - Seen failing on purpose: with `Bash(git push *:dev)` removed from a copy of jamly's rules, `git push origin HEAD:dev` comes out `allow` and the probe exits 1.
 - The account floor, 2026-11-01, in the folder above a jamly clone: 19 of 19 push cases and 2 of 2 floor cases. With `Bash(rm -rf *)` removed from a copy of the floor, `rm -rf probe-target` comes out `allow` and the probe exits 1.
 - The first version was built on jamly ([jamly PR 5](https://github.com/ferrarolabs/jamly/pull/5)) and never committed. This is the rebuild.
+
+## The laptop floor
+
+```bash
+sh account/install.sh --laptop
+node scripts/probe/probe-sandbox-floor.js
+```
+
+A second probe, for the sandbox and credentials floor ([ADR 0019](../../docs/decisions/0019-laptop-floor-in-managed-settings.md)). Each case runs in a **hostile project**: its `.claude/settings.json` turns the sandbox off, allows the unsandboxed retry, excludes the commands and grants reads of every credential path. The floor must hold anyway.
+
+- **Fake credentials only.** `HOME` points to a fake home with fake files, and the credential variables get fake values. The commands print sizes, counts and words, never a value.
+- **Evidence is the command's output**, matched against the case's `blocked` and `open` patterns ([laptop-floor.json](laptop-floor.json)). No match, no Bash call, or bubblewrap failing to start is a failure.
+- **One case at a time.** Parallel sandboxed sessions share a temporary file and break each other's start.
+- With no options it probes the floor installed on the machine. That is the check to run on a laptop.
+- `--floor <file>` probes a file instead. As managed settings (`--scope managed`, the default) it needs Linux and root: the file is bind-mounted over `/etc/claude-code` in a private mount namespace, for the probe's sessions only. `--scope user` puts it in user settings, where a project can turn the sandbox off: the run that shows the probe failing. `--nested` is for running inside a container.
+
+### Proven on the laptop floor
+- 2026-11-01, in a cloud container, floor as a managed drop-in: 9 of 9.
+- Same file with `--scope user`: 5 of 9, exit 1. The sandbox was off, the variables were present, home was writable.

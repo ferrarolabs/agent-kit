@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "$comment": "The laptop floor (ADR 0019). Installed by `account/install.sh --laptop` as a managed-settings drop-in, so no project or user file can turn it off. Sandbox on, no unsandboxed retry, credentials hidden or masked. Applies only on Elia's own machines: cloud sessions never read it.",
+  "permissions": {
+    "deny": [
+      "Read(~/.aws/credentials)",
+      "Read(~/.ssh/**)",
+      "Read(~/.config/gh/hosts.yml)",
+      "Read(~/.config/gcloud/**)",
+      "Read(~/.azure/**)",
+      "Read(~/.git-credentials)",
+      "Read(~/.netrc)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.supabase/**)",
+      "Read(~/.expo/**)",
+      "Edit(~/.claude/settings.json)",
+      "Edit(//etc/claude-code/**)",
+      "Edit(//Library/Application Support/ClaudeCode/**)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "tlsTerminate": {},
+      "allowedDomains": ["github.com", "api.github.com", "*.githubusercontent.com", "registry.npmjs.org"]
+    },
+    "credentials": {
+      "files": [
+        { "path": "~/.aws/credentials", "mode": "deny" },
+        { "path": "~/.ssh", "mode": "deny" },
+        { "path": "~/.config/gcloud", "mode": "deny" },
+        { "path": "~/.azure", "mode": "deny" },
+        { "path": "~/.git-credentials", "mode": "deny" },
+        { "path": "~/.netrc", "mode": "deny" },
+        { "path": "~/.docker/config.json", "mode": "deny" },
+        { "path": "~/.supabase", "mode": "deny" },
+        { "path": "~/.expo", "mode": "deny" },
+        {
+          "path": "~/.config/gh/hosts.yml",
+          "mode": "mask",
+          "extract": "oauth_token:\\s*(\\S+)",
+          "onExtractNoMatch": "deny",
+          "injectHosts": ["api.github.com", "github.com"]
+        }
+      ],
+      "envVars": [
+        { "name": "AWS_ACCESS_KEY_ID", "mode": "deny" },
+        { "name": "AWS_SECRET_ACCESS_KEY", "mode": "deny" },
+        { "name": "AWS_SESSION_TOKEN", "mode": "deny" },
+        { "name": "GOOGLE_APPLICATION_CREDENTIALS", "mode": "deny" },
+        { "name": "CLOUDSDK_AUTH_ACCESS_TOKEN", "mode": "deny" },
+        { "name": "AZURE_CLIENT_SECRET", "mode": "deny" },
+        { "name": "NPM_TOKEN", "mode": "deny" },
+        { "name": "SUPABASE_ACCESS_TOKEN", "mode": "deny" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "mode": "deny" },
+        { "name": "EXPO_TOKEN", "mode": "deny" },
+        { "name": "ANTHROPIC_API_KEY", "mode": "deny" },
+        { "name": "GH_TOKEN", "mode": "mask", "injectHosts": ["api.github.com", "github.com"] },
+        { "name": "GITHUB_TOKEN", "mode": "mask", "injectHosts": ["api.github.com", "github.com"] }
+      ]
+    }
+  }
+}

@@ -34,6 +34,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] [Kit aligned with jamly at every harness merge](https://github.com/ferrarolabs/agent-kit/issues/101) (ADR 0014): [inventory](inventory.md) of every harness piece on jamly
 - [x] [Sessions open from the repo root](https://github.com/ferrarolabs/agent-kit/issues/3): [guide](guides/open-sessions-from-the-repo-root.md), proven by a headless probe. Multi-repo cloud sessions [load no project deny rules](https://github.com/ferrarolabs/agent-kit/issues/103)
 - [ ] [Account deny floor](https://github.com/ferrarolabs/agent-kit/issues/103) (ADR 0017): `account/settings.json` and a SessionStart hook, installed by `account/install.sh`. Probed: 19 of 19 push cases and `rm -rf` denied with only the floor loaded. Checked once the setup script runs the installer and a two-repo cloud session denies `rm -rf` and says the project rules didn't load
+- [ ] [Laptop floor](https://github.com/ferrarolabs/agent-kit/issues/8) (ADR 0019, proposed): sandbox and credentials in a managed-settings drop-in, installed by `install.sh --laptop`; the installer now merges `settings.json` instead of skipping it. Probed in a hostile project: 9 of 9; as user settings, 5 of 9. Checked once installed on Elia's machine and the probe passes there
 
 **Exit:** a real issue implemented by a cloud session started from my phone, with a PR and green CI, without me writing code.
 
