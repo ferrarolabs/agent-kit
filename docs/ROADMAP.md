@@ -1,6 +1,6 @@
 # Roadmap
 
-Each phase is useful on its own and has a verifiable **exit criterion**. We don't move to the next phase until it's met. The pilot is **jamly**: phases 1–3 are built there, phase 4 extracts what's generic into this repo.
+Each phase is useful on its own and has a verifiable **exit criterion**. We don't move to the next phase until it's met. The pilot is **jamly**: pieces are built there, and the generic ones are ported into this repo at every harness merge (ADR 0014). Phase 4 adds the scripts and a second project.
 
 ## Phase 0 · Plan ✅
 - [x] Goal, principles and architecture in [PLAN.md](PLAN.md)
@@ -22,6 +22,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] Claude GitHub App on the `ferrarolabs` org, all repos: a cloud session pushed a branch and opened a PR (2026-10-31)
 - [x] [`gh` working in cloud sessions](https://github.com/ferrarolabs/agent-kit/issues/70) with an org token: REST only; GraphQL and org paths are blocked, so project scripts go through [an Action](https://github.com/ferrarolabs/agent-kit/issues/83)
 - [x] Branch protection on `dev`, `staging`, `main`: PR + green CI required. Proven: a direct push is rejected, a red PR is blocked, a green one merges ([jamly#2](https://github.com/ferrarolabs/jamly/issues/2))
+- [ ] [Merge queue on `main`](https://github.com/ferrarolabs/agent-kit/issues/111) (ADR 0015): CI runs on `merge_group`. Proven once a PR leaves the queue on red and `main` stays green
 - [x] Push deny rules probed: 12 ways to push to a protected branch denied, feature branches allowed ([jamly#5](https://github.com/ferrarolabs/jamly/pull/5))
 - [x] Repos public (rulesets need it on Free), under the `ferrarolabs` organization (ADR 0005, ADR 0006)
 - [x] Agents recover before they escalate (ADR 0010): in this repo's `CLAUDE.md` and in `account/CLAUDE.md`
@@ -30,6 +31,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] `account/CLAUDE.md` installed by the cloud setup script (2026-10-31). A session started with the file in `~/.claude/` loads it as global instructions
 - [ ] [Org first, then sync](https://github.com/ferrarolabs/agent-kit/issues/85): settings at org level, the rest synced from agent-kit (ADR 0011, proposed)
 - [ ] Cloud environment configured: setup script, network allowlist, no Supabase credentials
+- [ ] [Kit aligned with jamly at every harness merge](https://github.com/ferrarolabs/agent-kit/issues/101) (ADR 0014): [inventory](inventory.md) of every harness piece on jamly
 - [x] [Sessions open from the repo root](https://github.com/ferrarolabs/agent-kit/issues/3): [guide](guides/open-sessions-from-the-repo-root.md), proven by a headless probe. Multi-repo cloud sessions [load no project deny rules](https://github.com/ferrarolabs/agent-kit/issues/103)
 
 **Exit:** a real issue implemented by a cloud session started from my phone, with a PR and green CI, without me writing code.
@@ -54,8 +56,8 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 **Exit:** a feature moves forward for 24 hours without me, across at least one usage limit.
 
 ## Phase 4 · Extraction into the kit
-- [ ] Split jamly's generic files from its project-specific ones
-- [ ] Fill `template/` in this repo, including the generic labels (type, agent state, priority) and the board spec
+- [ ] Split jamly's generic files from its project-specific ones: done along the way in the [inventory](inventory.md) (ADR 0014)
+- [ ] Fill `template/` in this repo, including the generic labels (type, agent state) and the board spec: done along the way, one port per harness merge (ADR 0014)
 - [ ] `scripts/bootstrap.sh` and `scripts/sync-kit.sh`
 - [ ] Account-level skills: `write-spec`, `critic`, `explain-feature`
 - [ ] This repo set up as a GitHub template repository

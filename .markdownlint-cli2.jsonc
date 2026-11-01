@@ -1,0 +1,15 @@
+{
+  // Markdown lint for agent-kit. Run: npx markdownlint-cli2@0.18.1
+  "config": {
+    "default": true,
+    // Prose is written one paragraph per line; wrapping is the editor's job.
+    "MD013": false,
+    // House style puts a list or a paragraph right under its heading.
+    "MD022": false,
+    "MD032": false,
+    // Numbered lists sometimes continue across sections on purpose (project-boards §1).
+    "MD029": false
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules/**"]
+}

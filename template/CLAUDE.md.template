@@ -1,0 +1,74 @@
+# <Project> — project context
+
+<!--
+Skeleton from agent-kit. Keep it short: only what the code can't say. Replace every <…>.
+-->
+
+<What the project is, in two lines. What is being built right now.>
+
+## Read these before doing anything substantial
+
+| Question | Document |
+| --- | --- |
+| What are we building and why? | <link> |
+| What is in scope right now? | <link> |
+| How is it built? | <link> |
+| Why is it like this? | [docs/decisions/](docs/decisions/README.md) |
+
+## The things most likely to be got wrong
+
+1. <The pitfall a capable newcomer would fall into, and why.>
+
+## Commands
+
+```text
+<install>
+<typecheck>
+<lint>
+<format check>
+<test>
+```
+
+## Working as an agent
+
+These hold whenever you work on your own, for example in a cloud session started from
+an issue.
+
+- **One issue, one branch, one PR.** Branch `<type>/<issue>-<slug>`, e.g.
+  `feat/12-short-name`, cut from `dev`. Open the PR against `dev`; never merge it, and
+  never push to `dev`, `staging` or `main` (they flow dev → staging → main, and
+  promoting between them is the owner's). Always push with the branch named:
+  `git push -u origin <your-branch>`. A bare `git push`, `git push origin` or
+  `... HEAD` is denied, because it can't be told apart from a push to `dev`.
+- **Labels are the handshake.** Start only on issues labelled `agent:ready`; add
+  `agent:working` when you start. If you stop for any reason other than done, add
+  `needs:elia` and comment why.
+- **Never run the project's irreversible commands** (<database pushes, deploys,
+  store submissions>). Write the change as a file and say in the PR that it needs
+  applying. They are also denied in `.claude/settings.json`.
+- **Recover before you stop.** When something fails, read the real error, try the
+  alternatives (another tool, endpoint or source) and fix what's reversible. Add
+  `needs:elia` only for what only the owner can do, and say what you tried, the
+  alternative you prepared and your recommendation — never just "it doesn't work"
+  ([agent-kit ADR 0010](https://github.com/ferrarolabs/agent-kit/blob/main/docs/decisions/0010-agents-recover-before-they-escalate.md)).
+- **Product questions stop you.** If the issue doesn't settle a product choice (scope,
+  wording, who sees what), don't guess: ask in the PR and stop.
+
+## Definition of done
+
+Who holds each line:
+
+- Typecheck, lint, format, tests pass: `<the four commands joined with &&>` _(you,
+  before saying done; CI on the PR)_
+- New logic has a test where a test is meaningful _(you)_
+- Decisions written down, contradicted docs updated in the same PR _(you write them;
+  the owner checks in review)_
+- <What only the owner can check: devices, real accounts, production> _(the owner —
+  an agent session can't check these, so don't claim them; list in the PR what to
+  try)_
+
+## Recording decisions
+
+Significant decisions → a new ADR in `docs/decisions/` (never edit an existing one;
+supersede it). Everything smaller → a decision log. A decision that isn't written down is
+lost by the next session.
