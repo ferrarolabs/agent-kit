@@ -29,7 +29,7 @@ These hold whenever you work on your own, for example in a cloud session started
 - **Labels are the handshake.** Start only on issues labelled `agent:ready`, or on one I name in the session; add `agent:working` when you start. If you stop for any reason other than done, add `needs:elia` and comment why.
 - **Product questions stop you.** If the issue doesn't settle a choice that is mine (scope, what the kit should do, a trade-off between principles in `docs/PLAN.md`), don't guess: ask in the PR and stop.
 - **Deny rules change, the probe runs.** A PR that touches `.claude/settings.json` or `account/settings.json` pastes the output of [`scripts/probe/`](scripts/probe/README.md) run on the branch.
-- **Before saying done**, run what CI runs: `npx --yes markdownlint-cli2@0.18.1 && node scripts/check/check-links.js && node --test`.
+- **Before saying done**, run what CI runs: `npx --yes markdownlint-cli2@0.18.1 && node scripts/check/check-links.js && node --test "**/*.test.js" "template/.claude/**/*.test.js"`.
 
 ## Definition of done
 - The current phase's checklist in `docs/ROADMAP.md` is updated.
