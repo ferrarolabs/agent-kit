@@ -29,7 +29,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [ ] [Every feature PR ships a learn note](https://github.com/ferrarolabs/agent-kit/issues/91) (ADR 0013): rule written in `account/CLAUDE.md`. Checked once Elia says the format works on a note he didn't ask for
 - [x] `account/CLAUDE.md` installed by the cloud setup script (2026-10-31). A session started with the file in `~/.claude/` loads it as global instructions
 - [ ] [Org first, then sync](https://github.com/ferrarolabs/agent-kit/issues/85): settings at org level, the rest synced from agent-kit (ADR 0011, proposed)
-- [ ] Cloud environment configured: setup script, network allowlist, no Supabase credentials
+- [ ] Cloud environment configured: setup script, network allowlist (`*.supabase.co` allowed), no Supabase secret keys. Until real users, the live project's URL, publishable key and a test account are allowed for agent tests (ADR 0014)
 
 **Exit:** a real issue implemented by a cloud session started from my phone, with a PR and green CI, without me writing code.
 
