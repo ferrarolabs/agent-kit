@@ -28,3 +28,11 @@ Elia owns the feature, not every line, and learns from each one ([ADR 0013](http
 2. **What it covers:** the feature in one paragraph; how the code is layered; the concepts and technologies behind it, each with what it is and why it is used here; the decisions taken, linked; the alternatives rejected; what testing or running the app found; where to look in the code.
 3. **Who it is for:** a developer who knows the stack's basics and wants to grow. Explain the why, not only the what. Short sentences, real snippets, no filler.
 4. **Keep it true.** When review changes the code, update the note in the same push.
+
+## Every issue you open has a priority
+Set it yourself; Elia changes it if he disagrees ([ADR 0018](https://github.com/ferrarolabs/agent-kit/blob/main/docs/decisions/0018-agents-set-the-priority-of-the-issues-they-open.md)).
+
+1. **Set the `Priority` issue field on create**, where the repo has it: a number from 1 to 100, 100 = do first ([ADR 0008](https://github.com/ferrarolabs/agent-kit/blob/main/docs/decisions/0008-numeric-priority-and-projects-from-the-template.md)). Never leave it empty, never write "Elia to score it".
+2. **Calibrate against the open issues.** Read their values first; place the new one between the issues it should come after and before. The current phase sits high, later phases low.
+3. **Write the reason** on the issue's last line: `**Priority**: <n>, set by the agent: <why>. Elia can change it.`
+4. **When you find an open issue without one, set it** the same way, and say so in your reply. Never change a value Elia set.
