@@ -5,12 +5,14 @@ This repo is the **kit**, not an application. It holds the plan and, over time, 
 ## Where things are
 - `docs/PLAN.md` is the source of truth for the goal. If a change contradicts it, stop and ask.
 - `docs/ROADMAP.md` says what to do now. Work only on the current phase; don't get ahead of it.
+- `docs/inventory.md` lists every harness piece on jamly and where it stands in the kit.
 - `template/` holds **only** generic files that work for any project. No references to jamly or any other specific project.
 
 ## Rules
 - **Everything in this repo is in English**: files, decisions, issues, PRs, commit messages.
 - Every non-obvious choice becomes an ADR in `docs/decisions/`, numbered in sequence, with context, decision and consequences.
 - Nothing goes into `template/` until it has been proven on a real project (see ADR 0001).
+- The kit follows the pilot (ADR 0014). When a harness PR merges on jamly, port its generic part into `template/` in a PR here, and update `docs/inventory.md`. Until `sync-kit` exists, never change a `template/` file directly.
 - Every hook or check added comes with proof that it can fail.
 - Short sentences.
 - Refer to issues, PRs, ADRs and projects by their name, as a clickable link. Never by a bare number.
