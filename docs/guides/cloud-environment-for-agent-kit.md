@@ -1,10 +1,13 @@
 # Cloud environment for agent-kit
 
-A cloud session on agent-kit edits rules, scripts and docs. It needs no product secrets. The environment is set in claude.ai, not in this repo: open the cloud environment menu in a session's title bar, then **Edit**. Only Elia can change it.
+A cloud session on agent-kit edits rules, scripts and docs. It needs no product secrets. An environment holds the network access, the environment variables and the setup script; the repository is picked per session. It is set in claude.ai, not in this repo: open the cloud environment menu in a session's title bar to add one or **Edit** it ([docs](https://code.claude.com/docs/en/cloud-environments#network-access)). Only Elia can change it.
+
+## Why its own environment
+The shared Ferrarolabs Dev Environment carries jamly's Supabase URL and publishable key (ADR 0016) and allows `*.supabase.co`. agent-kit needs neither. A session that reads untrusted content (issues, web pages) should hold no credential it doesn't use.
 
 ## Settings
 - **Name:** `agent-kit`.
-- **Repository:** `ferrarolabs/agent-kit` only. One repo per session, so the session starts in the repo root and loads `.claude/settings.json` ([Guide: open sessions from the repo root](open-sessions-from-the-repo-root.md)).
+- **Repository, picked when the session starts:** `ferrarolabs/agent-kit` only. One repo per session, so the session starts in the repo root and loads `.claude/settings.json` ([Guide: open sessions from the repo root](open-sessions-from-the-repo-root.md)).
 - **Network access:** Limited, with the package managers allowed (CI's `npx markdownlint-cli2` needs the npm registry), plus `raw.githubusercontent.com` for the account installer. Nothing else: agent-kit calls no backend.
 - **Environment variables and secrets:** none. `gh` works through the session's GitHub App.
 - **Setup script:**
