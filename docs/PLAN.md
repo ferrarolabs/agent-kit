@@ -33,7 +33,7 @@ Taken from the *Harness Engineering* method (Alexio Cassani, Codemotion 2026) an
 6. **Every check must be seen failing.** A check never seen red may not be wired up at all.
 7. **Agents propose, I decide.** No agent merges to a protected branch or changes the architecture on its own.
 8. **Short contract.** `CLAUDE.md` holds only what the code can't say: pitfalls, reasons, the right commands, the definition of done.
-9. **Build bottom-up.** Use it on a real project first (jamly), then extract what's generic.
+9. **Build bottom-up.** Use it on a real project first (jamly), then port what's generic into the kit at every merge (ADR 0014).
 10. **Everything in a repo is in English.** Code, docs, decisions, issues, PRs and commit messages. The apps themselves can be in any language.
 
 ## 3. Architecture: three levels
@@ -47,16 +47,17 @@ The technical constraint that shapes everything: **a cloud session sees only wha
 | **Kit** | This repo, copied into projects | Roles (subagents), hooks, permissions, rules, issue templates, baseline CI, a `CLAUDE.md` skeleton | Every project that adopts it |
 | **Project** | The project's repo | Project-specific `CLAUDE.md`, architectural decisions, `progress.md`, `docs/learn/` | That project only |
 
-The kit is distributed like a library: **this repo is the original**, each project holds a **copy** (needed because a cloud session clones only the repo it works on). A sync script updates the generic files without touching the project-specific ones. No git submodules.
+The kit is distributed like a library: **this repo is the original**, each project holds a **copy**. Until `sync-kit` exists, jamly holds the original of each piece and the kit follows it at every merge; [inventory.md](inventory.md) tracks each one (ADR 0014). Each project needs its own copy because a cloud session clones only the repo it works on. A sync script updates the generic files without touching the project-specific ones. No git submodules.
 
 ### Final layout of this repo
 
-```
+```text
 agent-kit/
 ├── CLAUDE.md                 # how to work on this repo
 ├── docs/
 │   ├── PLAN.md               # this file
 │   ├── ROADMAP.md            # phases and checklists
+│   ├── inventory.md          # every harness piece on the pilot, and its place in template/
 │   └── decisions/            # the kit's ADRs
 ├── template/                 # what gets copied into every project
 │   ├── CLAUDE.md.template
@@ -96,7 +97,7 @@ agent-kit/
 
 ## 5. The flow of a feature
 
-```
+```text
 idea → [spec writer] → issue → [planner] → plan ──(I approve)──▶
 [implementer + test writer] ⇄ hooks/CI ⇄ [critic] → green PR ──(I merge)──▶
 [explainer] → docs/learn
