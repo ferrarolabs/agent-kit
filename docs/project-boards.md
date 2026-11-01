@@ -137,7 +137,7 @@ Ranked by value for effort. Each one says where its data comes from, because tha
 
 **How.** A `SessionEnd` hook (❓ or `Stop`, made idempotent) reads the session transcript, including subagent transcripts, and sums tokens per model. It then upserts one **usage ledger** comment on the issue: one row per session, then totals per model. The issue number comes from `gitBranch`. Comments are on the issue, so agents, Actions and I can all read them, and they survive the session.
 
-```
+```text
 Usage ledger — #12
 | session | model  | role (main/subagent) | input | output | cache read | cache write | est. $ |
 | …       | opus   | main                 | …     | …      | …          | …           | …      |
@@ -257,7 +257,7 @@ The org decision (§3.8) sits before P1, because it changes which token the Acti
 
 ### T1 · what was run (2026-10-31, cloud session)
 
-**MCP tools**
+#### MCP tools
 
 | Step | Call | Result |
 |---|---|---|
