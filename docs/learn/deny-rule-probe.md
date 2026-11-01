@@ -31,7 +31,7 @@ Three choices remove every way a case could pass without the rule doing its job:
 - a case the model **didn't attempt** fails. No evidence is not a pass.
 
 ### 3. Make a failure harmless
-The clone's `origin` is a local bare repo. So when a rule fails, the push really happens, but into a folder in `/tmp`. You can test "is this push denied?" without risking the push.
+The clone's `origin` is a local bare repo. So when a rule fails, the push really happens, but into a folder in `/tmp`. You can test "is this push denied?" without risking the push. Cloud sessions clone the repo shallow, and a bare repo refuses a shallow push by default (`shallow update not allowed`), so the probe sets `receive.shallowUpdate` on it. Found the first time the probe ran inside a cloud session.
 
 ### 4. Controls
 `feat/0-domain` contains `main`; `feat/0-dev-tools` contains `dev`. They must stay allowed. A rule that blocks them over-blocks, and agents would stop being able to push their own branches.

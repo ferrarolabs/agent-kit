@@ -31,7 +31,7 @@ node scripts/probe/probe-deny-rules.js <repo-dir> scripts/probe/push-to-protecte
 It needs the `claude` CLI, signed in. Each case is one short headless session on Haiku: 19 cases take about 40 seconds and a few cents.
 
 ## How it works, and why
-- **A throwaway clone.** The repo is cloned to a temporary folder and its `origin` points at a local bare repo. If a rule fails, the push lands there, never on GitHub. The repo's `.claude/settings.json` is copied as it is on disk, so uncommitted rules are tested too.
+- **A throwaway clone.** The repo is cloned to a temporary folder and its `origin` points at a local bare repo. If a rule fails, the push lands there, never on GitHub. The repo's `.claude/settings.json` is copied as it is on disk, so uncommitted rules are tested too. The bare repo accepts a shallow push, because cloud sessions check the repo out shallow (`receive.shallowUpdate`).
 - **One session per case**, started in the clone's root. Project settings load only from the folder a session starts in ([Guide: open sessions from the repo root](https://github.com/ferrarolabs/agent-kit/issues/3)). One per case because a long list made the model refuse some commands on its own.
 - **Only the deny rules can block.** Every Bash command is allowed on the command line (`--allowedTools Bash`), and only project settings are read (`--setting-sources project`). Deny beats allow.
 - **Evidence, not the model's word.** The verdict comes from Claude Code's event stream: the Bash call attempted, and `permission_denials` in the result.
