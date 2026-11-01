@@ -37,7 +37,7 @@ The clone's `origin` is a local bare repo. So when a rule fails, the push really
 `feat/0-domain` contains `main`; `feat/0-dev-tools` contains `dev`. They must stay allowed. A rule that blocks them over-blocks, and agents would stop being able to push their own branches.
 
 ## What running it found
-- **A real gap on jamly:** `git push --force-with-lease …` is allowed. The rule `Bash(git push --force *)` matches `--force` followed by a space, and `--force-with-lease` has none. Fixed in jamly separately.
+- **A real gap on jamly:** `git push --force-with-lease …` is allowed. The rule `Bash(git push --force *)` matches `--force` followed by a space, and `--force-with-lease` has none. Three more cases went in for flags at the end; on `dev`'s rules 3 of 4 force-pushes passed. Fixed in [Deny every spelling of a force-push](https://github.com/ferrarolabs/jamly/pull/33): 19 of 19.
 - **Seen failing on purpose:** with `Bash(git push *:dev)` removed from a copy of jamly's rules, `git push origin HEAD:dev` came out `allow`, exit 1.
 - The unit tests were seen failing too: with denials ignored, 2 of 5 go red.
 

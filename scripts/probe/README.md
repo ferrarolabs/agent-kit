@@ -18,7 +18,7 @@ PASS  expect allow  got allow          git push -u origin feat/0-domain
 - **After every change to a repo's deny rules**, in the PR that changes them. Paste the output in the PR.
 - When a repo adopts the kit.
 
-It needs the `claude` CLI, signed in. Each case is one short headless session on Haiku: 16 cases take about 30 seconds and a few cents.
+It needs the `claude` CLI, signed in. Each case is one short headless session on Haiku: 19 cases take about 40 seconds and a few cents.
 
 ## How it works, and why
 - **A throwaway clone.** The repo is cloned to a temporary folder and its `origin` points at a local bare repo. If a rule fails, the push lands there, never on GitHub. The repo's `.claude/settings.json` is copied as it is on disk, so uncommitted rules are tested too.
@@ -30,10 +30,10 @@ It needs the `claude` CLI, signed in. Each case is one short headless session on
 ## Cases
 A JSON file: `{ "cases": [{ "command": "...", "expect": "deny" | "allow" }] }`.
 
-- [push-to-protected-branches.json](push-to-protected-branches.json): 12 ways to push to `dev`, `staging` or `main`, or to force-push, plus 4 controls that must stay allowed. The controls (`feat/0-domain`, `feat/0-dev-tools`…) catch rules that over-block: they contain `main` or `dev` inside a longer name.
+- [push-to-protected-branches.json](push-to-protected-branches.json): 15 ways to push to `dev`, `staging` or `main`, or to force-push, plus 4 controls that must stay allowed. The controls (`feat/0-domain`, `feat/0-dev-tools`…) catch rules that over-block: they contain `main` or `dev` inside a longer name.
 - A project adds its own file for its own irreversible commands (database, deploys).
 
 ## Proven
-- On jamly, 2026-11-01: 15 of 16. The one failure is real: `git push --force-with-lease` isn't denied, because `Bash(git push --force *)` needs a space after `--force`.
+- On jamly, 2026-11-01: three force-pushes passed (`--force-with-lease`, and `--force` at the end). `Bash(git push --force *)` needs a space after `--force`, and nothing matched a flag at the end. Fixed in [Deny every spelling of a force-push](https://github.com/ferrarolabs/jamly/pull/33): 19 of 19.
 - Seen failing on purpose: with `Bash(git push *:dev)` removed from a copy of jamly's rules, `git push origin HEAD:dev` comes out `allow` and the probe exits 1.
 - The first version was built on jamly ([jamly PR 5](https://github.com/ferrarolabs/jamly/pull/5)) and never committed. This is the rebuild.
