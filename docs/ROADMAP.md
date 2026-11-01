@@ -76,3 +76,4 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [ ] (Optional) a view of what the agents are doing
 
 **Exit:** a week with several features moving in parallel, with no conflicts between branches.
+- [A file that does not exist](does-not-exist.md)
