@@ -46,4 +46,5 @@ jobs:
           exit $status
 
       - name: Unit tests
-        run: node --test
+        # Quoted globs: node --test alone skips dot-folders, so it would miss template/.claude/hooks/.
+        run: node --test "**/*.test.js" "template/.claude/**/*.test.js"

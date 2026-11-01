@@ -11,7 +11,7 @@ A harness piece is anything that shapes how agents work: rules, permissions, hoo
 - **Proven:** the PR or issue where it was merged and, for a check, seen failing. *No* means it isn't ready for `template/`.
 - **Template:** where it goes, or went, in `template/`. *Ported* or *to port*.
 
-Checked against jamly `dev` at `6e28048` (2026-11-01).
+Checked against jamly `dev` at `6e28048` (2026-11-01), plus the command log from [jamly#31](https://github.com/ferrarolabs/jamly/pull/31). Two harness merges since then are not ported yet: [jamly#33](https://github.com/ferrarolabs/jamly/pull/33) (every force-push spelling denied) and [jamly#29](https://github.com/ferrarolabs/jamly/pull/29) (board doc and labels).
 
 ## Contract and conventions
 
@@ -53,6 +53,12 @@ Checked against jamly `dev` at `6e28048` (2026-11-01).
 | `.github/project-extra-views.json` | jamly | [jamly#11](https://github.com/ferrarolabs/jamly/pull/11) | — | The mechanism (`build-project.js --extra`) is already in the kit |
 | Branch rulesets on `dev`, `staging`, `main` | generic | [jamly#2](https://github.com/ferrarolabs/jamly/issues/2) | `scripts/bootstrap.sh` · to build | Not a file: GitHub settings. [Bootstrap script](https://github.com/ferrarolabs/agent-kit/issues/4) |
 
+## Hooks
+
+| Piece on jamly | Scope | Proven | Template | Notes |
+|---|---|---|---|---|
+| `.claude/hooks/command-log.js` + its test, the `hooks` block in `.claude/settings.json`, `.claude/logs/` gitignored | generic | [jamly#31](https://github.com/ferrarolabs/jamly/pull/31): a real session logged ok, failed, denied and redacted commands, and upserted the comment; each of the 11 redaction patterns seen failing (D58) | `.claude/hooks/command-log.js` · ported | The kit's test uses `node:test`, jamly's uses Jest ([ADR 0020](decisions/0020-template-hooks-tested-with-node-test.md)). Same cases. Comment examples made generic |
+
 ## Not on jamly yet
 
-Hooks, skills, subagents and `docs/progress.md`. They are Phase 2 and 3. Each gets a row here when its first PR merges on jamly.
+Skills, subagents, the other hooks and `docs/progress.md`. They are Phase 2 and 3. Each gets a row here when its first PR merges on jamly.

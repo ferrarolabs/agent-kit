@@ -35,6 +35,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] [Sessions open from the repo root](https://github.com/ferrarolabs/agent-kit/issues/3): [guide](guides/open-sessions-from-the-repo-root.md), proven by a headless probe. Multi-repo cloud sessions [load no project deny rules](https://github.com/ferrarolabs/agent-kit/issues/103)
 - [ ] [Account deny floor](https://github.com/ferrarolabs/agent-kit/issues/103) (ADR 0017): `account/settings.json` and a SessionStart hook, installed by `account/install.sh`. Probed: 19 of 19 push cases and `rm -rf` denied with only the floor loaded. Checked once the setup script runs the installer and a two-repo cloud session denies `rm -rf` and says the project rules didn't load
 - [x] [Personal deny floor](https://github.com/ferrarolabs/agent-kit/issues/8): `install.sh` merges the floor into an existing `settings.json`. The laptop sandbox floor is designed and [deferred](https://github.com/ferrarolabs/agent-kit/issues/120) (ADR 0019): native Windows has no sandbox, and work is cloud-first
+- [x] [Command log](https://github.com/ferrarolabs/agent-kit/issues/39): every Bash command, its outcome and the loaded settings, upserted as one comment per session on the branch's issue. Proven on [jamly#31](https://github.com/ferrarolabs/jamly/pull/31), ported to `template/.claude/hooks/`, tested in the kit's CI (ADR 0020)
 
 - [x] [agent-kit harnessed itself](https://github.com/ferrarolabs/agent-kit/issues/55): "Working as an agent" in `CLAUDE.md`, `.claude/settings.json` (probed in a cloud session: 19 of 19 with the rules, 4 of 19 without), issue templates, and its own [cloud environment](guides/cloud-environment-for-agent-kit.md). Checked 2026-11-01: a session on that environment had the account layer installed, no Supabase variables, Supabase blocked, and the probe at 19 of 19
 
@@ -55,7 +56,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [ ] Cloud scheduled task that resumes work
 - [ ] "I need you" signal when the agent is blocked
 - [ ] [An agent starts on its own](https://github.com/ferrarolabs/agent-kit/issues/76) when an issue gets `agent:ready`
-- [ ] Command log (Record column)
+- [x] Command log (Record column): moved to Phase 1 and done there
 
 **Exit:** a feature moves forward for 24 hours without me, across at least one usage limit.
 
