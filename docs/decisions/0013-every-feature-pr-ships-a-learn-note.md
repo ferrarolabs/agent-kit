@@ -11,7 +11,7 @@ Elia wants to learn from each PR now, while he still reviews it. On [feat(16): s
 Until the explainer exists, **the implementing agent writes the learn note in the feature's PR**, before the merge.
 
 - It applies to every PR that adds or changes behaviour. A PR that changes agent rules but no code puts a short Learn section in its description instead. Chores that change no behaviour skip it.
-- The note lives in the project's repo, at `docs/learn/<story>.md`, and is linked at the top of the PR description.
+- The note lives in the project's repo, at `docs/learn/<story>.md`. It is written before the merge, so Elia reads it during the review. It is linked at the top of the PR description with a permalink to the commit, which survives the branch being deleted.
 - It covers: the feature in one paragraph, how the code is layered, the concepts and technologies behind it, the decisions taken, the alternatives rejected, what testing or running the app found, and where to look.
 - It stays true: when review changes the code, the note changes in the same push.
 
