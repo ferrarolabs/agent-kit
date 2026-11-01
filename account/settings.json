@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "$comment": "The account deny floor (ADR 0017). Installed as ~/.claude/settings.json by account/install.sh, so it loads wherever a session starts. Generic rules only: the same denies as jamly's .claude/settings.json, proven there (jamly PR 5, jamly PR 33). A project's own settings add to it; deny always wins.",
+  "permissions": {
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(!.env.example)",
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)",
+      "Bash(git push)",
+      "Bash(git push origin)",
+      "Bash(git push * HEAD)",
+      "Bash(git push * HEAD *)",
+      "Bash(git push * dev)",
+      "Bash(git push * dev *)",
+      "Bash(git push *:dev)",
+      "Bash(git push *:dev *)",
+      "Bash(git push */dev)",
+      "Bash(git push */dev *)",
+      "Bash(git push *+dev)",
+      "Bash(git push *+dev *)",
+      "Bash(git push * staging)",
+      "Bash(git push * staging *)",
+      "Bash(git push *:staging)",
+      "Bash(git push *:staging *)",
+      "Bash(git push */staging)",
+      "Bash(git push */staging *)",
+      "Bash(git push *+staging)",
+      "Bash(git push *+staging *)",
+      "Bash(git push * main)",
+      "Bash(git push * main *)",
+      "Bash(git push *:main)",
+      "Bash(git push *:main *)",
+      "Bash(git push */main)",
+      "Bash(git push */main *)",
+      "Bash(git push *+main)",
+      "Bash(git push *+main *)",
+      "Bash(rm -rf *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/project-rules-check.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
