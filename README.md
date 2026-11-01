@@ -1,60 +1,85 @@
 # agent-kit
 
-A harness that lets AI coding agents ([Claude Code](https://claude.com/claude-code)) build software on their own, for hours, while I keep the decisions that matter: what to build, how it's shaped, and what gets merged.
+A harness for AI coding agents ([Claude Code](https://claude.com/claude-code)). It lets agents build software unattended while a human keeps three decisions: what gets built, how it is shaped, and what gets merged.
 
-**Status:** Phase 1 of 6, foundations. Built on a real project first, [jamly](https://github.com/ferrarolabs/jamly), a mobile app for bands. See the [roadmap](docs/ROADMAP.md).
+## At a glance
+
+| | |
+|---|---|
+| **Goal** | Agents work for hours on real issues; irreversible actions stay out of their reach |
+| **Status** | Phase 1 of 6, foundations ([roadmap](docs/ROADMAP.md)) |
+| **Pilot** | [jamly](https://github.com/ferrarolabs/jamly), a mobile app for bands. Each piece is built and proven there first, then ported here ([ADR 0001](docs/decisions/0001-separate-kit-piloted-on-jamly.md), [ADR 0014](docs/decisions/0014-kit-aligned-at-every-harness-merge.md)) |
+| **Maintainer** | Elia Ferraro, solo |
+| **Licence** | [MIT](LICENSE) |
 
 ## The problem
 
-An agent can write a feature. Left alone, it can also push to `main`, read a secret, skip a failing test, or stop at the first error with "it doesn't work". A sentence in a prompt only makes those less likely.
+A coding agent can implement a feature. Unsupervised, it can also push to `main`, read a secret, skip a failing test, or stop at the first error. An instruction in a prompt makes these less likely. It does not prevent them.
 
-The model isn't mine to change. Everything around it is: the instructions it reads, the tools it may use, the checks it must pass, the limits it can't cross. That's the harness. **Agent = Model + Harness.**
+The model is fixed. Everything around it can be designed: the instructions it reads, the tools it may use, the checks it must pass, the limits it cannot cross. That surrounding layer is the harness: **Agent = Model + Harness**.
 
-## How it's built: three levels
+## Design
 
-A cloud session sees only what is committed to the repo it works on, plus what's on the account. So the kit lives at three levels:
+### Three levels
 
-| Level | Where | Holds |
+A cloud session sees only what is committed to the repo it works on, plus what is installed on the account. The kit is split accordingly.
+
+| Level | Location | Contents |
 |---|---|---|
-| **Account** | `account/CLAUDE.md`, installed in every session | Rules that hold everywhere: recover before you escalate, own your PR to the end, ship a learn note |
-| **Kit** | This repo, copied into each project | Permissions, hooks, CI, issue templates, labels: the generic parts |
+| **Account** | `account/CLAUDE.md`, installed in every session | Rules that apply everywhere: recover before escalating, own a PR to the end, ship a learn note |
+| **Kit** | `template/` in this repo, copied into each project | Generic pieces: permissions, CI, issue templates, labels, the `CLAUDE.md` skeleton |
 | **Project** | The project's own repo | What only that project knows: its stack, its irreversible commands, its decisions |
 
-## Four roles every piece plays
+### Four roles
 
-Each piece of the harness has one job:
+Every piece of the harness has exactly one role.
 
-- **Guide** tells the agent what to do. A short `CLAUDE.md`, a definition of done that says who checks each line.
-- **Sensor** notices when something is wrong. CI, tests, and checks on the harness itself.
-- **Boundary** stops what can't be undone, whatever the agent intends. Branch rulesets, deny rules, no production credentials in the cloud.
-- **Record** keeps what happened. Decisions as ADRs, state in the repo, not in a chat.
+| Role | Purpose | Examples |
+|---|---|---|
+| **Guide** | Tells the agent what to do | A short `CLAUDE.md`; a definition of done that names who checks each line |
+| **Sensor** | Detects that something is wrong | CI, tests, checks on the harness itself |
+| **Boundary** | Stops what cannot be undone, regardless of intent | Branch rulesets, deny rules, no production credentials in the cloud |
+| **Record** | Keeps what happened | ADRs, state in the repo rather than in a chat |
 
-The rule that ties them together: **irreversible things get a boundary, not an instruction.** A deny rule is a guardrail; the branch ruleset on GitHub is the boundary, because it holds even when the agent writes the command a new way.
+The governing principle: **irreversible actions get a boundary, not an instruction.** A deny rule is a guardrail. The GitHub branch ruleset is the boundary, because it holds even when the agent phrases a command a new way.
 
-## Evidence that the checks can fail
+## Evidence
 
-A check never seen red may not be wired up at all. So every one is made to fail once.
+A check that has never failed may not be wired up. Each check below was made to fail at least once before it was counted.
 
-- **Branch protection.** On `dev`, `staging` and `main`: a direct push is rejected, a PR with red CI is blocked, a green one merges ([jamly: branch protection](https://github.com/ferrarolabs/jamly/issues/2)).
-- **Push deny rules.** A probe ran one headless session per command: the first rules denied only 3 of 12 ways of pushing to a protected branch. The rewritten ones deny all 12, and still allow 4 feature branches whose names contain `dev` or `main` ([jamly PR 5](https://github.com/ferrarolabs/jamly/pull/5)).
-- **Formatting.** Without a failing check, unformatted files went from 2 to 45 in a few days. CI now fails on them ([jamly PR 15](https://github.com/ferrarolabs/jamly/pull/15)).
-- **Account rules reach the cloud.** A cloud session started with `account/CLAUDE.md` installed by the setup script loads it as its global instructions.
+| Check | Result | Proof |
+|---|---|---|
+| Branch protection on `dev`, `staging`, `main` | Direct push rejected; PR with red CI blocked; green PR merges | [jamly: branch protection](https://github.com/ferrarolabs/jamly/issues/2) |
+| Push deny rules | First version denied 3 of 12 ways to push to a protected branch. Rewritten rules deny 12 of 12 and still allow 4 feature branches whose names contain `dev` or `main` | [jamly PR 5](https://github.com/ferrarolabs/jamly/pull/5) |
+| Formatting in CI | Without a failing check, unformatted files grew from 2 to 45 in a few days. CI now fails on them | [jamly PR 15](https://github.com/ferrarolabs/jamly/pull/15) |
+| This repo's CI | Markdown lint, links, JSON, scripts, unit tests. A deliberately broken link turned it red, then was reverted | [agent-kit PR 106](https://github.com/ferrarolabs/agent-kit/pull/106) |
+| Account rules in the cloud | A cloud session with `account/CLAUDE.md` installed by the setup script loads it as global instructions | [roadmap, Phase 1](docs/ROADMAP.md#phase-1--foundations-on-jamly--in-progress) |
 
-## How it works day to day
+## Workflow
 
-1. I write an issue and mark it ready.
+1. The maintainer writes an issue and marks it ready.
 2. An agent picks it up, works on a branch, opens a PR, and follows it until CI is green.
-3. The PR carries a learn note: what was built, why, and the concepts behind it, so I understand the feature I own, not just approve it.
-4. I review and merge. Promoting to `staging` and `main` is mine too.
+3. The PR carries a learn note: what was built, why, and the concepts behind it. The maintainer owns the feature, not only the approval ([ADR 0013](docs/decisions/0013-every-feature-pr-ships-a-learn-note.md)).
+4. The maintainer reviews and merges. Promotion to `staging` and `main` is also the maintainer's.
 
-The decisions behind each choice are in [docs/decisions/](docs/decisions/), one per file. Start with [agents propose, I decide](docs/decisions/0003-agents-propose-i-decide.md) and [agents recover before they escalate](docs/decisions/0010-agents-recover-before-they-escalate.md).
+Agents propose; the maintainer decides ([ADR 0003](docs/decisions/0003-agents-propose-i-decide.md)). When an agent hits an error, it recovers before it escalates ([ADR 0010](docs/decisions/0010-agents-recover-before-they-escalate.md)).
 
-## Where to look
+## Not built yet
 
-- [docs/PLAN.md](docs/PLAN.md): the target. Goal, principles, architecture, roles, boundaries.
-- [docs/ROADMAP.md](docs/ROADMAP.md): six phases, each with an exit test. Long autonomy across usage limits and parallel agents come later; they aren't built yet.
-- [docs/decisions/](docs/decisions/): why it's like this.
-- [account/CLAUDE.md](account/CLAUDE.md): the rules every session gets.
+Planned in later phases of the [roadmap](docs/ROADMAP.md), not claimed here:
 
-## Licence
-[MIT](LICENSE).
+- Hooks that block an agent from finishing with red checks (Phase 2).
+- Long autonomy across usage limits (Phase 3).
+- Bootstrap and sync scripts, and a second project (Phase 4).
+- Parallel agents (Phase 6).
+
+## Repository map
+
+| Path | Contents |
+|---|---|
+| [docs/PLAN.md](docs/PLAN.md) | The target: goal, principles, architecture, roles, boundaries |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Six phases, each with an exit test |
+| [docs/decisions/](docs/decisions/) | Architecture decision records, one per file |
+| [docs/inventory.md](docs/inventory.md) | Every harness piece on jamly and where it stands in the kit |
+| [account/CLAUDE.md](account/CLAUDE.md) | The rules every session receives |
+| [template/](template/) | The generic files copied into projects |
