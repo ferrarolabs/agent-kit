@@ -1,0 +1,40 @@
+# agent-kit's own: a kit file, script or rule that behaves wrongly.
+# Adapted from template/.github/ISSUE_TEMPLATE/bug.yml.
+name: Bug
+description: A script, check, rule or template file that behaves wrongly.
+labels: [type:bug, area:harness]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The command or session, and the real output.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should have happened
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. …
+        2. …
+    validations:
+      required: true
+  - type: textarea
+    id: where
+    attributes:
+      label: Where
+      description: Local or cloud session, which repo, Claude Code version.
+  - type: textarea
+    id: fixed-when
+    attributes:
+      label: Fixed when
+      description: The check that proves it's fixed. It should become a test or a probe case.
+    validations:
+      required: true

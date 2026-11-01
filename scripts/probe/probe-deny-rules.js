@@ -78,6 +78,9 @@ function prepareClone(repoDir) {
     fs.copyFileSync(settings, path.join(clone, '.claude', 'settings.json'));
   }
   run(['init', '--quiet', '--bare', bare]);
+  // Cloud sessions check the repo out shallow, and a bare repo refuses a shallow push by
+  // default ("shallow update not allowed"). The probe's origin is a throwaway: accept it.
+  run(['config', 'receive.shallowUpdate', 'true'], bare);
   run(['remote', 'set-url', 'origin', bare], clone);
   run(['checkout', '--quiet', '-B', PROBE_BRANCH], clone);
   run(['push', '--quiet', 'origin', `${PROBE_BRANCH}:${PROBE_BRANCH}`], clone);

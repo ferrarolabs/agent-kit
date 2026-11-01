@@ -1,0 +1,45 @@
+# agent-kit's own: a harness piece, written so an agent can build it without asking.
+# Adapted from template/.github/ISSUE_TEMPLATE/feature.yml.
+name: Harness piece
+description: A rule, hook, script, check or template the kit should have.
+labels: [type:feature, area:harness]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What goes wrong today, or what the agents can't do yet. Link the failure if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: The piece, in a few lines. Where it lives (this repo, `template/`, `account/`).
+    validations:
+      required: true
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: The observable proof. A hook or check also needs proof that it can fail.
+      placeholder: |
+        - … runs green on the real repo
+        - … runs red on a broken copy
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What this issue must NOT do, even if it looks small.
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Decisions already taken
+      description: ADRs or choices settled for this issue, so the agent doesn't guess.
+  - type: textarea
+    id: elia-checks
+    attributes:
+      label: What Elia does by hand
+      description: Settings, approvals or checks an agent session can't do.

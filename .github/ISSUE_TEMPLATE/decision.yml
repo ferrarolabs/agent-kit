@@ -1,0 +1,32 @@
+# agent-kit's own: one question for Elia, readable in under a minute.
+name: Decision
+description: One question only Elia can answer. It becomes an ADR once answered.
+title: "Decide: "
+labels: [type:docs, needs:elia]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: One question. Bigger work becomes a parent issue with sub-issues.
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options
+      description: Each with what it costs and what it gives.
+    validations:
+      required: true
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommendation
+      description: The one you'd pick, and why.
+    validations:
+      required: true
+  - type: textarea
+    id: blocks
+    attributes:
+      label: What it blocks
+      description: Issues waiting on the answer.
