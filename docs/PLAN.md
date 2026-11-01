@@ -45,7 +45,6 @@ The technical constraint that shapes everything: **a cloud session sees only wha
 | **Account** | Skills on my claude.ai account | The *method*: writing specs, implementing an issue, critiquing, explaining, resuming work | Every cloud session, on every repo |
 | **Account rules** | `account/CLAUDE.md`, installed as `~/.claude/CLAUDE.md` by the setup script and on my machine | Rules that hold everywhere, always on (a skill only loads when it matches) | Every session, cloud or local, on every repo |
 | **Account deny floor** | `account/settings.json` and its SessionStart hook, installed in `~/.claude/` | The generic denies, and a warning when a project's own rules didn't load | Every session, wherever it starts |
-| **Laptop floor** | `account/laptop/managed-floor.json`, installed as a managed-settings drop-in by `install.sh --laptop` | Sandbox on, credentials hidden or masked; no repo can turn it off (ADR 0019, proposed) | Every session on my own machines, never in the cloud |
 | **Kit** | This repo, copied into projects | Roles (subagents), hooks, permissions, rules, issue templates, baseline CI, a `CLAUDE.md` skeleton | Every project that adopts it |
 | **Project** | The project's repo | Project-specific `CLAUDE.md`, architectural decisions, `progress.md`, `docs/learn/` | That project only |
 
@@ -80,9 +79,8 @@ agent-kit/
 │   ├── CLAUDE.md             # always-on rules, installed as ~/.claude/CLAUDE.md
 │   ├── settings.json         # deny floor + SessionStart hook, as ~/.claude/settings.json
 │   ├── hooks/                # account-level hooks
-│   ├── laptop/               # sandbox + credentials floor, managed settings, laptop only
 │   ├── merge-settings.js     # merges the floor into an existing settings.json
-│   └── install.sh            # installs the three into ~/.claude; --laptop adds the laptop floor
+│   └── install.sh            # installs the three into ~/.claude, merging settings.json
 ├── account-skills/           # sources of the skills to enable on the account
 ├── evals/                    # tests for the harness itself
 └── scripts/

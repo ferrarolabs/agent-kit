@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Merge the kit's settings into an existing settings file, never overwriting it (issue 8, ADR 0019).
+// Merge the kit's settings into an existing settings file, never overwriting it (issue 8, ADR 0017).
 //
 //   node account/merge-settings.js <existing.json> <kit.json>
 //
