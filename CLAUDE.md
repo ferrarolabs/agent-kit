@@ -6,6 +6,7 @@ This repo is the **kit**, not an application. It holds the plan and, over time, 
 - `docs/PLAN.md` is the source of truth for the goal. If a change contradicts it, stop and ask.
 - `docs/ROADMAP.md` says what to do now. Work only on the current phase; don't get ahead of it.
 - `docs/inventory.md` lists every harness piece on jamly and where it stands in the kit.
+- `docs/guides/` holds how-tos for working with the kit, such as [opening sessions from the repo root](docs/guides/open-sessions-from-the-repo-root.md).
 - `template/` holds **only** generic files that work for any project. No references to jamly or any other specific project.
 
 ## Rules
