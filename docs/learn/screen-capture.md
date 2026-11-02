@@ -58,7 +58,7 @@ redirected  /band/create → /sign-in  …/band-create.png
 
 ### 4. Secrets by name only
 
-The test account comes from environment variables, never from flags, which end up in shell history and in the command log. The script prints only variable *names*: `sign-in skipped: missing CAPTURE_PASSWORD`. A test checks that a value never shows up in that report.
+The test account comes from environment variables, never from flag values, which end up in shell history and in the command log. A flag can only say *which* variable to read (`--email-env JAMLY_TEST_EMAIL`), so the script reuses what a project's environment already holds. `--email-env me@example.com` is refused: it isn't a variable name. The script prints only variable *names*: `sign-in skipped: missing JAMLY_TEST_PASSWORD`. A test checks that a value never shows up in that report.
 
 ### 5. Why test only the pure parts
 
@@ -70,12 +70,13 @@ Starting Chromium in CI for a docs repo is slow and flaky. The browser part is p
 - **Rejected: `npx expo start --web`.** A dev server, slow to start, and it needs a watcher. A static export is one command and leaves nothing running.
 - **Rejected: committing screenshots to the product repo.** They go stale. They belong in the issue or PR they illustrate.
 - **Rejected: a sign-in flag (`--password`).** It would end up in the command log.
+- **Rejected: fixed `CAPTURE_*` names only.** jamly's environment already holds the account as `JAMLY_TEST_EMAIL` and `JAMLY_TEST_PASSWORD` (ADR 0016). Asking for a second copy under new names means two places to rotate. `--email-env` and `--password-env` read the existing ones.
 
 ## What running it found
 
 - jamly's web export builds in a cloud session in about a minute after `npm ci`.
 - Without `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` in the environment, every route except `/sign-in` redirects to sign-in. The sign-in step's default selectors matched jamly's form: a fill with fake values went through without a timeout.
-- To see the screens behind the gate, the cloud environment needs those two variables and a test account (ADR 0016 allows them). Only Elia can add them.
+- The run was in agent-kit's cloud environment, which has none of jamly's variables. jamly's own environment holds the test account (Elia, in the PR review). So the screens behind the gate are captured from a session on jamly's environment, with `--email-env JAMLY_TEST_EMAIL --password-env JAMLY_TEST_PASSWORD`.
 
 ## Where to look
 

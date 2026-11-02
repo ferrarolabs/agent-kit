@@ -10,11 +10,15 @@
 // --base <url>   uses a server that is already running instead.
 // --width/--height  viewport, default 390×844 (a phone).
 //
-// Optional sign-in, all from the environment, so nothing secret is on the command line:
-//   CAPTURE_SIGN_IN_ROUTE  route of the sign-in screen, e.g. /sign-in
-//   CAPTURE_EMAIL, CAPTURE_PASSWORD  the test account
+// Optional sign-in. The account comes from the environment, so nothing secret is on the
+// command line:
+//   --sign-in-route <route>  route of the sign-in screen (or CAPTURE_SIGN_IN_ROUTE)
+//   --email-env <NAME>       variable holding the test account's email (default CAPTURE_EMAIL)
+//   --password-env <NAME>    variable holding its password (default CAPTURE_PASSWORD)
 //   CAPTURE_EMAIL_SELECTOR, CAPTURE_PASSWORD_SELECTOR, CAPTURE_SUBMIT_SELECTOR  optional overrides
-// The values are never printed: only the names of the variables that are set or missing.
+// --email-env and --password-env let a project reuse the variables its environment already
+// has, e.g. --email-env JAMLY_TEST_EMAIL. The values are never printed: only the names of
+// the variables that are set or missing.
 //
 // Prints one line per route: the file written, and where the page ended up. A route that
 // lands somewhere else (an auth gate redirecting to sign-in) is marked "redirected", so the
@@ -27,7 +31,7 @@ const path = require('node:path');
 const DEFAULTS = { width: 390, height: 844, settleMs: 800 };
 
 function parseArgs(argv) {
-  const opts = { routes: [], width: DEFAULTS.width, height: DEFAULTS.height };
+  const opts = { routes: [], width: DEFAULTS.width, height: DEFAULTS.height, emailEnv: 'CAPTURE_EMAIL', passwordEnv: 'CAPTURE_PASSWORD' };
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
     const value = argv[i + 1];
@@ -42,13 +46,23 @@ function parseArgs(argv) {
     else if (flag === '--routes') opts.routes.push(...need().split(',').map((r) => r.trim()).filter(Boolean));
     else if (flag === '--width') opts.width = positiveInt(flag, need());
     else if (flag === '--height') opts.height = positiveInt(flag, need());
+    else if (flag === '--sign-in-route') opts.signInRoute = need();
+    else if (flag === '--email-env') opts.emailEnv = envName(flag, need());
+    else if (flag === '--password-env') opts.passwordEnv = envName(flag, need());
     else throw new Error(`unknown flag ${flag}`);
   }
   if (!opts.out) throw new Error('--out is required');
   if (!opts.routes.length) throw new Error('--routes is required');
   if (Boolean(opts.serve) === Boolean(opts.base)) throw new Error('give exactly one of --serve or --base');
   for (const r of opts.routes) if (!r.startsWith('/')) throw new Error(`route must start with /: ${r}`);
+  if (opts.signInRoute !== undefined && !opts.signInRoute.startsWith('/')) throw new Error(`--sign-in-route must start with /: ${opts.signInRoute}`);
   return opts;
+}
+
+// A variable name, not a value: refusing anything else stops a secret being passed by mistake.
+function envName(flag, value) {
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) throw new Error(`${flag} takes a variable name, e.g. TEST_EMAIL`);
+  return value;
 }
 
 function positiveInt(flag, value) {
@@ -88,16 +102,25 @@ function staticFileFor(root, urlPath) {
 
 // Sign-in settings from the environment. Returns { config, missing }: config is null unless
 // every required variable is set. Only names go into `missing`, never values.
-function signInFromEnv(env) {
-  const required = ['CAPTURE_SIGN_IN_ROUTE', 'CAPTURE_EMAIL', 'CAPTURE_PASSWORD'];
-  const missing = required.filter((name) => !env[name]);
-  const anySet = required.some((name) => env[name]);
-  if (missing.length) return { config: null, missing: anySet ? missing : [] };
+// `names` says which variables hold the account; a route given on the command line
+// replaces CAPTURE_SIGN_IN_ROUTE.
+function signInFromEnv(env, names = {}) {
+  const emailEnv = names.emailEnv || 'CAPTURE_EMAIL';
+  const passwordEnv = names.passwordEnv || 'CAPTURE_PASSWORD';
+  const values = {
+    CAPTURE_SIGN_IN_ROUTE: names.signInRoute || env.CAPTURE_SIGN_IN_ROUTE,
+    [emailEnv]: env[emailEnv],
+    [passwordEnv]: env[passwordEnv],
+  };
+  const required = Object.keys(values);
+  const missing = required.filter((name) => !values[name]);
+  const anySet = required.some((name) => values[name]);
+  if (missing.length) return { config: null, missing: anySet ? missing.map((n) => (n === 'CAPTURE_SIGN_IN_ROUTE' ? 'CAPTURE_SIGN_IN_ROUTE or --sign-in-route' : n)) : [] };
   return {
     config: {
-      route: env.CAPTURE_SIGN_IN_ROUTE,
-      email: env.CAPTURE_EMAIL,
-      password: env.CAPTURE_PASSWORD,
+      route: values.CAPTURE_SIGN_IN_ROUTE,
+      email: values[emailEnv],
+      password: values[passwordEnv],
       emailSelector: env.CAPTURE_EMAIL_SELECTOR || 'input[type="email"], input[autocomplete="email"]',
       passwordSelector: env.CAPTURE_PASSWORD_SELECTOR || 'input[type="password"]',
       submitSelector: env.CAPTURE_SUBMIT_SELECTOR || '[role="button"]:has-text("Sign in"), button:has-text("Sign in")',
@@ -139,7 +162,7 @@ async function signIn(page, base, cfg) {
 
 async function main(argv, env) {
   const opts = parseArgs(argv);
-  const { config: signInCfg, missing } = signInFromEnv(env);
+  const { config: signInCfg, missing } = signInFromEnv(env, opts);
   if (missing.length) console.log(`sign-in skipped: missing ${missing.join(', ')}`);
 
   let server;
