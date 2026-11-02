@@ -249,7 +249,7 @@ The org decision (§3.8) sits before P1, because it changes which token the Acti
 |---|---|---|---|
 | T1 | ✅ **Verified 2026-10-31**, through the GitHub MCP tools and through `gh api` (REST), on a throwaway issue in `ferrarolabs/agent-kit` (see below). GraphQL is not available from cloud sessions | Decides whether issue fields can carry the agents' state | Done |
 | T2 | Historical charts are available on Free | M4 and the charts | Create one in a test project |
-| T3 | A hook in a cloud session can comment on its issue | M3 in the cloud | One-line hook on a test issue |
+| T3 | ✅ **Verified 2026-11-02 for a Stop hook; SessionEnd not tested** (see below). A hook in a cloud session can comment on its issue | M3 in the cloud | Done, from evidence that already existed |
 | T4 | ✅ **Verified 2026-10-30.** Each subagent has its own transcript in `<session>/subagents/agent-*.jsonl` (with `isSidechain: true`, its own `model`) plus a `.meta.json` with the agent type. The headless result's `modelUsage` includes subagents. **Raw transcript lines double-count**: dedupe by request id | M3 per role | Done |
 | T5 | ✅ **Verified 2026-10-30** on live items via `items(query:)`: `<` means older. `updated:<@today-1d` → 0 and `updated:>@today-1d` → all, on items all updated today. The Stalled filter is right | The Stalled view | Done |
 | T6 | ✅ docs: GitHub Mobile shows projects as **lists with collapsible groups**, not as boards | Phone views are tables grouped by Status | Done |
@@ -287,6 +287,25 @@ The org decision (§3.8) sits before P1, because it changes which token the Acti
 - `gh auth status` reports `The token in GH_TOKEN is invalid` while `gh api user` works. Don't trust it; test with `gh api user`.
 
 **What does reach the Project:** a cloud session can start a workflow (`POST repos/{owner}/{repo}/actions/workflows/{file}/dispatches` passes the proxy) and read its runs. So project scripts run in an Action, started from the cloud ([Project scripts run in an Action, started from cloud sessions](https://github.com/ferrarolabs/agent-kit/issues/83)).
+
+### T3 · what was found (2026-11-02, read-only)
+
+No new comment was posted. The test already ran, as a side effect of the command log.
+
+**How the hook posts.** [`command-log.js`](../template/.claude/hooks/command-log.js) runs on the **Stop** event (`template/.claude/settings.json`, timeout 30 s). It reads the issue number from the branch name (`chore/30-...` gives 30) and the repo from `origin`. It then calls `gh api` over REST: list the issue's comments, find its marker `<!-- command-log:<session> -->`, and PATCH that comment, or POST a new one. The token is the cloud session's own. It posts as Elia, not as a bot ([Agents act on GitHub as a bot account, not as Elia](https://github.com/ferrarolabs/agent-kit/issues/113)).
+
+**The comment exists.** [The command log on jamly issue 30](https://github.com/ferrarolabs/jamly/issues/30#issuecomment-6556683973) was created 2026-11-01 10:23:42 UTC and updated at 10:26:48. Its author is Elia's account. It lists 6 commands. The table shows two runs of the same session id, so the second Stop updated the comment in place. It was written by the hook in [PR 31](https://github.com/ferrarolabs/jamly/pull/31), whose description records the run: headless Claude Code inside a cloud session, started in `/home/user/jamly`.
+
+#### What is proven
+- A hook in a cloud session can read and write issue comments with `gh api` (REST). Create and update both work.
+- A **Stop** hook runs to the end, and its network call succeeds, in a cloud session.
+
+#### What is not proven
+- **SessionEnd** was never used. Nothing here shows it runs, or that it runs before the container is reclaimed.
+- The runs were headless sessions started inside a cloud session. A Stop at the end of an interactive cloud session has no recorded comment. (Stop fires after every agent turn, so for the ledger it is the safer event anyway.)
+- Whether a Stop after the last turn always finishes before the container is reclaimed.
+
+**Consequence for the ledger.** Post it from Stop, as an upsert keyed by session id, like the command log. Do not rely on SessionEnd. To close the open points, read the next comment the command log leaves at the end of a normal cloud session.
 
 ---
 
