@@ -11,7 +11,7 @@ A harness piece is anything that shapes how agents work: rules, permissions, hoo
 - **Proven:** the PR or issue where it was merged and, for a check, seen failing. *No* means it isn't ready for `template/`.
 - **Template:** where it goes, or went, in `template/`. *Ported* or *to port*.
 
-Checked against jamly `dev` at `6e28048` (2026-11-01), plus the command log from [jamly#31](https://github.com/ferrarolabs/jamly/pull/31). Two harness merges since then are not ported yet: [jamly#33](https://github.com/ferrarolabs/jamly/pull/33) (every force-push spelling denied) and [jamly#29](https://github.com/ferrarolabs/jamly/pull/29) (board doc and labels).
+Checked against jamly `dev` at `35b6077` (2026-11-01). One harness merge since `6e28048` is not ported yet: [jamly#33](https://github.com/ferrarolabs/jamly/pull/33) (every force-push spelling denied), tracked in [agent-kit#121](https://github.com/ferrarolabs/agent-kit/issues/121). [jamly#29](https://github.com/ferrarolabs/jamly/pull/29) (board doc and labels) is checked below, and [jamly#31](https://github.com/ferrarolabs/jamly/pull/31) (command log) is ported.
 
 ## Contract and conventions
 
@@ -23,7 +23,7 @@ Checked against jamly `dev` at `6e28048` (2026-11-01), plus the command log from
 | `AGENTS.md` (read the Expo v57 docs) | jamly | — | — | |
 | `docs/process/41-decision-log.md` + `docs/tech/adr/` convention | split | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) | `docs/decisions/README.md` · ported | Generic: big decision → ADR, never edited, superseded; small → decision log. The entries are jamly's |
 | `docs/process/40-ways-of-working.md` | jamly | — | — | Solo-project rhythm. Its "Working with AI" section is already covered by the contract |
-| `docs/process/42-project-board.md` | jamly | — | — | **Out of date**: says Status is moved by hand and projects are built by hand, against [ADR 0007](decisions/0007-project-boards.md) and [ADR 0008](decisions/0008-numeric-priority-and-projects-from-the-template.md). The generic design is [project-boards.md](project-boards.md) |
+| `docs/process/42-project-board.md` | jamly | [jamly#29](https://github.com/ferrarolabs/jamly/pull/29) | — | Up to date with [ADR 0007](decisions/0007-project-boards.md) and [ADR 0008](decisions/0008-numeric-priority-and-projects-from-the-template.md): Status derived, Project built from the template, "Not built yet" section. It links to the generic design in [project-boards.md](project-boards.md) and only says how it applies to jamly. Nothing to port: the kit has no board page for `template/` |
 | `docs/tech/33-conventions.md` · definition of done | split | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) | `CLAUDE.md.template` · ported | Same list as in `CLAUDE.md` |
 | `docs/learn/<story>.md` | generic | [jamly#17](https://github.com/ferrarolabs/jamly/pull/17) ([ADR 0013](decisions/0013-every-feature-pr-ships-a-learn-note.md)) | `docs/learn/README.md` · ported | The format, not the note |
 
@@ -46,9 +46,9 @@ Checked against jamly `dev` at `6e28048` (2026-11-01), plus the command log from
 | `.github/workflows/ci.yml` | split | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1), [jamly#15](https://github.com/ferrarolabs/jamly/pull/15) (fails on format, D50) | `.github/workflows/ci.yml` · ported | Generic shape: on PRs and on pushes to long-lived branches; typecheck, lint, format, test. The npm commands are the project's |
 | `.github/ISSUE_TEMPLATE/feature.yml` | split | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) (D45) | `.github/ISSUE_TEMPLATE/feature.yml` · ported | Generic: why, acceptance criteria, out of scope, tests, decisions taken, data changes, manual check. jamly-only: story IDs, musician wording |
 | `.github/ISSUE_TEMPLATE/bug.yml` | split | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) | `.github/ISSUE_TEMPLATE/bug.yml` · ported | Generic except the platform list |
-| `.github/labels.yml` · `type:*`, `agent:*`, `needs:elia`, `area:harness` | generic | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) (D46) | `.github/labels.yml` · ported | `agent:*` and `needs:*` are due to be replaced by Stage ([ADR 0009](decisions/0009-issue-data-in-issue-fields.md)) |
+| `.github/labels.yml` · `type:*`, `agent:*`, `needs:elia`, `area:harness` | generic | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) (D46), [jamly#29](https://github.com/ferrarolabs/jamly/pull/29) (still the same set on `dev`) | `.github/labels.yml` · ported | `agent:*` and `needs:*` are due to be replaced by Stage ([ADR 0009](decisions/0009-issue-data-in-issue-fields.md)) |
 | `.github/labels.yml` · `needs:device-check` | open | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) | — | Waits on [Decide: is "Device check" a generic Status?](https://github.com/ferrarolabs/agent-kit/issues/73) |
-| `.github/labels.yml` · `priority:*` | — | — | — | **To remove** from jamly: Priority is an org number field ([ADR 0008](decisions/0008-numeric-priority-and-projects-from-the-template.md)) |
+| `.github/labels.yml` · `priority:*` | — | [jamly#29](https://github.com/ferrarolabs/jamly/pull/29) | — | Removed from jamly: Priority is an org number field ([ADR 0008](decisions/0008-numeric-priority-and-projects-from-the-template.md)). The kit's `.github/labels.yml` never had them |
 | `.github/labels.yml` · `epic:*` | jamly | — | — | |
 | `.github/project-extra-views.json` | jamly | [jamly#11](https://github.com/ferrarolabs/jamly/pull/11) | — | The mechanism (`build-project.js --extra`) is already in the kit |
 | Branch rulesets on `dev`, `staging`, `main` | generic | [jamly#2](https://github.com/ferrarolabs/jamly/issues/2) | `scripts/bootstrap.sh` · to build | Not a file: GitHub settings. [Bootstrap script](https://github.com/ferrarolabs/agent-kit/issues/4) |
