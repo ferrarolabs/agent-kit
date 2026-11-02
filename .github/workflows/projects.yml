@@ -1,0 +1,107 @@
+name: Projects
+
+# Runs scripts/projects/build-project.js with an org token. Cloud sessions can't reach
+# GraphQL or org paths, but they can dispatch this workflow and read its run (issue 83).
+# Guide: docs/guides/run-project-scripts-from-a-cloud-session.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "check changes nothing; build creates what is missing"
+        type: choice
+        options: [check, build]
+        default: check
+      title:
+        description: "Project title, e.g. Agent work or Jamly"
+        type: string
+        required: true
+      repo:
+        description: "Repo in ferrarolabs the project belongs to. Empty = the org template (--template)"
+        type: string
+        default: ""
+      extra:
+        description: "Also apply the repo's .github/project-extra-views.json"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Two runs writing the same project at once would race on its views.
+concurrency:
+  group: projects
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: build-project.js
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Check the token and the inputs
+        # Inputs reach the shell only as environment variables, never as ${{ }} inside the script.
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          MODE: ${{ inputs.mode }}
+          TITLE: ${{ inputs.title }}
+          REPO: ${{ inputs.repo }}
+          EXTRA: ${{ inputs.extra }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::The PROJECT_TOKEN secret is empty or missing. Add it in Settings > Secrets and variables > Actions (issue 83)."
+            exit 1
+          fi
+          case "$MODE" in check|build) ;; *) echo "::error::mode must be check or build"; exit 1 ;; esac
+          if ! printf '%s' "$TITLE" | grep -Eq '^[A-Za-z0-9 ._-]{1,64}$'; then
+            echo "::error::title must be 1-64 letters, digits, spaces, dots, dashes or underscores"
+            exit 1
+          fi
+          if [ -n "$REPO" ] && ! printf '%s' "$REPO" | grep -Eq '^[A-Za-z0-9_-][A-Za-z0-9._-]{0,99}$'; then
+            echo "::error::repo must be a bare repo name in ferrarolabs, e.g. jamly"
+            exit 1
+          fi
+          if [ "$EXTRA" = "true" ] && [ -z "$REPO" ]; then
+            echo "::error::extra needs a repo: the org template has no extra views"
+            exit 1
+          fi
+
+      - name: Fetch the repo's extra views
+        if: inputs.extra
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          REPO: ${{ inputs.repo }}
+        run: |
+          gh api -H "Accept: application/vnd.github.raw" \
+            "repos/ferrarolabs/$REPO/contents/.github/project-extra-views.json" > "$RUNNER_TEMP/extra-views.json"
+          node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"))' "$RUNNER_TEMP/extra-views.json"
+
+      - name: Run build-project.js
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          MODE: ${{ inputs.mode }}
+          TITLE: ${{ inputs.title }}
+          REPO: ${{ inputs.repo }}
+          EXTRA: ${{ inputs.extra }}
+        run: |
+          set -- --owner ferrarolabs --title "$TITLE"
+          if [ -n "$REPO" ]; then set -- "$@" --repo "$REPO"; else set -- "$@" --template; fi
+          if [ "$EXTRA" = "true" ]; then set -- "$@" --extra "$RUNNER_TEMP/extra-views.json"; fi
+          if [ "$MODE" = "check" ]; then set -- "$@" --check; fi
+          echo "node scripts/projects/build-project.js $*"
+          status=0
+          node scripts/projects/build-project.js "$@" > "$RUNNER_TEMP/out.txt" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/out.txt"
+          {
+            echo "### build-project.js · $MODE · $TITLE"
+            echo '```text'
+            cat "$RUNNER_TEMP/out.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
