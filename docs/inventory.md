@@ -62,3 +62,5 @@ Checked against jamly `dev` at `6e28048` (2026-11-01), plus the command log from
 ## Not on jamly yet
 
 Skills, subagents, the other hooks and `docs/progress.md`. They are Phase 2 and 3. Each gets a row here when its first PR merges on jamly.
+
+Screen capture ([scripts/screens/](../scripts/screens/capture.js)) runs from the kit against a project's web build, like the probe. It was tried on jamly `dev` at `35b6077` from the kit and is not in `template/`. It gets a row here when a jamly issue or PR uses it.
