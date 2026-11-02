@@ -1,0 +1,18 @@
+# agent-kit's own labels, layered on the kit's generic file (template/.github/labels.yml).
+# A label here replaces the generic one of the same name. Apply or check with:
+#   node scripts/labels/sync-labels.js --repo ferrarolabs/agent-kit --extra .github/labels.yml --check
+#
+# agent-kit is a kit, not a product, so the type descriptions say "the kit".
+
+- name: 'type:feature'
+  color: '1f6feb'
+  description: Something new the product or kit can do
+- name: 'type:chore'
+  color: '6e7781'
+  description: Tooling, CI, dependencies, setup — nothing user-visible
+- name: 'type:docs'
+  color: '0075ca'
+  description: Documentation or a decision record
+- name: 'type:audit'
+  color: 'bf8700'
+  description: Raised by an auditor agent — a proposal, not yet accepted

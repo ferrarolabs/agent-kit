@@ -14,6 +14,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] CI on GitHub Actions: test, lint, typecheck, on pushes to every long-lived branch ([jamly#1](https://github.com/ferrarolabs/jamly/pull/1))
 - [x] Issue templates: feature and bug ([jamly#1](https://github.com/ferrarolabs/jamly/pull/1))
 - [x] Labels as code and a project board spec: labels carry the agent workflow, the Project is for planning ([jamly#1](https://github.com/ferrarolabs/jamly/pull/1))
+- [x] [Labels as code for the org](https://github.com/ferrarolabs/agent-kit/issues/27): the kit's generic file plus each repo's own, kept in step by [scripts/labels/](../scripts/labels/README.md), additive (ADR 0022). `--check` in step on jamly and agent-kit; seen failing on agent-kit without its own file
 - [x] One project template, built and checked by `scripts/projects/build-project.js` ([board design](project-boards.md), ADR 0007): the org template [Agent work](https://github.com/orgs/ferrarolabs/projects/3). Its `--check` mode was seen failing on a hand-edited filter
 - [ ] Template finalised by hand (sorts, grouping, workflows), then the repo projects created as copies of it (ADR 0008)
 - [ ] Board views: group-by, sort and workflows set by hand (the API can't)
