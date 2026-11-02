@@ -11,7 +11,7 @@ A harness piece is anything that shapes how agents work: rules, permissions, hoo
 - **Proven:** the PR or issue where it was merged and, for a check, seen failing. *No* means it isn't ready for `template/`.
 - **Template:** where it goes, or went, in `template/`. *Ported* or *to port*.
 
-Checked against jamly `dev` at `35b6077` (2026-11-01). One harness merge since `6e28048` is not ported yet: [jamly#33](https://github.com/ferrarolabs/jamly/pull/33) (every force-push spelling denied), tracked in [agent-kit#121](https://github.com/ferrarolabs/agent-kit/issues/121). [jamly#29](https://github.com/ferrarolabs/jamly/pull/29) (board doc and labels) is checked below, and [jamly#31](https://github.com/ferrarolabs/jamly/pull/31) (command log) is ported.
+Checked against jamly `dev` at `35b6077` (2026-11-01). Every harness merge since `6e28048` is ported: [jamly#33](https://github.com/ferrarolabs/jamly/pull/33) (every force-push spelling denied, [agent-kit#121](https://github.com/ferrarolabs/agent-kit/issues/121)) and [jamly#31](https://github.com/ferrarolabs/jamly/pull/31) (command log). [jamly#29](https://github.com/ferrarolabs/jamly/pull/29) (board doc and labels) is checked below.
 
 ## Contract and conventions
 
@@ -33,7 +33,7 @@ Checked against jamly `dev` at `35b6077` (2026-11-01). One harness merge since `
 |---|---|---|---|---|
 | `.claude/settings.json` · deny reading `.env` | generic | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) | `.claude/settings.json` · ported | |
 | `.claude/settings.json` · push deny rules for `dev`, `staging`, `main` | generic | [jamly#5](https://github.com/ferrarolabs/jamly/pull/5): 12 of 12 denied, 4 feature pushes allowed | `.claude/settings.json` · ported | Branch names are the kit's default long-lived branches |
-| `.claude/settings.json` · deny force-push, `rm -rf` | generic | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) | `.claude/settings.json` · ported | |
+| `.claude/settings.json` · deny force-push, `rm -rf` | generic | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1); every force-push spelling in [jamly#33](https://github.com/ferrarolabs/jamly/pull/33) | `.claude/settings.json` · ported | `--force*` and `-f`, before or after the remote. The probe on a copy of the template: 16 of 19 before the port, 19 of 19 after |
 | `.claude/settings.json` · ask before editing workflows | generic | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) | `.claude/settings.json` · ported | |
 | `.claude/settings.json` · deny Supabase and EAS writes, ask on `config.toml` and `eas.json` | jamly | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) (D42) | — | The pattern is generic: deny the project's irreversible commands |
 | `.claude/settings.json` · allow npm checks, Expo plugin | jamly | — | — | |
