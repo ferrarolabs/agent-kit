@@ -5,6 +5,8 @@ on:
   push:
     branches: [dev, staging, main]
   pull_request:
+  # The merge queue tests the base branch + the PR on a temporary branch, and waits for this check there.
+  merge_group:
 
 permissions:
   contents: read
