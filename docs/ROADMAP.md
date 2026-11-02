@@ -37,6 +37,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] [Personal deny floor](https://github.com/ferrarolabs/agent-kit/issues/8): `install.sh` merges the floor into an existing `settings.json`. The laptop sandbox floor is designed and [deferred](https://github.com/ferrarolabs/agent-kit/issues/120) (ADR 0019): native Windows has no sandbox, and work is cloud-first
 - [x] [Command log](https://github.com/ferrarolabs/agent-kit/issues/39): every Bash command, its outcome and the loaded settings, upserted as one comment per session on the branch's issue. Proven on [jamly#31](https://github.com/ferrarolabs/jamly/pull/31), ported to `template/.claude/hooks/`, tested in the kit's CI (ADR 0020)
 
+- [x] [Harness diagnosed with the 5×4 matrix](https://github.com/ferrarolabs/agent-kit/issues/56): [harness-matrix.md](harness-matrix.md), top three gaps linked to their issues. Re-run at the end of every phase
 - [x] [agent-kit harnessed itself](https://github.com/ferrarolabs/agent-kit/issues/55): "Working as an agent" in `CLAUDE.md`, `.claude/settings.json` (probed in a cloud session: 19 of 19 with the rules, 4 of 19 without), issue templates, and its own [cloud environment](guides/cloud-environment-for-agent-kit.md). Checked 2026-11-01: a session on that environment had the account layer installed, no Supabase variables, Supabase blocked, and the probe at 19 of 19
 
 **Exit:** a real issue implemented by a cloud session started from my phone, with a PR and green CI, without me writing code.
