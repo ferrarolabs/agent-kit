@@ -46,7 +46,7 @@ Org-level fields, the same in every repo. Five, against a limit of 25 ([S1](#6-s
 
 | Field | Data type | Values | Who writes it | Source |
 |---|---|---|---|---|
-| **Stage** | Single select | `Inbox`, `Ready`, `Working`, `Needs Elia`, `Done` | Elia (`Inbox` → `Ready`); the agent (`Working`, `Needs Elia`); the reconciler (`Done` on close) | Decision 2; ADR 0009; Rust's `S-waiting-on-*` ([S6](#6-sources)) |
+| **Stage** | Single select | `Inbox`, `Ready`, `Working`, `Asking`, `In validation`, `Done` | Elia (`Inbox` → `Ready`); the agent (`Working`, `Asking`, `In validation`); the reconciler (`Done` on close) | Decision 2; ADR 0009; Rust's `S-waiting-on-*` ([S6](#6-sources)) |
 | **Priority** | Number | 1–100, 100 = do first | The agent that opens the issue; Elia adjusts | ADR 0008, ADR 0018 |
 | **Effort** | Single select | `S`, `M`, `L` | Whoever writes the spec | GitHub default, T-shirt sizes suggested ([S1](#6-sources)); [board design §3.4](project-boards.md#34-size-s--m--l) |
 | **Start date** | Date | any | Optional | GitHub default ([S1](#6-sources)) |
@@ -60,12 +60,15 @@ Stage answers one question: **whose turn is it?** That's what Rust's `S-waiting-
 | `Inbox` | Written, not yet ready for an agent. The default. | no label |
 | `Ready` | Spec complete. An agent may start. | `agent:ready` |
 | `Working` | An agent is on it. Don't start a second one. | `agent:working` |
-| `Needs Elia` | Blocked on Elia: a decision, an approval, a review, a device check. The issue's last comment says exactly what. | `needs:elia`, `needs:device-check` |
+| `Asking` | The agent is stuck and has asked the owner something: a decision, a credential, a setting. The issue's last comment says exactly what the owner has to do. No PR yet. | `needs:elia` when stuck |
+| `In validation` | The work is done and a complete PR waits for the owner: review, try it, check it on a device. Nothing is stuck. | `needs:elia` on a finished PR, `needs:device-check` |
 | `Done` | Closed. | closed state |
 
-- The three values Elia named map one to one. `Inbox` and `Done` exist because Status mirrors Stage and needs a first and a last column (ADR 0009).
+- Elia's three values map onto four: `needs:elia` splits in two, because "stuck" and "waiting for my review" are different queues (Elia, [on the PR](https://github.com/ferrarolabs/agent-kit/pull/141#issuecomment-6590082701)). `Inbox` and `Done` exist because Status mirrors Stage and needs a first and a last column (ADR 0009).
+- **Generic names.** No value names a person: the kit is for any project and any owner. `Asking`, not `Blocked`: GitHub already shows a *Blocked* icon on issues with an open "blocked by" dependency ([S4](#6-sources)), and the two would be confused.
 - **One field, not two.** This *is* ADR 0009's Stage. Its values are now defined here.
-- *In review* stays folded into `Needs Elia` (ADR 0007, decision 5).
+- *In review* is **no longer folded** into the "needs me" queue (ADR 0007, decision 5): it is `In validation`. Rust keeps the same two apart, `S-waiting-on-author` and `S-waiting-on-review` ([S6](#6-sources)).
+- `In validation` follows rule 4 of [Define the work flow](https://github.com/ferrarolabs/agent-kit/issues/137): a PR arrives only when the work is complete. So an issue in `In validation` always has one complete PR, and an issue in `Asking` has none.
 - *Device check* is not a value: it's one more reason to need Elia, written in the comment. This answers [Decide: is "Device check" a generic Status?](https://github.com/ferrarolabs/agent-kit/issues/73) with *no*.
 
 ### Effort, in detail
@@ -113,7 +116,9 @@ Labels stay only for what is **multi-valued and per repo**. An issue field can't
 | `type:feature`, `type:bug` | Type Feature, Bug |
 | `type:chore`, `type:docs` | Type Task |
 | `type:audit` | The proposal's own type, with Stage `Inbox` (a proposal not yet accepted is exactly `Inbox`) |
-| `agent:ready`, `agent:working`, `needs:elia`, `needs:device-check` | Stage |
+| `agent:ready`, `agent:working` | Stage `Ready`, `Working` |
+| `needs:elia` | Stage `Asking` (stuck) or `In validation` (a finished PR) |
+| `needs:device-check` | Stage `In validation` |
 | `priority:*` | Already gone (ADR 0008) |
 | `epic:*` (jamly) | An Epic issue, with the work as sub-issues |
 
@@ -149,6 +154,8 @@ Read on 2026-11-02. GitHub's docs were read from their source, [github/docs](htt
 | *Story* and *Technical story* as types | Same split as Feature / Task, minus GitHub's defaults |
 | *Documentation* as a type (Next.js) | For this kit, docs is a Task. Next.js gets outside docs reports; we don't |
 | A *Severity* field on Bug (GitHub's own example, [S1](#6-sources)) | One person, one queue: Priority already says how urgent it is |
+| A value that names the owner (`Needs Elia`) | The kit is generic. Rejected by Elia on the PR |
+| *Needs dev* as the stuck value | It reads as "needs a developer", which is the agent's own job |
 | Separate fields for Stage and agent state | Decision 2 and ADR 0009: one field. Two would drift |
 | Cost $, Opus share %, Waited on me (h) as fields now (ADR 0009) | No writer yet. They're created with the metric that fills them ([usage ledger](https://github.com/ferrarolabs/agent-kit/issues/33), [board metrics](https://github.com/ferrarolabs/agent-kit/issues/34)) |
 | An `Area` single-select field | Areas differ per repo and an issue can have two; fields are org-wide and single-valued |
@@ -162,11 +169,11 @@ Nothing is edited until Elia approves. Then:
 |---|---|
 | [Migrate type labels to org issue types](https://github.com/ferrarolabs/agent-kit/issues/46) | Becomes the migration: create Epic and Decision, set each open issue's type, remove `type:*`. Its "if the cloud test passes" is moot |
 | [Decide: Effort values](https://github.com/ferrarolabs/agent-kit/issues/74) | Answered: `S`, `M`, `L` (§3). Close |
-| [Decide: is "Device check" a generic Status?](https://github.com/ferrarolabs/agent-kit/issues/73) | Answered: no, it's a `Needs Elia` reason (§3). Close |
+| [Decide: is "Device check" a generic Status?](https://github.com/ferrarolabs/agent-kit/issues/73) | Answered: no. A device check is one way of validating a finished PR: Stage `In validation` (§3). Close |
 | [Move the project's number fields to org issue fields, and add Stage](https://github.com/ferrarolabs/agent-kit/issues/77) | Narrows to creating Stage with the values above. The number fields wait for their metrics |
-| [Replace the agent labels with Stage](https://github.com/ferrarolabs/agent-kit/issues/82) | Unchanged in goal; the value names are now fixed (`Ready`, `Working`, `Needs Elia`) |
+| [Replace the agent labels with Stage](https://github.com/ferrarolabs/agent-kit/issues/82) | Unchanged in goal; the value names are now fixed (`Ready`, `Working`, `Asking`, `In validation`), and `needs:elia` maps to two of them |
 | [Action: keep project Status in step with labels](https://github.com/ferrarolabs/agent-kit/issues/19) | Obsolete: labels stop carrying state. Replaced by the [Stage ⇄ Status reconciler](https://github.com/ferrarolabs/agent-kit/issues/78). Close as not planned |
-| [Stage ⇄ Status reconciler](https://github.com/ferrarolabs/agent-kit/issues/78) | Status gets the same five values as Stage |
+| [Stage ⇄ Status reconciler](https://github.com/ferrarolabs/agent-kit/issues/78) | Status gets the same six values as Stage |
 | [Completeness check](https://github.com/ferrarolabs/agent-kit/issues/75) | Checks the "required" cells of §3, per type |
 | [Define the project template's board](https://github.com/ferrarolabs/agent-kit/issues/140) | Starts from this: columns are Stage's values, views filter on type and fields |
 | The issue templates (`.github/ISSUE_TEMPLATE/`, `template/.github/ISSUE_TEMPLATE/`) and `template/.github/labels.yml` | Set `type:` instead of `type:*` labels; `labels.yml` keeps only `area:*`. Through the jamly-first port (ADR 0014) |
