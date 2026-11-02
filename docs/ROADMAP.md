@@ -18,6 +18,7 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [ ] Template finalised by hand (sorts, grouping, workflows), then the repo projects created as copies of it (ADR 0008)
 - [ ] Board views: group-by, sort and workflows set by hand (the API can't)
 - [ ] Action that sets Status from labels (ADR 0007)
+- [ ] [Issue structure](https://github.com/ferrarolabs/agent-kit/issues/139) (ADR 0022, proposed): five issue types, five issue fields, labels only for `area:*`, in [issue-structure.md](issue-structure.md). Checked once Elia approves it and the types and fields exist
 - [ ] Issue data in org issue fields; Stage mirrored with Status by a [10-minute reconciler](https://github.com/ferrarolabs/agent-kit/issues/78) (ADR 0009, proposed). Cloud sessions [can read and set them](https://github.com/ferrarolabs/agent-kit/issues/24); Stage will [replace the agent labels](https://github.com/ferrarolabs/agent-kit/issues/82)
 - [x] Claude GitHub App on the `ferrarolabs` org, all repos: a cloud session pushed a branch and opened a PR (2026-10-31)
 - [x] [`gh` working in cloud sessions](https://github.com/ferrarolabs/agent-kit/issues/70) with an org token: REST only; GraphQL and org paths are blocked, so project scripts go through [an Action](https://github.com/ferrarolabs/agent-kit/issues/83)
