@@ -26,7 +26,7 @@ The system is **opt-in**: in any repo I can keep working by hand or in chat. Age
 Taken from the *Harness Engineering* method (Alexio Cassani, Codemotion 2026) and adapted.
 
 1. **Agent = Model + Harness.** I don't control the model; I control everything else. The work is on the harness.
-2. **State lives in the repo, not in the session.** Spec, plan, progress and decisions are committed files. A session can die at any moment without losing anything.
+2. **State lives in the repo, not in the session.** Spec and plan live on the issue (ADR 0023); progress and decisions are committed files. A session can die at any moment without losing anything.
 3. **Irreversible → boundary, not instruction.** A sentence in `CLAUDE.md` only raises a probability. What can't be undone is prevented by permissions, sandboxing and branch protection.
 4. **The definition of done is enforced, not just stated.** The contract states it, a skill runs it, a Stop hook refuses to finish until it passes.
 5. **Evidence, not verdicts.** When a check fails, the agent gets the real error output back.
@@ -93,7 +93,7 @@ agent-kit/
 | Role | When it works | What it produces | What it can't do |
 |---|---|---|---|
 | **Spec writer** | When I ask | An explicit issue from my idea: context, acceptance criteria, out of scope, test cases | Make product decisions for me |
-| **Planner** | At the start of every issue | A plan in `docs/plans/<issue>.md`, with the architectural decisions I need to approve | Write code |
+| **Planner** | At the start of every issue | A plan as a comment on the issue, with the architectural decisions I need to approve (ADR 0023) | Write code |
 | **Implementer** | After the plan is approved | Code + tests on a branch, small commits, `progress.md` kept current | Merge, touch secrets or deployments |
 | **Critic** | Before the PR | Concrete objections to the implementer's work, on a clean context | Change the code |
 | **Test writer** | Alongside the implementer | Tests anchored to the acceptance criteria, not to the code written | Weaken existing tests |
@@ -103,12 +103,12 @@ agent-kit/
 ## 5. The flow of a feature
 
 ```text
-idea → [spec writer] → issue → [planner] → plan ──(I approve)──▶
-[implementer + test writer] ⇄ hooks/CI ⇄ [critic] → green PR ──(I merge)──▶
+idea → [spec writer] → issue → [planner] → plan on the issue ──(I approve)──▶
+[implementer + test writer] ⇄ hooks/CI ⇄ [critic] → complete, green PR ──(I merge)──▶
 [explainer] → docs/learn
 ```
 
-I step in at two points: **I approve the plan** and **I merge**. Everything else runs on its own.
+I step in at two points: **I approve the plan** and **I merge**. Everything else runs on its own. Changes to the plan and blockers are comments on the issue; a PR arrives only when the work is complete (ADR 0023). The whole flow, up to production, is in [guides/work-flow.md](guides/work-flow.md).
 
 ## 6. Long autonomy and resuming after limits
 
@@ -118,7 +118,7 @@ Goal: the feature moves forward for 12–24 hours without me, including across a
 - **Small, frequent commits:** saved work is work pushed to the branch.
 - **Automatic resume:** a cloud scheduled task runs at regular intervals with the instruction "resume from `progress.md`". When I'm out of usage, runs are rejected until the reset; the first one after the reset picks up from the saved point.
 - **Idempotence:** resuming twice must do no harm. If the work is already done, or blocked waiting for me, the resume does nothing.
-- **Asking for help:** if the agent is blocked on a decision of mine, it writes it in `progress.md`, stops, and flags it to me (an issue or a PR comment).
+- **Asking for help:** if the agent is blocked on a decision of mine, it writes it in `progress.md`, comments on the issue with the problem and the one thing I must do, and stops. It never opens a partial PR to ask (ADR 0023).
 
 ## 7. Boundaries
 

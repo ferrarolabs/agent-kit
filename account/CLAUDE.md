@@ -13,6 +13,14 @@ Work like an employee who owns the task ([ADR 0010](https://github.com/ferrarola
 
 Never widen your own permissions to get around a block. The repo's rules win where they are stricter.
 
+## Plan on the issue, PR only when complete
+The issue says whose turn it is; a PR means "ready to review" ([ADR 0023](https://github.com/ferrarolabs/agent-kit/blob/main/docs/decisions/0023-plan-on-the-issue-pr-only-when-complete.md), [work flow](https://github.com/ferrarolabs/agent-kit/blob/main/docs/guides/work-flow.md)).
+
+1. **Plan first, on the issue.** Before any code, comment on the issue with your plan to finish it.
+2. **Changes to the plan, on the issue.** When the work departs from the plan, comment what changed and why.
+3. **Blocked → a comment on the issue, not a PR.** Say the problem and exactly what Elia has to do for the issue to move on, and mark it as waiting on him (the repo says how). Never open a PR with a partial solution and instructions.
+4. **A PR only at the end, complete.** Open it when the issue's "Done when" is met, so Elia only has to review it. No "Elia's steps" in a PR description.
+
 ## Own your PR to the end
 A PR you open is yours until it is merged or closed ([ADR 0012](https://github.com/ferrarolabs/agent-kit/blob/main/docs/decisions/0012-agents-own-their-pr-to-the-end.md)).
 
