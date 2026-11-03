@@ -42,7 +42,7 @@ Five types, org-wide. Three are GitHub's defaults, kept with their names. Two ar
 
 ## 3. Issue fields
 
-Org-level fields, the same in every repo. Five, against a limit of 25 ([S1](#6-sources)).
+Org-level fields, the same in every repo. Six, against a limit of 25 ([S1](#6-sources)). Review level was added by [ADR 0023](decisions/0023-the-work-flow-from-an-idea-to-a-pr.md).
 
 | Field | Data type | Values | Who writes it | Source |
 |---|---|---|---|---|
@@ -51,6 +51,7 @@ Org-level fields, the same in every repo. Five, against a limit of 25 ([S1](#6-s
 | **Effort** | Single select | `S`, `M`, `L` | Whoever writes the spec | GitHub default, T-shirt sizes suggested ([S1](#6-sources)); [board design §3.4](project-boards.md#34-size-s--m--l) |
 | **Start date** | Date | any | Optional | GitHub default ([S1](#6-sources)) |
 | **Target date** | Date | any | Optional | GitHub default ([S1](#6-sources)) |
+| **Review level** | Single select | `green`, `yellow`, `red` | A separate agent on the plan; re-checked on the PR | [Work flow §2.3](guides/work-flow.md#23-the-review-level), ADR 0023 |
 
 ### Stage, in detail
 Stage answers one question: **whose turn is it?** That's what Rust's `S-waiting-on-author` / `S-waiting-on-review` do with labels ([S6](#6-sources)), and what Kubernetes' `triage/needs-information` does ([S5](#6-sources)).
@@ -60,7 +61,7 @@ Stage answers one question: **whose turn is it?** That's what Rust's `S-waiting-
 | `Inbox` | Written, not yet ready for an agent. The default. | no label |
 | `Ready` | Spec complete. An agent may start. | `agent:ready` |
 | `Working` | An agent is on it. Don't start a second one. | `agent:working` |
-| `Asking` | The agent is stuck and has asked the owner something: a decision, a credential, a setting. The issue's last comment says exactly what the owner has to do. No PR yet. | `needs:elia` when stuck |
+| `Asking` | The agent has asked the owner something: a plan verdict, a decision, a credential, a setting. The issue's last comment says exactly what the owner has to do. No PR yet. The owner answers and sets `Ready` again ([work flow §2.4](guides/work-flow.md#24-the-plan-verdict)). | `needs:elia` when stuck or waiting for a plan verdict |
 | `In validation` | The work is done and a complete PR waits for the owner: review, try it, check it on a device. Nothing is stuck. | `needs:elia` on a finished PR, `needs:device-check` |
 | `Done` | Closed. | closed state |
 
@@ -91,6 +92,7 @@ GitHub pins both dates to Feature ([S1](#6-sources)). Solo and part-time, a plan
 | Effort | required | required | required | — | — |
 | Start date | — | — | — | optional | — |
 | Target date | — | — | — | optional | — |
+| Review level | required | required | required | — | — |
 
 - An Epic has no Effort: its size is its sub-issues.
 - A Decision has no Effort: it should take a minute to answer (`CLAUDE.md`, "atomic" issues).

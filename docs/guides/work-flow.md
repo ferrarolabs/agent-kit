@@ -1,79 +1,150 @@
-# The work flow, from an idea to production
+# The work flow, from an idea to a PR
 
-How an idea becomes an issue, a plan, a PR, and then something in production. It holds for every unit of work: Feature, Task, Bug, Epic, Decision. The four rules in [§2](#2-the-four-rules) are decided ([ADR 0023](../decisions/0023-plan-on-the-issue-pr-only-when-complete.md)). The steps that are still open link their own issue and say what holds until then.
+How an idea in the owner's head becomes an issue, a plan, code and a PR the owner can merge. It holds for every unit of work: Feature, Task, Bug, Epic, Decision. Elia defined it on [Define the work flow](https://github.com/ferrarolabs/agent-kit/issues/137); the decisions are in [ADR 0023](../decisions/0023-the-work-flow-from-an-idea-to-a-pr.md).
 
 ## 1. The flow at a glance
 
 ```text
-idea ─▶ issue ─▶ Ready ─▶ plan comment ─▶ work ─▶ complete PR ─▶ review ─▶ merge ─▶ promote ─▶ production
-         (owner)   (owner)    (agent)       (agent)   (agent)       (owner)   (owner)  (owner)    (owner)
-                                 │            │
-                                 │            ├─▶ change of plan → comment on the issue
-                                 │            └─▶ blocked → comment on the issue, Asking, no PR
+ OWNER                          AGENT
+ idea ──▶ spec skill: questions, one at a time ──▶ issue body (goal, FR, NFR, Done when)
+ Stage: Ready ─────────────────▶ draft plan
+                                 refuters in parallel, one per area ──▶ final plan
+                                 review level: green / yellow / red
+ ◀───────────────────────────── plan comment, Stage: Asking
+ verdict comment, Stage: Ready ─▶ go → implement            change → new plan, Asking again
+                                 tests: every FR, NFR, Done when
+                                 e2e as a real user
+                                 PR from the template
+                                 independent agent re-checks the review level
+ ◀───────────────────────────── Stage: In validation
+ review as the level says, merge
 ```
 
-The owner acts at five points: write the issue, mark it ready, review, merge, promote. Everything between the plan and the PR is the agent's ([ADR 0003](../decisions/0003-agents-propose-i-decide.md)).
+The owner acts four times: describe the idea and answer the questions, mark it ready, give the plan verdict, review and merge. Everything else is the agent's. No agent approves or merges ([ADR 0003](../decisions/0003-agents-propose-i-decide.md)).
 
-## 2. The four rules
+## 2. Step by step
 
-These hold on every issue, decided by Elia on [Define the work flow](https://github.com/ferrarolabs/agent-kit/issues/137).
+### 2.1 Idea → issue: the spec skill
+The owner calls the spec skill and describes the idea roughly. It will have gaps and cases not thought of. That is expected.
 
-1. **Plan first, on the issue.** Before any code, the agent comments on the issue with its plan to finish it.
-2. **Changes to the plan, on the issue.** When the work departs from the plan, the agent comments what changed and why.
-3. **Blocked → a comment on the issue, not a PR.** The comment says the problem and exactly what the owner has to do for the issue to move on. The agent marks the issue as waiting on the owner. It does not open a PR with a partial solution and instructions.
-4. **A PR only at the end, complete.** The PR arrives when the issue's "Done when" is met, so the owner only has to review it. No "owner's steps" in a PR description.
+The agent then asks questions, **one at a time**, until nothing material is open. They have two goals:
 
-Why: in the 2026-11-02 sweep, agents opened PRs with partial solutions plus `needs:elia` and steps for Elia. He had to review unfinished work and act on its instructions at the same time. With these rules, an issue tells you whose turn it is, and a PR always means "ready to review".
+1. **Take the idea apart.** Most features users ask for are not the ones they need. Ask about the problem behind the request, who has it, what happens today without the feature, what would make it not worth building. Questions may be uncomfortable; that is their job.
+2. **Leave no room for interpretation.** Every case the agent would otherwise guess is asked instead: edge cases, errors, who sees what, what is out.
 
-## 3. Step by step
+The output is the **issue body**, and everything below lives in it:
 
-| # | Step | Who | Produces | Where it lives | Next step starts when |
-|---|---|---|---|---|---|
-| 1 | **Idea → issue** | Owner (later the spec writer, [account-level skills](https://github.com/ferrarolabs/agent-kit/issues/43)) | An issue from a form: why, what, "Done when" | The issue | The owner marks it ready |
-| 2 | **Ready** | Owner | Stage `Ready` (today: label `agent:ready`), or the owner names it in a session | Issue field (today: label) | An agent picks it |
-| 3 | **Plan** | Agent | A plan comment: what it will do, what it won't, what it found blocked | Issue comment | See [§4.1](#41-plan-approval) |
-| 4 | **Work** | Agent | Commits on one branch; a comment for every change of plan | Branch; issue comments | "Done when" is met |
-| 5 | **Blocked** (if it happens) | Agent | A comment: the problem, what was tried, the one action the owner must take. Stage `Asking` (today: `needs:elia`). No PR | Issue comment | The owner answers on the issue |
-| 6 | **Complete PR** | Agent | One PR, green CI, learn note ([ADR 0013](../decisions/0013-every-feature-pr-ships-a-learn-note.md)), followed to the end ([ADR 0012](../decisions/0012-agents-own-their-pr-to-the-end.md)). Stage `In validation` (today: `needs:elia` on the PR, or `needs:device-check` in jamly) | The PR | The owner reviews |
-| 7 | **Review** | Owner; agent fixes | Comments on the PR, fixed by the agent in the same PR | The PR | The owner approves |
-| 8 | **Merge** | Owner | "Merge when ready" into the PR's base branch, through the merge queue on `main` ([ADR 0015](../decisions/0015-merge-through-a-merge-queue.md)) | The base branch | — |
-| 9 | **Promote** | Owner | `dev` → `staging` → `main`, by PR, where a repo has the three branches | Long-lived branches | — |
-| 10 | **Production** | Owner | A release or deploy | Outside the repo | — |
+| Section | What it says | Rule |
+|---|---|---|
+| **Problem** | What hurts today, for whom. No solution here | Separate from the goal, so the goal can be challenged |
+| **Goal** | The outcome the agent must reach | One paragraph. A reader, human or agent, knows at once what is asked |
+| **Functional requirements** | What it must do | Each one testable, written as *Given / When / Then*, each with how it is verified |
+| **Non-functional requirements** | How well: performance, security, accessibility, cost | Each one measurable: a number, not "fast" |
+| **Out of scope** | What it will not do | Explicit, so nobody adds it |
+| **Done when** | Anything not already covered by the requirements: tests passing, a configuration in place, a dependency unblocked | Each line checkable |
 
-Notes on the steps:
+Before the issue is saved, a second agent reads **only the body**, without the conversation, and lists anything it could read two ways. Each one becomes a question to the owner. This *cold read* is the test that nobody can misunderstand it.
 
-- **Base branch.** This repo has only `main`: a PR goes there. A project made from the template opens its PR against `dev`, and promoting between `dev`, `staging` and `main` is the owner's ([template `CLAUDE.md`](../../template/CLAUDE.md.template)). Pushes to all three are denied to agents ([ADR 0017](../decisions/0017-account-deny-floor.md)).
-- **Production is never an agent's.** No agent deploys to production ([PLAN §10](../PLAN.md#10-out-of-scope-for-now)). A project's irreversible commands (database pushes, deploys, store submissions) are denied; the agent writes the change as a file and the PR says it needs applying.
-- **Whose turn is it?** Steps 3, 4 and 6 are the agent's work. Steps 5 and 6 hand the turn to the owner: `Asking` when the agent is stuck, `In validation` when the PR is complete. Stage says it in one field once it exists ([issue structure §3](../issue-structure.md#stage-in-detail)). Until the migration, the labels hold.
-- **Recover before step 5.** A failure is not a block until the agent has read the real error, tried the alternatives and fixed what's reversible ([ADR 0010](../decisions/0010-agents-recover-before-they-escalate.md)).
+If the work needs more than one PR, the skill makes it an Epic with sub-issues ([§4](#4-epics)). The skill sets Priority ([ADR 0018](../decisions/0018-agents-set-the-priority-of-the-issues-they-open.md)) and Effort. Stage stays `Inbox`.
 
-## 4. Still open, and what holds until then
+After `Ready`, the body is frozen: only the owner changes it.
 
-Each of these has its own issue. Until it is settled, the line under it holds.
+### 2.2 Ready → the plan
+The owner sets Stage `Ready` (today: label `agent:ready`). An agent takes the issue, sets `Working`, reads the body and drafts the technical plan.
 
-### 4.1 Plan approval
-[Plan before code: how an agent knows a plan is approved](https://github.com/ferrarolabs/agent-kit/issues/114).
-Until then: the agent posts the plan and starts. The owner stops it by answering on the issue. A plan that needs a product decision is a block (rule 3): the agent asks on the issue and stops.
+Then **refuters**, agents in parallel on a clean context, one per area, try to break the draft:
 
-### 4.2 Requirements before the PR
-[Issues state functional and non-functional requirements; the PR waits until every criterion is ticked](https://github.com/ferrarolabs/agent-kit/issues/93).
-Until then: the issue's "Done when" is the list. The PR says how each line is met.
+| Area | Looks for |
+|---|---|
+| User design | Flows that confuse, states not designed (empty, error, loading), accessibility |
+| Code quality | Wrong layer, duplication, a design that won't survive the next feature |
+| Performance | Work that grows with data, network round trips, startup cost |
+| Security | Data exposed, trust in the client, secrets, the lethal trifecta ([threat model](../threat-model.md)) |
+| Scalability and cost | What breaks at ten times the users, usage and hosting cost |
+| Tests | Requirements with no test, tests that can't fail |
 
-### 4.3 Using the feature before the PR
-[Before the PR, the agent uses the feature as a user would](https://github.com/ferrarolabs/agent-kit/issues/92).
-Until then: the agent runs what CI runs, and lists in the PR what only the owner can try (devices, real accounts, production).
+Each project may add areas (for example offline use on a mobile app). Rules:
 
-### 4.4 Review levels and the review loop
-[PRs come in three review levels](https://github.com/ferrarolabs/agent-kit/issues/98) and [Review loop](https://github.com/ferrarolabs/agent-kit/issues/95).
-Until then: every PR is reviewed by the owner. A review comment is work for the agent now (ADR 0012).
+- An objection needs **evidence**: a file, a requirement, a scenario. Opinion alone is dismissed.
+- The planner answers **every** objection: *fixed* (and how) or *dismissed* (and why).
+- At most **two rounds**. What is still open after that goes to the owner in the plan comment.
 
-## 5. Epics: when an issue becomes a parent
+### 2.3 The review level
+A **third agent**, which neither planned nor refuted, sets the issue field **Review level**:
 
-An issue becomes an Epic when it needs more than one PR, or its Effort would be `L` ([issue structure §3](../issue-structure.md#effort-in-detail)). Its work moves to sub-issues, each with one PR. An issue that needs the owner's approval is atomic: one question or one task, readable in under a minute (`CLAUDE.md`). The Epic is done when its sub-issues are.
+| Value | The owner, to merge |
+|---|---|
+| `green` | Approves and merges **without reading anything**. The agent still never merges |
+| `yellow` | Reads only the PR description |
+| `red` | Reviews the code carefully |
 
-Order between sub-issues is "blocked by", not a field ([issue structure §1](../issue-structure.md#1-rules-of-thumb)). A sub-issue blocked by one that waits on the owner is not started.
+There is a floor the agent can't go under, set by the files the plan touches: harness, CI, deny rules, `settings.json`, auth, migrations and user data are always `red`. The check in [§2.7](#27-the-pr) enforces it ([Protect the grader](https://github.com/ferrarolabs/agent-kit/issues/61)).
 
-## 6. Where this replaces older text
+### 2.4 The plan verdict
+The agent posts the **final plan** as a comment on the issue:
 
-- **The plan is a comment on the issue, not `docs/plans/<issue>.md`.** [ADR 0002](../decisions/0002-state-lives-in-the-repo.md) and the first version of PLAN §4–§5 put it in the repo. The issue is just as durable for the next session, and it is where the owner already reads ([ADR 0023](../decisions/0023-plan-on-the-issue-pr-only-when-complete.md)). Progress (`docs/progress.md`) and decisions (ADRs) stay in the repo.
-- **"Ask in the PR"** in "Working as an agent" now reads "ask on the issue": rule 3 forbids a PR to ask.
+- the plan, step by step;
+- the table of objections with their outcome, dismissed ones first: those are the ones the owner should read;
+- the review level and why;
+- anything still open.
+
+It sets Stage `Asking` (today: label `needs:elia`) and stops.
+
+The owner comments the verdict, whatever it is: go, or change this and that. Then he **always sets `Ready` again**. That is the signal to resume. The agent reads the last comment:
+
+- **Go** → it implements.
+- **Change** → it changes the plan, posts it again, and sets `Asking` again.
+
+### 2.5 Implementation and tests
+The agent implements, with sub-agents in parallel where the work splits into areas that don't touch the same files. Still one branch and one PR per issue.
+
+Tests are written from the requirements, not from the code ([PLAN §4](../PLAN.md#4-agent-roles)). Before going on, every FR, NFR and Done when line is validated, each with its evidence.
+
+**Changes and blocks go on the issue.** A departure from the approved plan is a comment, and the work goes on. A departure that changes an FR, an NFR or raises the review level goes back to the owner: comment, `Asking`, stop. A block that only the owner can lift is the same ([ADR 0010](../decisions/0010-agents-recover-before-they-escalate.md) first: recover before you escalate). Never a partial PR.
+
+### 2.6 E2E as a real user
+Last, an agent uses the result as a real user would ([Before the PR, the agent uses the feature](https://github.com/ferrarolabs/agent-kit/issues/92)). It plays the stakeholder: does it solve the **original problem**? Is it right functionally, non-functionally, in design, in its real environment?
+
+That agent reads **only the issue body**, not the plan or the code, so it judges against what the owner asked, not against what was built. It says what it could not check from a cloud session (real devices, real accounts, production): that list goes in the PR for the owner.
+
+### 2.7 The PR
+Only when §2.5 and §2.6 are all met, the agent opens the PR from the repo's PR template:
+
+- what was done, in a few lines, and the core of the issue;
+- the requirements table: each FR, NFR and Done when, its test, its result;
+- what the owner should look at, for the review level;
+- what only the owner can check;
+- the learn note ([ADR 0013](../decisions/0013-every-feature-pr-ships-a-learn-note.md)).
+
+An **independent agent**, on a clean context, re-assesses the review level against what was really built. It confirms it or changes it, and says why.
+
+The level appears on the PR as a **check run** named `Review level`: a line in the PR's *Checks* list, with the value and the reason. The check also fails when the level is under the floor set by the files touched. One day a ruleset can require it, for auto-merge.
+
+The agent follows the PR to the end ([ADR 0012](../decisions/0012-agents-own-their-pr-to-the-end.md)) and sets Stage `In validation` (today: `needs:elia` on the PR).
+
+### 2.8 Review and merge
+The flow stops here. The owner reviews as the level says and merges through the merge queue ([ADR 0015](../decisions/0015-merge-through-a-merge-queue.md)). Promoting `dev` → `staging` → `main` and releasing to production are the owner's; no agent deploys to production ([PLAN §10](../PLAN.md#10-out-of-scope-for-now)).
+
+## 3. Proportionality
+The full flow costs usage ([PLAN §9](../PLAN.md#9-cost-and-limits)). A small, safe issue doesn't need all of it.
+
+| Issue | Refuters | E2E | Questions |
+|---|---|---|---|
+| Effort `S` and Review level `green` | none: the planner reviews its own draft against the areas table | by the implementing agent, no separate agent | as many as needed |
+| Anything else | every area | a separate agent | as many as needed |
+
+The plan verdict and the PR are never skipped.
+
+## 4. Epics
+An issue becomes an Epic when it needs more than one PR, or its Effort would be `L` ([issue structure §3](../issue-structure.md#effort-in-detail)). Each sub-issue goes through the whole flow on its own. Order between them is "blocked by" ([issue structure §1](../issue-structure.md#1-rules-of-thumb)).
+
+## 5. Until the pieces exist
+The flow is decided; some of its tools are not built yet. They are the sub-issues of [Build the work flow, from an idea to a PR](https://github.com/ferrarolabs/agent-kit/issues/150). Until each exists, this holds:
+
+| Piece | Until it exists |
+|---|---|
+| Spec skill | The owner writes the issue from the form; the agent asks its questions on the issue before planning |
+| Stage and Review level fields | Labels: `agent:ready` for Ready, `needs:elia` for Asking and In validation. The review level is written in the plan comment and the PR description |
+| Refuters | The planning agent starts them itself, with the Agent tool, one per area |
+| Review-level check | The independent agent's verdict is a line in the PR description |
+| PR template | The PR follows [§2.7](#27-the-pr) |

@@ -92,8 +92,10 @@ agent-kit/
 
 | Role | When it works | What it produces | What it can't do |
 |---|---|---|---|
-| **Spec writer** | When I ask | An explicit issue from my idea: context, acceptance criteria, out of scope, test cases | Make product decisions for me |
+| **Spec writer** | When I ask | An issue from my idea, after questioning me one question at a time: problem, goal, functional and non-functional requirements, out of scope, Done when | Make product decisions for me |
 | **Planner** | At the start of every issue | A plan as a comment on the issue, with the architectural decisions I need to approve (ADR 0023) | Write code |
+| **Refuters** | On the planner's draft, in parallel, one per area | Objections with evidence: design, code quality, performance, security, scalability, tests | Write the plan |
+| **Review judge** | On the final plan, and again on the PR | The review level: green, yellow or red, never under the floor for the files touched | Merge, or judge its own work |
 | **Implementer** | After the plan is approved | Code + tests on a branch, small commits, `progress.md` kept current | Merge, touch secrets or deployments |
 | **Critic** | Before the PR | Concrete objections to the implementer's work, on a clean context | Change the code |
 | **Test writer** | Alongside the implementer | Tests anchored to the acceptance criteria, not to the code written | Weaken existing tests |
@@ -103,12 +105,12 @@ agent-kit/
 ## 5. The flow of a feature
 
 ```text
-idea → [spec writer] → issue → [planner] → plan on the issue ──(I approve)──▶
-[implementer + test writer] ⇄ hooks/CI ⇄ [critic] → complete, green PR ──(I merge)──▶
+idea → [spec writer ⇄ me] → issue → [planner ⇄ refuters] → plan + review level ──(I approve)──▶
+[implementer + test writer] ⇄ hooks/CI ⇄ [critic] → e2e as a user → complete, green PR ──(I merge)──▶
 [explainer] → docs/learn
 ```
 
-I step in at two points: **I approve the plan** and **I merge**. Everything else runs on its own. Changes to the plan and blockers are comments on the issue; a PR arrives only when the work is complete (ADR 0023). The whole flow, up to production, is in [guides/work-flow.md](guides/work-flow.md).
+I step in at three points: **I answer the spec writer's questions**, **I approve the plan** and **I merge**, reading as much as the review level says. Everything else runs on its own. Changes to the plan and blockers are comments on the issue; a PR arrives only when the work is complete (ADR 0023). The whole flow is in [guides/work-flow.md](guides/work-flow.md).
 
 ## 6. Long autonomy and resuming after limits
 
