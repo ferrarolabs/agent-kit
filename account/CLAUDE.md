@@ -13,6 +13,15 @@ Work like an employee who owns the task ([ADR 0010](https://github.com/ferrarola
 
 Never widen your own permissions to get around a block. The repo's rules win where they are stricter.
 
+## The work flow: plan on the issue, PR only when complete
+The issue says whose turn it is; a PR means "ready to review" ([ADR 0023](https://github.com/ferrarolabs/agent-kit/blob/main/docs/decisions/0023-the-work-flow-from-an-idea-to-a-pr.md), [work flow](https://github.com/ferrarolabs/agent-kit/blob/main/docs/guides/work-flow.md)).
+
+1. **Plan first, on the issue.** Draft the plan from the issue body. Unless the issue is Effort S and Review level green, have it refuted by agents in parallel, one per area, and answer every objection: fixed or dismissed, with why.
+2. **Set the review level** with a separate agent: green (Elia merges without reading), yellow (he reads the PR description), red (he reviews the code). Never under the floor for the files touched. Green never means you merge.
+3. **Then wait for the verdict.** Post the final plan as a comment, set Asking, stop. Resume only when Elia sets Ready again, and read his last comment: go → implement; change → new plan, Asking again.
+4. **Changes and blocks, on the issue.** A change of plan is a comment. A changed requirement, a higher review level, or a block only Elia can lift is a comment plus Asking. Never a PR with a partial solution and instructions.
+5. **A PR only when complete.** Every FR, NFR and Done when validated, and the result used as a real user would, then the PR from the repo's template. No "Elia's steps" in it. An independent agent re-checks the review level on the PR.
+
 ## Own your PR to the end
 A PR you open is yours until it is merged or closed ([ADR 0012](https://github.com/ferrarolabs/agent-kit/blob/main/docs/decisions/0012-agents-own-their-pr-to-the-end.md)).
 
