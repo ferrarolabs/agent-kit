@@ -50,7 +50,7 @@ If the work needs more than one PR, the skill makes it an Epic with sub-issues (
 After `Ready`, the body is frozen: only the owner changes it.
 
 ### 2.2 Ready → the plan
-The owner sets Stage `Ready` (today: label `agent:ready`). An agent takes the issue, sets `Working`, reads the body and drafts the technical plan.
+The owner sets Stage `Ready`. An agent takes the issue, sets `Working`, reads the body and drafts the technical plan.
 
 Then **refuters**, agents in parallel on a clean context, one per area, try to break the draft:
 
@@ -88,7 +88,7 @@ The agent posts the **final plan** as a comment on the issue:
 - the review level and why;
 - anything still open.
 
-It sets Stage `Asking` (today: label `needs:elia`) and stops.
+It sets Stage `Asking` and stops.
 
 The owner comments the verdict, whatever it is: go, or change this and that. Then he **always sets `Ready` again**. That is the signal to resume. The agent reads the last comment:
 
@@ -120,7 +120,7 @@ An **independent agent**, on a clean context, re-assesses the review level again
 
 The level appears on the PR as a **check run** named `Review level`: a line in the PR's *Checks* list, with the value and the reason. The check also fails when the level is under the floor set by the files touched. One day a ruleset can require it, for auto-merge.
 
-The agent follows the PR to the end ([ADR 0012](../decisions/0012-agents-own-their-pr-to-the-end.md)) and sets Stage `In validation` (today: `needs:elia` on the PR).
+The agent follows the PR to the end ([ADR 0012](../decisions/0012-agents-own-their-pr-to-the-end.md)) and sets Stage `In validation`.
 
 ### 2.8 Review and merge
 The flow stops here. The owner reviews as the level says and merges through the merge queue ([ADR 0015](../decisions/0015-merge-through-a-merge-queue.md)). Promoting `dev` → `staging` → `main` and releasing to production are the owner's; no agent deploys to production ([PLAN §10](../PLAN.md#10-out-of-scope-for-now)).
@@ -144,7 +144,6 @@ The flow is decided; some of its tools are not built yet. They are the sub-issue
 | Piece | Until it exists |
 |---|---|
 | Spec skill | The owner writes the issue from the form; the agent asks its questions on the issue before planning |
-| Stage and Review level fields | Labels: `agent:ready` for Ready, `needs:elia` for Asking and In validation. The review level is written in the plan comment and the PR description |
 | Refuters | The planning agent starts them itself, with the Agent tool, one per area |
 | Review-level check | The independent agent's verdict is a line in the PR description |
 | PR template | The PR follows [§2.7](#27-the-pr) |
