@@ -17,7 +17,7 @@ Checked against jamly `dev` at `35b6077` (2026-11-01). Every harness merge since
 
 | Piece on jamly | Scope | Proven | Template | Notes |
 |---|---|---|---|---|
-| `CLAUDE.md` · "Working as an agent" | split | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1), [jamly#5](https://github.com/ferrarolabs/jamly/pull/5), [jamly#14](https://github.com/ferrarolabs/jamly/pull/14) | `CLAUDE.md.template` · ported | Generic: one issue one branch one PR, labels handshake, push with the branch named, recover before you stop, product questions stop you. jamly-only: Supabase and EAS lines |
+| `CLAUDE.md` · "Working as an agent" | split | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1), [jamly#5](https://github.com/ferrarolabs/jamly/pull/5), [jamly#14](https://github.com/ferrarolabs/jamly/pull/14), [jamly#39](https://github.com/ferrarolabs/jamly/pull/39) | `CLAUDE.md.template` · ported | Generic: one issue one branch one PR, labels handshake, push with the branch named, recover before you stop, plan on the issue and PR only when complete, product questions asked on the issue. jamly-only: Supabase and EAS lines |
 | `CLAUDE.md` · definition of done, with who holds each line | split | [jamly#1](https://github.com/ferrarolabs/jamly/pull/1) (D44) | `CLAUDE.md.template` · ported | The "who holds it" column is generic; device, offline and dark lines are jamly's |
 | `CLAUDE.md` · project context, five pitfalls, stack, layout | jamly | — | — | |
 | `AGENTS.md` (read the Expo v57 docs) | jamly | — | — | |
