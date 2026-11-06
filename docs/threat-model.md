@@ -49,11 +49,11 @@ No session cuts a leg completely. What keeps the risk low today is that the priv
 This leg can't be cut. Both repos are public ([ADR 0005](decisions/0005-public-under-mit.md), jamly D47), so anyone can open an issue or comment on one. Other sources: web pages the agent fetches, and npm packages (jamly's setup runs `npm ci`).
 
 What narrows it:
-- **Only collaborators can label.** On GitHub, adding a label needs triage access or more. An agent starts only on `agent:ready`, or on an issue Elia names in the session. A stranger can't put work in front of an agent.
-- **No agent starts on its own yet.** Every session is started by Elia. When [An agent starts on its own](https://github.com/ferrarolabs/agent-kit/issues/76) is built, the trigger must check who set the label.
+- **Only collaborators can set Stage.** On GitHub, setting an issue field needs triage access or more, as adding a label does ([issue fields, community discussion](https://github.com/orgs/community/discussions/175366)). An agent starts only on Stage `Ready`, or on an issue Elia names in the session, and never sets `Ready` itself. A stranger can't put work in front of an agent. Caveat: every agent acts as Elia's account today, so the field's history can't tell Elia from an agent ([bot account](https://github.com/ferrarolabs/agent-kit/issues/113)).
+- **No agent starts on its own yet.** Every session is started by Elia. When [An agent starts on its own](https://github.com/ferrarolabs/agent-kit/issues/76) is built, the trigger must check who set Stage `Ready`.
 - **The agent treats fetched text as data, not instructions.** That is a rule in the session's own prompt, so it's a promise, not a boundary.
 
-What doesn't: a stranger's comment on an `agent:ready` issue is still read by the agent. Accepted, because the other two legs are kept thin.
+What doesn't: a stranger's comment on a `Ready` issue is still read by the agent. Accepted, because the other two legs are kept thin.
 
 ## Leg 3: a way out
 
@@ -83,7 +83,7 @@ Not verified when this was written. Each is a question, not a claim.
 | Separate agent-kit environment, no variables | Private data | [guide](guides/cloud-environment-for-agent-kit.md) |
 | `.env` denied | Private data | `account/settings.json`, each project's `.claude/settings.json` |
 | GitHub scoped to the session's repos, no GraphQL | Private data, a way out | The session's GitHub proxy |
-| Labels need triage access | Untrusted content | GitHub |
+| Issue fields need triage access | Untrusted content | GitHub |
 | Egress allowlist | A way out | The environment's settings |
 | Push denies and rulesets | A way out (to protected branches only) | Deny rules, GitHub rulesets |
 | Command log redaction | A way out (partial) | `template/.claude/hooks/command-log.js` |
