@@ -1,11 +1,12 @@
 # Generic labels for every repo that uses agent-kit.
-# A repo adds its own labels (for example epic:*) in its own file, on top.
+# A repo adds its own area:* labels in its own file, on top.
 #
-# Agents read labels: a cloud session reaches issues and labels over REST, not Projects.
-# Priority is not a label: it is the org number field (agent-kit ADR 0008).
-# agent:* and needs:* are due to be replaced by the Stage issue field (agent-kit ADR 0009).
+# Labels hold only what can have several values per issue and is the repo's own
+# (agent-kit issue-structure.md §5). Workflow state is the org issue field Stage,
+# Priority is the org number field, and the kind of work is the issue type.
 
-# --- Type: what kind of work. Exactly one per issue.
+# --- Type: kept only until the issue forms set the issue type (agent-kit #147).
+# Then they go too.
 - name: 'type:feature'
   color: '1f6feb'
   description: Something a user can use
@@ -18,20 +19,6 @@
 - name: 'type:docs'
   color: '0075ca'
   description: Documentation only
-- name: 'type:audit'
-  color: 'bf8700'
-  description: Raised by the codebase auditor — a proposal, not yet accepted
-
-# --- Agent state: the handshake between the owner and the agents.
-- name: 'agent:ready'
-  color: '2da44e'
-  description: Spec is complete; an agent may pick this up
-- name: 'agent:working'
-  color: 'fbca04'
-  description: An agent is on it — don't start a second one
-- name: 'needs:elia'
-  color: 'e99695'
-  description: Blocked on Elia — a decision, an approval or a review
 
 # --- Area outside the product.
 - name: 'area:harness'
