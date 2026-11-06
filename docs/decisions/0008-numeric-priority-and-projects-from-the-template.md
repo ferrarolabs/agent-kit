@@ -17,3 +17,6 @@ The first Jamly and agent-kit projects were built by script before the org templ
 - New issues get a score between their neighbours, then the scale is re-spread when it gets crowded.
 - `labels.yml` (jamly, and the kit's shared one) drops `priority:*`.
 - The template must be finalised by hand before any repo project exists.
+
+## Later
+- 2026-11-05: "they take only `agent:ready` issues" now reads Stage `Ready` ([ADR 0022](0022-issue-structure-types-and-fields.md)). The rest holds.

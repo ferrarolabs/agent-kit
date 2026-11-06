@@ -1,6 +1,6 @@
 # Issue structure
 
-> Status: **proposed** in [ADR 0022](decisions/0022-issue-structure-types-and-fields.md), for [Define the issue structure](https://github.com/ferrarolabs/agent-kit/issues/139). Nothing here is created on GitHub yet. Creating the types and fields, and migrating the open issues, is a follow-up once Elia approves.
+> Status: **accepted** in [ADR 0022](decisions/0022-issue-structure-types-and-fields.md), for [Define the issue structure](https://github.com/ferrarolabs/agent-kit/issues/139). The types and fields exist in the org ([Create the issue types and fields](https://github.com/ferrarolabs/agent-kit/issues/143)), and the open issues of agent-kit and jamly are migrated ([the migration](https://github.com/ferrarolabs/agent-kit/issues/144)).
 
 What an issue is made of, in every `ferrarolabs` repo: its **type**, its **fields**, its **place in the hierarchy**, and the few **labels** left. Every choice cites a source. Nothing is invented where a source already does it.
 
@@ -94,6 +94,7 @@ GitHub pins both dates to Feature ([S1](#6-sources)). Solo and part-time, a plan
 | Target date | — | — | — | optional | — |
 | Review level | required | required | required | — | — |
 
+- Review level is set when the issue is planned ([work flow §2.3](guides/work-flow.md#23-the-review-level)). An issue not yet planned lacks it by design; the completeness check counts it only from `Working` on.
 - An Epic has no Effort: its size is its sub-issues.
 - A Decision has no Effort: it should take a minute to answer (`CLAUDE.md`, "atomic" issues).
 
@@ -124,7 +125,13 @@ Labels stay only for what is **multi-valued and per repo**. An issue field can't
 | `priority:*` | Already gone (ADR 0008) |
 | `epic:*` (jamly) | An Epic issue, with the work as sub-issues |
 
-GitHub's default labels (`good first issue`, `duplicate`, …) are left alone: they cost nothing and outside contributors know them.
+GitHub's default labels (`good first issue`, `duplicate`, …) are left alone: they cost nothing and outside contributors know them. What labels are for, beyond `area:*`, is [its own issue](https://github.com/ferrarolabs/agent-kit/issues/155).
+
+**Three rules the table leaves open, settled by the migration** ([plan](https://github.com/ferrarolabs/agent-kit/issues/144#issuecomment-6658223916), approved by Elia):
+- A title that starts with "Decide:" is a **Decision**, whatever its `type:*` label.
+- An issue with sub-issues is an **Epic**.
+- `needs:elia` wins over `agent:working`: an issue with both is `Asking`, because nobody is working on it.
+- A type or field value already set is never overwritten by a mapping.
 
 ## 6. Sources
 

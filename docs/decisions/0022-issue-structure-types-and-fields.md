@@ -1,6 +1,6 @@
 # 0022 · Issue structure: five types, five fields, labels only for area
 
-**Status:** proposed · 2026-11-02 · supersedes parts of [ADR 0007](0007-project-boards.md) and [ADR 0009](0009-issue-data-in-issue-fields.md), keeps [ADR 0008](0008-numeric-priority-and-projects-from-the-template.md)
+**Status:** accepted · 2026-11-05 (proposed 2026-11-02) · supersedes parts of [ADR 0007](0007-project-boards.md) and [ADR 0009](0009-issue-data-in-issue-fields.md), keeps [ADR 0008](0008-numeric-priority-and-projects-from-the-template.md)
 
 ## Context
 What an issue is made of grew one piece at a time: `type:*` labels, agent labels, org issue fields, project fields. [Labels as code](https://github.com/ferrarolabs/agent-kit/pull/133) was rejected because the labels themselves were never decided.

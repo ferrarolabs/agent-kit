@@ -17,9 +17,8 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [x] One project template, built and checked by `scripts/projects/build-project.js` ([board design](project-boards.md), ADR 0007): the org template [Agent work](https://github.com/orgs/ferrarolabs/projects/3). Its `--check` mode was seen failing on a hand-edited filter
 - [ ] Template finalised by hand (sorts, grouping, workflows), then the repo projects created as copies of it (ADR 0008)
 - [ ] Board views: group-by, sort and workflows set by hand (the API can't)
-- [ ] Action that sets Status from labels (ADR 0007)
-- [ ] [Issue structure](https://github.com/ferrarolabs/agent-kit/issues/139) (ADR 0022, proposed): five issue types, five issue fields, labels only for `area:*`, in [issue-structure.md](issue-structure.md). Checked once Elia approves it and the types and fields exist
-- [ ] Issue data in org issue fields; Stage mirrored with Status by a [10-minute reconciler](https://github.com/ferrarolabs/agent-kit/issues/78) (ADR 0009, proposed). Cloud sessions [can read and set them](https://github.com/ferrarolabs/agent-kit/issues/24); Stage will [replace the agent labels](https://github.com/ferrarolabs/agent-kit/issues/82)
+- [x] [Issue structure](https://github.com/ferrarolabs/agent-kit/issues/139) (ADR 0022): five issue types, six issue fields, labels only for `area:*`, in [issue-structure.md](issue-structure.md). Types and fields created in the org settings ([Create the issue types and fields](https://github.com/ferrarolabs/agent-kit/issues/143)); every open issue of agent-kit and jamly migrated, Stage is the handshake ([the migration](https://github.com/ferrarolabs/agent-kit/issues/144))
+- [ ] Issue data in org issue fields; Stage mirrored with Status by a [10-minute reconciler](https://github.com/ferrarolabs/agent-kit/issues/78) (ADR 0009, proposed). Cloud sessions [can read and set them](https://github.com/ferrarolabs/agent-kit/issues/24); Stage has replaced the agent labels ([the migration](https://github.com/ferrarolabs/agent-kit/issues/144)); the reconciler is still to build
 - [x] Claude GitHub App on the `ferrarolabs` org, all repos: a cloud session pushed a branch and opened a PR (2026-10-31)
 - [x] [`gh` working in cloud sessions](https://github.com/ferrarolabs/agent-kit/issues/70) with an org token: REST only; GraphQL and org paths are blocked, so project scripts go through [an Action](https://github.com/ferrarolabs/agent-kit/issues/83)
 - [x] Branch protection on `dev`, `staging`, `main`: PR + green CI required. Proven: a direct push is rejected, a red PR is blocked, a green one merges ([jamly#2](https://github.com/ferrarolabs/jamly/issues/2))
@@ -60,14 +59,14 @@ Each phase is useful on its own and has a verifiable **exit criterion**. We don'
 - [ ] Idempotent `resume-work` skill
 - [ ] Cloud scheduled task that resumes work
 - [ ] "I need you" signal when the agent is blocked
-- [ ] [An agent starts on its own](https://github.com/ferrarolabs/agent-kit/issues/76) when an issue gets `agent:ready`
+- [ ] [An agent starts on its own](https://github.com/ferrarolabs/agent-kit/issues/76) when an issue gets Stage `Ready`
 - [x] Command log (Record column): moved to Phase 1 and done there
 
 **Exit:** a feature moves forward for 24 hours without me, across at least one usage limit.
 
 ## Phase 4 · Extraction into the kit
 - [ ] Split jamly's generic files from its project-specific ones: done along the way in the [inventory](inventory.md) (ADR 0014)
-- [ ] Fill `template/` in this repo, including the generic labels (type, agent state) and the board spec: done along the way, one port per harness merge (ADR 0014)
+- [ ] Fill `template/` in this repo, including the generic labels (area) and the board spec: done along the way, one port per harness merge (ADR 0014)
 - [ ] `scripts/bootstrap.sh` and `scripts/sync-kit.sh`
 - [ ] Account-level skills: `write-spec`, `critic`, `explain-feature`
 - [ ] This repo set up as a GitHub template repository
