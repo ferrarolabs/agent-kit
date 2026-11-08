@@ -48,7 +48,7 @@ Org-level fields, the same in every repo. Six, against a limit of 25 ([S1](#6-so
 |---|---|---|---|---|
 | **Stage** | Single select | `Inbox`, `Ready`, `Working`, `Asking`, `In validation`, `Done` | Elia (`Inbox` → `Ready`); the agent (`Working`, `Asking`, `In validation`); the reconciler (`Done` on close) | Decision 2; ADR 0009; Rust's `S-waiting-on-*` ([S6](#6-sources)) |
 | **Priority** | Number | 1–100, 100 = do first | The agent that opens the issue; Elia adjusts | ADR 0008, ADR 0018 |
-| **Effort** | Single select | `S`, `M`, `L` | Whoever writes the spec | GitHub default, T-shirt sizes suggested ([S1](#6-sources)); [board design §3.4](project-boards.md#34-size-s--m--l) |
+| **Effort** | Single select | `S`, `M`, `L` | Whoever writes the spec | GitHub default, T-shirt sizes suggested ([S1](#6-sources)); [board design §3.4](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md#34-size-s--m--l) |
 | **Start date** | Date | any | Optional | GitHub default ([S1](#6-sources)) |
 | **Target date** | Date | any | Optional | GitHub default ([S1](#6-sources)) |
 | **Review level** | Single select | `green`, `yellow`, `red` | A separate agent on the plan; re-checked on the PR | [Work flow §2.3](guides/work-flow.md#23-the-review-level), ADR 0023 |
@@ -74,13 +74,13 @@ Stage answers one question: **whose turn is it?** That's what Rust's `S-waiting-
 
 ### Effort, in detail
 - `S`: one sitting. `M`: a few sittings, one PR.
-- `L` means **split it**: an `L` issue becomes an Epic, and its sub-issues get `S` or `M`. Same rule as the [board design](project-boards.md#34-size-s--m--l).
+- `L` means **split it**: an `L` issue becomes an Epic, and its sub-issues get `S` or `M`. Same rule as the [board design](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md#34-size-s--m--l).
 - GitHub's default is `High`, `Medium`, `Low` and its own docs suggest T-shirt sizes ([S1](#6-sources)). Sizes read as size; High/Low reads as importance and gets confused with Priority.
-- Effort is a *prediction*. Once the [usage ledger](https://github.com/ferrarolabs/agent-kit/issues/33) measures cost, the two are compared. If `S` and `M` cost the same, the field goes ([board design §4](project-boards.md#4-metrics), M6).
+- Effort is a *prediction*. Once the [usage ledger](https://github.com/ferrarolabs/agent-kit/issues/33) measures cost, the two are compared. If `S` and `M` cost the same, the field goes ([board design §4](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md#4-metrics), M6).
 - This answers [Decide: Effort values](https://github.com/ferrarolabs/agent-kit/issues/74).
 
 ### Dates
-GitHub pins both dates to Feature ([S1](#6-sources)). Solo and part-time, a planned date is a guess ([board design §3.9](project-boards.md#39-roadmap-layout-iterations-dates)). So the two fields stay, but **optional**, and pinned only to **Epic**, where a range on a roadmap means something. When work really started and ended is read from the timeline, not typed.
+GitHub pins both dates to Feature ([S1](#6-sources)). Solo and part-time, a planned date is a guess ([board design §3.9](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md#39-roadmap-layout-iterations-dates)). So the two fields stay, but **optional**, and pinned only to **Epic**, where a range on a roadmap means something. When work really started and ended is read from the timeline, not typed.
 
 ### Which type needs which field
 "Required" means an open issue of that type without it is flagged by the [completeness check](https://github.com/ferrarolabs/agent-kit/issues/75). Pinned fields are the ones the sidebar shows ([S1](#6-sources)).
@@ -168,7 +168,7 @@ Read on 2026-11-02. GitHub's docs were read from their source, [github/docs](htt
 | Separate fields for Stage and agent state | Decision 2 and ADR 0009: one field. Two would drift |
 | Cost $, Opus share %, Waited on me (h) as fields now (ADR 0009) | No writer yet. They're created with the metric that fills them ([usage ledger](https://github.com/ferrarolabs/agent-kit/issues/33), [board metrics](https://github.com/ferrarolabs/agent-kit/issues/34)) |
 | An `Area` single-select field | Areas differ per repo and an issue can have two; fields are org-wide and single-valued |
-| Iterations | Solo and part-time; milestones are enough ([board design §3.9](project-boards.md#39-roadmap-layout-iterations-dates)) |
+| Iterations | Solo and part-time; milestones are enough ([board design §3.9](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md#39-roadmap-layout-iterations-dates)) |
 
 ## 8. What this changes in open issues
 

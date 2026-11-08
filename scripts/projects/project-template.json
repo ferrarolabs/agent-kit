@@ -1,5 +1,5 @@
 {
-  "$comment": "One template for every repo's GitHub Project. See docs/project-boards.md and ADR 0007. Status is set by automation from labels, never by hand. Priority is the org number field 1-100 (100 = do first); there are no priority labels.",
+  "$comment": "SUPERSEDED by ADR 0024 (docs/project-boards.md): the board's columns are the Stage issue field, Status is aligned with Stage both ways by the reconciler, and the views and workflows change. statusFromLabels, views and workflows below are the old ADR 0007 spec, kept until Configure the Agent work project template once (agent-kit issue 20) rewrites this file and build-project.js. Priority is the org number field 1-100 (100 = do first); there are no priority labels.",
   "status": [
     "Inbox",
     "Ready",

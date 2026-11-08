@@ -51,6 +51,7 @@ This leg can't be cut. Both repos are public ([ADR 0005](decisions/0005-public-u
 What narrows it:
 - **Only collaborators can set Stage.** On GitHub, setting an issue field needs triage access or more, as adding a label does ([issue fields, community discussion](https://github.com/orgs/community/discussions/175366)). An agent starts only on Stage `Ready`, or on an issue Elia names in the session, and never sets `Ready` itself. A stranger can't put work in front of an agent. Caveat: every agent acts as Elia's account today, so the field's history can't tell Elia from an agent ([bot account](https://github.com/ferrarolabs/agent-kit/issues/113)).
 - **No agent starts on its own yet.** Every session is started by Elia. When [An agent starts on its own](https://github.com/ferrarolabs/agent-kit/issues/76) is built, the trigger must check who set Stage `Ready`.
+- **The project can't set `Ready` for someone else.** The board's columns are Stage, and a drag writes it ([ADR 0024](decisions/0024-the-board-on-issue-fields.md)). The project is private, with Elia as its only admin, so a stranger can't drag a card. The project token, held only by Actions, never writes `Ready` to Stage or Status: the reconciler only copies values the owner set, and sets `Done` on close.
 - **The agent treats fetched text as data, not instructions.** That is a rule in the session's own prompt, so it's a promise, not a boundary.
 
 What doesn't: a stranger's comment on a `Ready` issue is still read by the agent. Accepted, because the other two legs are kept thin.
