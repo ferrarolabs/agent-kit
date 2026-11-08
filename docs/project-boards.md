@@ -1,6 +1,6 @@
 # Project boards — design
 
-> Status: **proposed** in [ADR 0024](decisions/0024-the-board-on-issue-fields.md), for [Define the project template's board](https://github.com/ferrarolabs/agent-kit/issues/140). It replaces the design of [ADR 0007](decisions/0007-project-boards.md), whose full text and research are kept [at `89f8515`](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md).
+> Status: **accepted** in [ADR 0024](decisions/0024-the-board-on-issue-fields.md), for [Define the project template's board](https://github.com/ferrarolabs/agent-kit/issues/140). It replaces the design of [ADR 0007](decisions/0007-project-boards.md), whose full text and research are kept [at `89f8515`](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md).
 > **Nothing here is built yet.** [Configure the "Agent work" project template once](https://github.com/ferrarolabs/agent-kit/issues/20) applies it to the org template. Then the repo projects are created as copies ([ADR 0008](decisions/0008-numeric-priority-and-projects-from-the-template.md)). The rows marked ❓ in §3 are checked live there first.
 
 The board's job, in one line: **show the owner what needs them and where everything is, at a glance, from a phone, without asking an agent.**
