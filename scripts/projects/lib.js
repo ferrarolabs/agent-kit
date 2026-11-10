@@ -7,13 +7,18 @@ const BUILT_IN = new Set([
   'Reviewers', 'Parent issue', 'Sub-issues progress', 'Type', 'Tracks', 'Tracked by',
 ]);
 
-// A field the project owns: created in the project, not built in, not an org issue field.
+// Data types a person can create in a project. Built-in fields have their own types
+// (TITLE, ASSIGNEES, LABELS, …), so a built-in name missing from BUILT_IN is still safe.
+const USER_TYPES = new Set(['NUMBER', 'TEXT', 'DATE', 'SINGLE_SELECT', 'ITERATION']);
+
+// A field the project owns: of a type a person creates, not built in, not an org issue field.
+// Only these are reported as extra, and only these --prune may delete.
 function isCustomField(f, spec) {
-  return !BUILT_IN.has(f.name) && !spec.issueFields.includes(f.name);
+  return USER_TYPES.has(f.dataType) && !BUILT_IN.has(f.name) && !spec.issueFields.includes(f.name);
 }
 
 // Compares the spec with a live project. `live` is plain data:
-//   { public, template, status: [{name, color}], fields: [{name}], views: [{name, layout, filter, fields: [names]}] }
+//   { public, template, status: [{name, color}], fields: [{name, dataType}], views: [{name, layout, filter, fields: [names]}] }
 // `views` is the spec's views plus the repo's extra views. Returns [{ ok, msg }].
 function diff(spec, views, live, { asTemplate = false } = {}) {
   const out = [];
@@ -57,4 +62,4 @@ function pruneTargets(spec, views, live) {
   };
 }
 
-module.exports = { BUILT_IN, isCustomField, diff, pruneTargets };
+module.exports = { BUILT_IN, USER_TYPES, isCustomField, diff, pruneTargets };

@@ -37,7 +37,7 @@ test('an extra view is reported, and pruned', () => {
 
 There is one such test per kind of failure: an extra view, an extra field, a public project, Status out of order, a wrong colour, filter or field, a missing view or issue field. That is the kit's rule that a check comes with proof it can fail.
 
-**Additive by default, prune once.** `build` creates and updates; it never deletes, unless `--prune` is given. `--prune` works only on the template, and only with `build`, for one reason: deleting a field deletes its values on every item. Repo projects hold real items, and syncing them is additive by rule ([Project sync](https://github.com/ferrarolabs/agent-kit/issues/66)). The template holds none, so cleaning it once is safe.
+**Additive by default, prune once.** `build` creates and updates; it never deletes, unless `--prune` is given. `--prune` works only on the template, and only with `build`, for one reason: deleting a field deletes its values on every item. Repo projects hold real items, and syncing them is additive by rule ([Project sync](https://github.com/ferrarolabs/agent-kit/issues/66)). The template holds none, so cleaning it once is safe. And `--prune` deletes only fields of a type a person can create (number, text, date, single select, iteration), never one of GitHub's own, even under a name the script doesn't know. The independent check of this PR found that risk; a test now covers it.
 
 **A guard as a test.** The token the script runs with can write the org's projects. ADR 0024 says no job holding it writes `Ready`. The script now writes no field value on any item at all: Status belongs to the reconciler. A test fails if any project script contains an item-field write:
 

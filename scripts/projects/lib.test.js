@@ -30,7 +30,7 @@ test('an extra view is reported, and pruned', () => {
 
 test('an extra project field is reported and pruned; built-ins and issue fields never are', () => {
   const live = matching();
-  live.fields.push({ name: 'Cost $' });
+  live.fields.push({ name: 'Cost $', dataType: 'NUMBER' });
   assert.match(fails(live).join('\n'), /field "Cost \$" is not in the spec/);
   assert.deepStrictEqual(pruneTargets(spec, spec.views, live).fields.map((f) => f.name), ['Cost $']);
 });
@@ -75,4 +75,11 @@ test('a project not marked as a template fails, in template mode only', () => {
   live.template = false;
   assert.match(fails(live).join('\n'), /marked as an org template/);
   assert.deepStrictEqual(diff(spec, spec.views, live).filter((r) => !r.ok), []);
+});
+
+test('a field of a built-in type is never reported or pruned, even with an unknown name', () => {
+  const live = matching();
+  live.fields.push({ name: 'Some future built-in', dataType: 'TRACKED_BY' });
+  assert.deepStrictEqual(fails(live), []);
+  assert.deepStrictEqual(pruneTargets(spec, spec.views, live).fields, []);
 });
