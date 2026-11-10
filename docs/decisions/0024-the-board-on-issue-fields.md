@@ -1,6 +1,6 @@
 # 0024 · The board on issue fields: columns on Stage, Status aligned both ways, a private project
 
-**Status:** proposed · 2026-11-06 · supersedes parts of [ADR 0007](0007-project-boards.md), keeps [ADR 0009](0009-issue-data-in-issue-fields.md)'s reconciler
+**Status:** accepted · 2026-11-08 (proposed 2026-11-06) · supersedes parts of [ADR 0007](0007-project-boards.md), keeps [ADR 0009](0009-issue-data-in-issue-fields.md)'s reconciler
 
 ## Context
 The "Agent work" project template was designed before the [issue structure](../issue-structure.md) ([ADR 0022](0022-issue-structure-types-and-fields.md)). Its columns were Status, set from the agent labels, and it held its own number fields. The labels are gone: Stage, an issue field, carries whose turn it is.
