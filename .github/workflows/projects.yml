@@ -24,6 +24,10 @@ on:
         description: "Also apply the repo's .github/project-extra-views.json"
         type: boolean
         default: false
+      prune:
+        description: "Template only, with build: delete views and project fields the spec doesn't name (one-off)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -53,6 +57,7 @@ jobs:
           TITLE: ${{ inputs.title }}
           REPO: ${{ inputs.repo }}
           EXTRA: ${{ inputs.extra }}
+          PRUNE: ${{ inputs.prune }}
         run: |
           if [ -z "$GH_TOKEN" ]; then
             echo "::error::The PROJECT_TOKEN secret is empty or missing. Add it in Settings > Secrets and variables > Actions (issue 83)."
@@ -69,6 +74,10 @@ jobs:
           fi
           if [ "$EXTRA" = "true" ] && [ -z "$REPO" ]; then
             echo "::error::extra needs a repo: the org template has no extra views"
+            exit 1
+          fi
+          if [ "$PRUNE" = "true" ] && { [ -n "$REPO" ] || [ "$MODE" != "build" ]; }; then
+            echo "::error::prune is for the template only, with mode build: repo projects are never pruned"
             exit 1
           fi
 
@@ -89,10 +98,12 @@ jobs:
           TITLE: ${{ inputs.title }}
           REPO: ${{ inputs.repo }}
           EXTRA: ${{ inputs.extra }}
+          PRUNE: ${{ inputs.prune }}
         run: |
           set -- --owner ferrarolabs --title "$TITLE"
           if [ -n "$REPO" ]; then set -- "$@" --repo "$REPO"; else set -- "$@" --template; fi
           if [ "$EXTRA" = "true" ]; then set -- "$@" --extra "$RUNNER_TEMP/extra-views.json"; fi
+          if [ "$PRUNE" = "true" ]; then set -- "$@" --prune; fi
           if [ "$MODE" = "check" ]; then set -- "$@" --check; fi
           echo "node scripts/projects/build-project.js $*"
           status=0

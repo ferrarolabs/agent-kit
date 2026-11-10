@@ -1,7 +1,7 @@
 # Project boards — design
 
 > Status: **accepted** in [ADR 0024](decisions/0024-the-board-on-issue-fields.md), for [Define the project template's board](https://github.com/ferrarolabs/agent-kit/issues/140). It replaces the design of [ADR 0007](decisions/0007-project-boards.md), whose full text and research are kept [at `89f8515`](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md).
-> **Nothing here is built yet.** [Configure the "Agent work" project template once](https://github.com/ferrarolabs/agent-kit/issues/20) applies it to the org template. Then the repo projects are created as copies ([ADR 0008](decisions/0008-numeric-priority-and-projects-from-the-template.md)). The rows marked ❓ in §3 are checked live there first.
+> **Nothing here is built yet.** [Configure the "Agent work" project template once](https://github.com/ferrarolabs/agent-kit/issues/20) applies it to the org template, with `scripts/projects/build-project.js` and [`project-template.json`](../scripts/projects/project-template.json). Then the repo projects are created as copies ([ADR 0008](decisions/0008-numeric-priority-and-projects-from-the-template.md)). The rows marked ❓ in §3 are checked live there first.
 
 The board's job, in one line: **show the owner what needs them and where everything is, at a glance, from a phone, without asking an agent.**
 
@@ -185,14 +185,14 @@ The metrics in [ADR 0007](decisions/0007-project-boards.md), decision 4, hold: t
 
 T1–T7 are [at `89f8515`, §7](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md#7-hypotheses-to-test-before-building). They still hold: T1 (cloud sessions set issue fields over REST), T5 (`updated:<` means older), T6 (Mobile shows lists, not boards), T7 (`issues: field_added` triggers Actions). T2 is [its own issue](https://github.com/ferrarolabs/agent-kit/issues/26).
 
-Each new one is checked on the org template, in [Configure the template once](https://github.com/ferrarolabs/agent-kit/issues/20), in this order. The order is by risk: T8 decides decision 2.
+T8, T10 and T11 are owner steps on the org template, in [Configure the template once](https://github.com/ferrarolabs/agent-kit/issues/20): the API can't set a column field, a workflow or a column limit. T9 needs real items, which a template never has, so it runs on the first repo project, in [Create the projects as copies](https://github.com/ferrarolabs/agent-kit/issues/22): `check` prints the issue numbers each filter returns, to compare with the issues' field values. The order is by risk: T8 decides decision 2.
 
-| # | Hypothesis | Cheapest test | If it fails |
-|---|---|---|---|
-| T8 | Stage can be a board's column field, and a drag writes Stage on the issue (F1, F6) | Add a board view, pick Stage as Column field, drag a throwaway issue from `Inbox` to `Done` and back; read the issue | Flow becomes a table grouped by Stage. Nothing else changes |
-| T9 | `-stage:Inbox,Ready,Working,Done` keeps issues with no Stage; `stage:Working` and `no:stage` work on an issue field | Paste each into a table view holding one issue per Stage value and one with none | A separate *Triage* view, `no:stage`; or, if issue fields can't be filtered at all, the issue list's own search |
-| T10 | Auto-add accepts `is:issue is:open` | Save the workflow with that filter; open a throwaway issue | Drop `is:open` |
-| T11 | A column limit can be set on an issue-field column | Set 1 on `Working` | The Stalled view is the only signal |
+| # | Hypothesis | Cheapest test | If it fails | Status |
+|---|---|---|---|---|
+| T8 | Stage can be a board's column field, and a drag writes Stage on the issue (F1, F6) | Add a board view, pick Stage as Column field, drag a throwaway issue from `Inbox` to `Done` and back; read the issue | Flow becomes a table grouped by Stage. Nothing else changes | ❓ owner step, [issue 20](https://github.com/ferrarolabs/agent-kit/issues/20) |
+| T9 | `-stage:Inbox,Ready,Working,Done` keeps issues with no Stage; `stage:Working` and `no:stage` work on an issue field | On the first repo project, compare the issue numbers `check` prints per view with the issues' Stage values. `Ready` and `In validation` count only if an issue has them then | A separate *Triage* view, `no:stage`; or, if issue fields can't be filtered at all, the issue list's own search | ❓ [issue 22](https://github.com/ferrarolabs/agent-kit/issues/22) |
+| T10 | Auto-add accepts `is:issue is:open` | Save the workflow with that filter; open a throwaway issue | Drop `is:open` | ❓ owner step, [issue 20](https://github.com/ferrarolabs/agent-kit/issues/20) |
+| T11 | A column limit can be set on an issue-field column | Set 1 on `Working` | The Stalled view is the only signal | ❓ owner step, [issue 20](https://github.com/ferrarolabs/agent-kit/issues/20) |
 
 ---
 
