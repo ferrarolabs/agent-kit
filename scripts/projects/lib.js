@@ -4,7 +4,7 @@
 // Fields every project has, whatever the spec says. Never reported as extra, never pruned.
 const BUILT_IN = new Set([
   'Title', 'Assignees', 'Status', 'Labels', 'Linked pull requests', 'Milestone', 'Repository',
-  'Reviewers', 'Parent issue', 'Sub-issues progress', 'Type', 'Tracks', 'Tracked by',
+  'Reviewers', 'Parent issue', 'Sub-issues progress', 'Created', 'Updated', 'Closed', 'Type', 'Tracks', 'Tracked by',
 ]);
 
 // Data types a person can create in a project. Built-in fields have their own types

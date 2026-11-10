@@ -22,8 +22,8 @@
       "name": "Flow",
       "layout": "BOARD_LAYOUT",
       "filter": "is:issue is:open",
-      "fields": ["Title", "Type", "Priority", "Effort", "Review level"],
-      "manual": "Column field: Stage (test T8: drag a card and check the issue's Stage changed). Sort by Priority descending. Column limit 1 on Working (test T11)."
+      "fields": ["Title", "Priority", "Effort", "Review level"],
+      "manual": "Column field: Stage (test T8: drag a card and check the issue's Stage changed). Sort by Priority descending. Column limit 1 on Working (test T11). Add the Type column by hand if the UI offers it: the API exposes no Type field, so check does not verify it."
     },
     {
       "name": "Stalled",
@@ -43,8 +43,8 @@
       "name": "Shipped",
       "layout": "TABLE_LAYOUT",
       "filter": "is:issue is:closed",
-      "fields": ["Title", "Type", "Linked pull requests"],
-      "manual": "Sort by Updated, newest first."
+      "fields": ["Title", "Linked pull requests"],
+      "manual": "Sort by Updated, newest first. Add the Type column by hand if the UI offers it: the API exposes no Type field, so check does not verify it."
     }
   ],
   "workflows": [

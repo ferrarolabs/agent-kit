@@ -70,16 +70,17 @@ Five views, the same in every repo. Each answers needs from §1. The fields are 
 | View | Layout | Filter | Group, sort | Fields | Answers |
 |---|---|---|---|---|---|
 | **Needs me** | table | `is:issue is:open -stage:Inbox,Ready,Working,Done` | group by Stage; sort Priority desc | Title, Stage, Priority | 1, and new issues that nobody has triaged (the *No Stage* group) |
-| **Flow** | board | `is:issue is:open` | columns Stage; sort Priority desc | Type, Priority, Effort, Review level | 2 (the `Ready` column), 3 |
+| **Flow** | board | `is:issue is:open` | columns Stage; sort Priority desc | Priority, Effort, Review level; Type by hand | 2 (the `Ready` column), 3 |
 | **Stalled** | table | `is:issue is:open stage:Working updated:<@today-1d` | sort Updated, oldest first | Title, Updated, Linked pull requests | 6 |
 | **Epics** | table | `is:issue is:open type:"Epic"` | group by Milestone; sort Priority desc | Title, Sub-issues progress, Target date | 4 |
-| **Shipped** | table | `is:issue is:closed` | sort Updated, newest first | Title, Type, Linked pull requests | 4, and throughput |
+| **Shipped** | table | `is:issue is:closed` | sort Updated, newest first | Title, Linked pull requests; Type by hand | 4, and throughput |
 
 - **Why five.** GitHub's guidance pairs a table for the backlog with a board for progress ([S2](#11-sources)). Solo setups do the same with one or two views ([S6](#11-sources), [S7](#11-sources)). ADR 0007's *Ready for agents* is now Flow's `Ready` column, and *Incomplete* is the `no:stage` group in Needs me. Fewer views means fewer places to drift.
 - **Needs me filters on two values, not one.** `Asking` (stuck) and `In validation` (a complete PR) are different queues ([issue structure §3](issue-structure.md#stage-in-detail)). The group shows which is which.
 - **One filter, by exclusion.** Listing `Asking`, `In validation` *and* `no:stage` can't be one filter: terms separated by a space are AND (F4). Excluding the other four values keeps the issues with no Stage. If that doesn't hold live (T9), the triage group becomes its own view, `is:issue is:open no:stage`.
 - **No Stage is a group, not a value.** Auto-add can't set Stage (F3), so a new issue arrives without one. Kubernetes' SIG Node board starts every new item in a **Triage** column and moves it out only once its required data is set ([S4](#11-sources)). `no:stage` in Needs me is that column.
 - **Epics on a table, not a roadmap.** Solo and part-time, a planned date is a guess ([issue structure §3](issue-structure.md#dates)). The dates are optional, so a roadmap would be mostly empty. Milestones carry the phase.
+- **Type by hand.** The API exposes no Type field on a project ([run 42915409373](https://github.com/ferrarolabs/agent-kit/actions/runs/42915409373), 2026-11-10), so the script can't show the column. The owner adds it in the UI if offered; `check` doesn't verify it. Filtering on type (`type:"Epic"`) still works.
 - **Repo-specific views** are allowed on top, never instead (jamly's *Audit inbox*, for example).
 
 ### Filters, and how sure each one is

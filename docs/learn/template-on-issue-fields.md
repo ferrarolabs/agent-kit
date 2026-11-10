@@ -66,7 +66,12 @@ It is a text check, not a proof. But it turns "someone added an item write" from
   - `check` reported 19 differences: public, the Status options, three missing issue fields, three extra fields, every view, and two extra views.
   - `build --prune` made exactly the expected 11 changes, with no item write.
   - `check` was then green.
-- The live run happens from `main` after the merge, and its log is on the issue.
+- Live, from `main` ([the runs](https://github.com/ferrarolabs/agent-kit/issues/20#issuecomment-6781112561)):
+  - `check` was red with 18 differences;
+  - `build --prune` did everything the fake run did, but ended with 2 differences the fake could not show: **a project exposes no `Type` field through the API**, though it does expose `Created`, `Updated` and `Closed`;
+  - the fix takes `Type` out of the spec's views and makes it a manual column.
+
+  A fake is only as good as what you know about the real thing; the live run is where the unknowns show up.
 
 ## Where to look
 - `scripts/projects/project-template.json`: the spec.
