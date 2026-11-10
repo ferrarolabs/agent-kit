@@ -1,130 +1,61 @@
 {
-  "$comment": "SUPERSEDED by ADR 0024 (docs/project-boards.md): the board's columns are the Stage issue field, Status is aligned with Stage both ways by the reconciler, and the views and workflows change. statusFromLabels, views and workflows below are the old ADR 0007 spec, kept until Configure the Agent work project template once (agent-kit issue 20) rewrites this file and build-project.js. Priority is the org number field 1-100 (100 = do first); there are no priority labels.",
+  "$comment": "One template for every repo's GitHub Project, from docs/project-boards.md (ADR 0024). The board's columns are the Stage issue field. Status is aligned with Stage both ways by the reconciler (issue 78); no script writes it on items. Priority is the org number field 1-100 (100 = do first).",
+  "public": false,
   "status": [
-    "Inbox",
-    "Ready",
-    "In progress",
-    "Needs me",
-    "Device check",
-    "Done"
+    { "name": "Inbox", "color": "GRAY" },
+    { "name": "Ready", "color": "BLUE" },
+    { "name": "Working", "color": "YELLOW" },
+    { "name": "Asking", "color": "RED" },
+    { "name": "In validation", "color": "PURPLE" },
+    { "name": "Done", "color": "GREEN" }
   ],
-  "numberFields": [
-    "Cost $",
-    "Opus share %",
-    "Waited on me (h)"
-  ],
-  "issueFields": [
-    "Priority",
-    "Effort"
-  ],
-  "statusFromLabels": [
-    {
-      "label": "needs:device-check",
-      "status": "Device check"
-    },
-    {
-      "label": "needs:elia",
-      "status": "Needs me"
-    },
-    {
-      "label": "agent:working",
-      "status": "In progress"
-    },
-    {
-      "label": "agent:ready",
-      "status": "Ready"
-    }
-  ],
+  "issueFields": ["Stage", "Priority", "Effort", "Review level", "Target date"],
   "views": [
     {
       "name": "Needs me",
       "layout": "TABLE_LAYOUT",
-      "filter": "is:open label:needs:elia,needs:device-check",
-      "fields": [
-        "Title",
-        "Status",
-        "Priority",
-        "Labels",
-        "Linked pull requests",
-        "Waited on me (h)"
-      ],
-      "manual": "Sort by Priority descending (100 first), then Waited on me (h) descending."
+      "filter": "is:issue is:open -stage:Inbox,Ready,Working,Done",
+      "fields": ["Title", "Stage", "Priority"],
+      "manual": "Group by Stage. Sort by Priority descending (100 first)."
     },
     {
       "name": "Flow",
       "layout": "BOARD_LAYOUT",
-      "filter": "-status:Done",
-      "fields": [
-        "Title",
-        "Priority",
-        "Effort",
-        "Labels"
-      ],
-      "manual": "Column field: Status."
-    },
-    {
-      "name": "Ready for agents",
-      "layout": "TABLE_LAYOUT",
-      "filter": "is:open label:agent:ready -label:agent:working -is:blocked",
-      "fields": [
-        "Title",
-        "Priority",
-        "Effort",
-        "Milestone",
-        "Labels"
-      ],
-      "manual": "Sort by Priority descending (100 first). Blocked issues are excluded: an agent never picks one up."
+      "filter": "is:issue is:open",
+      "fields": ["Title", "Type", "Priority", "Effort", "Review level"],
+      "manual": "Column field: Stage (test T8: drag a card and check the issue's Stage changed). Sort by Priority descending. Column limit 1 on Working (test T11)."
     },
     {
       "name": "Stalled",
       "layout": "TABLE_LAYOUT",
-      "filter": "is:open label:agent:working updated:<@today-1d",
-      "fields": [
-        "Title",
-        "Labels",
-        "Linked pull requests"
-      ],
+      "filter": "is:issue is:open stage:Working updated:<@today-1d",
+      "fields": ["Title", "Stage", "Linked pull requests"],
       "manual": "Sort by Updated, oldest first."
     },
     {
-      "name": "Milestone",
+      "name": "Epics",
       "layout": "TABLE_LAYOUT",
-      "filter": "-status:Done",
-      "fields": [
-        "Title",
-        "Status",
-        "Priority",
-        "Effort",
-        "Labels",
-        "Sub-issues progress"
-      ],
-      "manual": "Group by Milestone; sort by Priority descending (100 first)."
+      "filter": "is:issue is:open type:\"Epic\"",
+      "fields": ["Title", "Sub-issues progress", "Target date"],
+      "manual": "Group by Milestone. Sort by Priority descending."
     },
     {
       "name": "Shipped",
       "layout": "TABLE_LAYOUT",
-      "filter": "status:Done",
-      "fields": [
-        "Title",
-        "Effort",
-        "Cost $",
-        "Opus share %",
-        "Waited on me (h)",
-        "Linked pull requests"
-      ],
+      "filter": "is:issue is:closed",
+      "fields": ["Title", "Type", "Linked pull requests"],
       "manual": "Sort by Updated, newest first."
     }
   ],
   "workflows": [
-    "Run after the script: it replaces the Status options, so any workflow set earlier loses its value (shown with a red !) and must be re-picked.",
-    "Item added to project → Set Status: Inbox (on)",
-    "Item closed → Set Status: Done (on)",
-    "Pull request merged → Set Status: Done (on)",
-    "Auto-add to project: this repo, filter is:issue,pr is:open (on)",
-    "Auto-archive items: is:closed updated:<@today-14d (on)",
-    "Auto-add sub-issues to project (on)",
-    "Auto-close issue (off: closing drives Status, never the other way)",
-    "Pull request linked to issue (off: labels drive In progress)",
-    "Code changes requested / Code review approved (off)"
-  ]
+    "Set these after build: build replaces the Status options, and a workflow set before it loses its value (red !).",
+    "Item added to project → Status: OFF (through the reconciler it would overwrite Stage)",
+    "Item closed → Set Status: Done (ON)",
+    "Auto-add to project: this repo, filter is:issue is:open (ON; test T10: the filter is accepted)",
+    "Auto-add sub-issues to project (ON)",
+    "Item reopened, Pull request linked to issue, Pull request merged, Code changes requested, Code review approved (OFF)",
+    "Auto-archive items (OFF)",
+    "Auto-close issue (OFF)"
+  ],
+  "access": "Settings → Manage access: base role No access; the owner is the only admin."
 }
