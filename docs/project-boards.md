@@ -1,7 +1,7 @@
 # Project boards — design
 
 > Status: **accepted** in [ADR 0024](decisions/0024-the-board-on-issue-fields.md), for [Define the project template's board](https://github.com/ferrarolabs/agent-kit/issues/140). It replaces the design of [ADR 0007](decisions/0007-project-boards.md), whose full text and research are kept [at `89f8515`](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md).
-> **Nothing here is built yet.** [Configure the "Agent work" project template once](https://github.com/ferrarolabs/agent-kit/issues/20) applies it to the org template, with `scripts/projects/build-project.js` and [`project-template.json`](../scripts/projects/project-template.json). Then the repo projects are created as copies ([ADR 0008](decisions/0008-numeric-priority-and-projects-from-the-template.md)). The rows marked ❓ in §3 are checked live there first.
+> **The org template is built** ([Configure the template once](https://github.com/ferrarolabs/agent-kit/issues/20), 2026-11-11), with `scripts/projects/build-project.js` and [`project-template.json`](../scripts/projects/project-template.json). The repo projects, copies of it, come with [Create the projects as copies](https://github.com/ferrarolabs/agent-kit/issues/22). Then the repo projects are created as copies ([ADR 0008](decisions/0008-numeric-priority-and-projects-from-the-template.md)). The rows marked ❓ in §3 are checked live there first.
 
 The board's job, in one line: **show the owner what needs them and where everything is, at a glance, from a phone, without asking an agent.**
 
@@ -49,7 +49,7 @@ Taken by Elia on [the issue](https://github.com/ferrarolabs/agent-kit/issues/140
 
 | # | Capability | Status | Consequence |
 |---|---|---|---|
-| F1 | A board's columns can be "any single select or iteration field". Issue fields can "group by column on the board layout" | ✅ docs, ❓ live: the board page never names issue fields | Stage can be the board's columns. Test T8 |
+| F1 | A board's columns can be "any single select or iteration field". Issue fields can "group by column on the board layout" | ✅ live, 2026-11-11: Flow's column field set to Stage on the template | Stage can be the board's columns. Test T8 |
 | F2 | Group, filter and sort by issue fields, "in both table and board layouts". Charts can use them | ✅ docs | Every view below uses Stage, Priority, Effort, Review level |
 | F3 | Built-in workflows set **only Status**. Auto-add filters take only `is`, `label`, `reason`, `assignee`, `no` | ✅ docs | No workflow can set Stage. Auto-add can't filter on type or fields |
 | F4 | View filters: `type:"Bug"`, `has:FIELD`, `no:FIELD`, `-field:A,B` (none of these values), `parent-issue:`, numeric ranges, `@today`. Terms separated by a space are AND; a comma is OR within one field. There is no `is:blocked` | ✅ docs | Flow's `Ready` column can't hide blocked issues by filter. GitHub marks them with an icon instead |
@@ -58,7 +58,7 @@ Taken by Elia on [the issue](https://github.com/ferrarolabs/agent-kit/issues/140
 | F7 | Only fields with **Public** visibility show in public or internal projects | ✅ docs | A private project shows every field, whatever its visibility |
 | F8 | From a cloud session, GraphQL and project pages return 403 | ✅ live, 2026-11-06 | Nothing about the project can be checked or changed from a session; only through an Action |
 | F9 | A project holds up to 50,000 items, archived ones included | ✅ docs | Not a constraint. No auto-archive is needed |
-| F10 | A board can set a **column limit**: the count is highlighted when over it; nothing is blocked | ✅ docs | Used on `Working` (§5) |
+| F10 | A board can set a **column limit**: the count is highlighted when over it; nothing is blocked | ✅ docs for Status; ❌ live on an issue-field column (T11, 2026-11-11: the UI returns an error) | No limit on `Working`; the Stalled view is the signal (§5) |
 | F11 | Free allows **one** *auto-add to project* workflow per project. *Auto-add sub-issues* is a separate built-in workflow, not a copy of it | ✅ docs | One repo per project by auto-add. A hub needs an Action to add items (§8) |
 
 ---
@@ -105,12 +105,12 @@ Stage says whose turn it is ([issue structure §3](issue-structure.md#stage-in-d
 | (no Stage) | auto-add | the triage group |
 | `Inbox` | whoever triages | the owner may drag here |
 | `Ready` | **the owner only** | the owner may drag here. It is the signal that an agent may start |
-| `Working` | the agent, on the issue (agents can't reach the project) | never dragged by hand. **Column limit: 1** while one session runs at a time ([Run 2–3 agent sessions in parallel](https://github.com/ferrarolabs/agent-kit/issues/51) raises it) |
+| `Working` | the agent, on the issue (agents can't reach the project) | never dragged by hand. No column limit (T11 failed, and sessions may run in parallel) |
 | `Asking` | the agent | never dragged by hand |
 | `In validation` | the agent | never dragged by hand |
 | `Done` | closing the issue | never dragged by hand: close the issue instead |
 
-- The column limit follows the personal-kanban practice of capping work in progress ([S7](#11-sources)). Above 1, two agents may be on the same issue, or a dead session holds a slot.
+- **No limit on `Working`.** A limit was planned, from the personal-kanban practice of capping work in progress ([S7](#11-sources)). It was dropped on 2026-11-11: GitHub refuses a limit on an issue-field column (T11), and a limit only colours a count, while agents may run in parallel. What matters is an agent that stopped, and that is the **Stalled** view.
 - **Nobody but the owner sets `Ready`, on the board or anywhere.** The project is private, with the owner as its only admin (§2.4). So only the owner and the Actions' token can write Status or drag a card. The rule for the token is in §6.
 
 ---
@@ -130,7 +130,7 @@ Stage says whose turn it is ([issue structure §3](issue-structure.md#stage-in-d
 
 | Workflow | Setting | Why |
 |---|---|---|
-| Auto-add to project | **on**: this repo, `is:issue is:open` | Every new issue lands in the triage group. PRs carry no Stage (F5). ❓ `is:open` in auto-add: T10 |
+| Auto-add to project | **off on the template; on in each repo project**: that repo, `is:issue is:open` | A template is linked to no repo, and copies don't inherit auto-add ([S1](#11-sources): "configured workflows (except any auto-add workflows)"). Every new issue lands in the triage group. PRs carry no Stage (F5). ❓ `is:open` in auto-add: T10, on the first repo project |
 | Auto-add sub-issues to project | **on** | An Epic's work shows with it |
 | Item closed → Status: Done | **on** | Agrees with Stage `Done` on close; the reconciler copies it |
 | Item added → Status | **off** | It would make `Inbox` the newest change and overwrite a `Ready` Stage through the reconciler |
@@ -186,14 +186,14 @@ The metrics in [ADR 0007](decisions/0007-project-boards.md), decision 4, hold: t
 
 T1–T7 are [at `89f8515`, §7](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md#7-hypotheses-to-test-before-building). They still hold: T1 (cloud sessions set issue fields over REST), T5 (`updated:<` means older), T6 (Mobile shows lists, not boards), T7 (`issues: field_added` triggers Actions). T2 is [its own issue](https://github.com/ferrarolabs/agent-kit/issues/26).
 
-T8, T10 and T11 are owner steps on the org template, in [Configure the template once](https://github.com/ferrarolabs/agent-kit/issues/20): the API can't set a column field, a workflow or a column limit. T9 needs real items, which a template never has, so it runs on the first repo project, in [Create the projects as copies](https://github.com/ferrarolabs/agent-kit/issues/22): `check` prints the issue numbers each filter returns, to compare with the issues' field values. The order is by risk: T8 decides decision 2.
+T8 and T11 were owner steps on the org template, in [Configure the template once](https://github.com/ferrarolabs/agent-kit/issues/20): the API can't set a column field or a column limit. T9, T10 and the drag half of T8 need a repo project, in [Create the projects as copies](https://github.com/ferrarolabs/agent-kit/issues/22): a template holds no items and has no auto-add. T9 needs real items, which a template never has, so it runs on the first repo project, in [Create the projects as copies](https://github.com/ferrarolabs/agent-kit/issues/22): `check` prints the issue numbers each filter returns, to compare with the issues' field values. The order is by risk: T8 decides decision 2.
 
 | # | Hypothesis | Cheapest test | If it fails | Status |
 |---|---|---|---|---|
-| T8 | Stage can be a board's column field, and a drag writes Stage on the issue (F1, F6) | Add a board view, pick Stage as Column field, drag a throwaway issue from `Inbox` to `Done` and back; read the issue | Flow becomes a table grouped by Stage. Nothing else changes | ❓ owner step, [issue 20](https://github.com/ferrarolabs/agent-kit/issues/20) |
+| T8 | Stage can be a board's column field, and a drag writes Stage on the issue (F1, F6) | Add a board view, pick Stage as Column field, drag a throwaway issue from `Inbox` to `Done` and back; read the issue | Flow becomes a table grouped by Stage. Nothing else changes | ✅ column field set to Stage, [on issue 20](https://github.com/ferrarolabs/agent-kit/issues/20#issuecomment-6781186225); ❓ the drag, on the first repo project ([issue 22](https://github.com/ferrarolabs/agent-kit/issues/22)) |
 | T9 | `-stage:Inbox,Ready,Working,Done` keeps issues with no Stage; `stage:Working` and `no:stage` work on an issue field | On the first repo project, compare the issue numbers `check` prints per view with the issues' Stage values. `Ready` and `In validation` count only if an issue has them then | A separate *Triage* view, `no:stage`; or, if issue fields can't be filtered at all, the issue list's own search | ❓ [issue 22](https://github.com/ferrarolabs/agent-kit/issues/22) |
-| T10 | Auto-add accepts `is:issue is:open` | Save the workflow with that filter; open a throwaway issue | Drop `is:open` | ❓ owner step, [issue 20](https://github.com/ferrarolabs/agent-kit/issues/20) |
-| T11 | A column limit can be set on an issue-field column | Set 1 on `Working` | The Stalled view is the only signal | ❓ owner step, [issue 20](https://github.com/ferrarolabs/agent-kit/issues/20) |
+| T10 | Auto-add accepts `is:issue is:open` | Save the workflow with that filter; open a throwaway issue | Drop `is:open` | ❓ on the first repo project ([issue 22](https://github.com/ferrarolabs/agent-kit/issues/22)): auto-add is off on a template |
+| T11 | A column limit can be set on an issue-field column | Set 1 on `Working` | The Stalled view is the only signal | ❌ the UI refuses it, [on issue 20](https://github.com/ferrarolabs/agent-kit/issues/20#issuecomment-6781186225). No limit; the Stalled view is the signal (§5) |
 
 ---
 
@@ -242,7 +242,7 @@ No issue is edited until Elia approves this design. Then:
 
 | Issue | Change |
 |---|---|
-| [Configure the "Agent work" project template once](https://github.com/ferrarolabs/agent-kit/issues/20) | Applies §4–§7 to the template, runs T8–T11 in order, and rewrites `project-template.json` |
+| [Configure the "Agent work" project template once](https://github.com/ferrarolabs/agent-kit/issues/20) | Done: §4–§7 on the template, T8 (column field) ✅, T11 ❌ |
 | [build-project.js: create repo projects by copying the org template](https://github.com/ferrarolabs/agent-kit/issues/21) | `--check` compares views on Stage and issue fields; `statusFromLabels` goes. Runs in an Action ([Project scripts run in an Action](https://github.com/ferrarolabs/agent-kit/issues/83)) |
 | [Create the Jamly and agent-kit projects as copies](https://github.com/ferrarolabs/agent-kit/issues/22) | Each copy is private, with Elia as its only admin |
 | [Project sync](https://github.com/ferrarolabs/agent-kit/issues/66), [Detect drift](https://github.com/ferrarolabs/agent-kit/issues/67) | The spec they apply and check is §4–§7, with the column field Stage |
@@ -250,5 +250,5 @@ No issue is edited until Elia approves this design. Then:
 | [Project scripts run in an Action](https://github.com/ferrarolabs/agent-kit/issues/83) | Its token is the one in §6: Projects and Issues read and write, held only by Actions |
 | [Completeness check](https://github.com/ferrarolabs/agent-kit/issues/75) | The `no:stage` group in Needs me shows the same gap live; the check still covers the other fields |
 | [An agent starts on its own](https://github.com/ferrarolabs/agent-kit/issues/76) | Unchanged, and still bound by the threat model: the trigger checks who set `Ready` |
-| [Run 2–3 agent sessions in parallel](https://github.com/ferrarolabs/agent-kit/issues/51) | Raises the `Working` column limit |
+| [Run 2–3 agent sessions in parallel](https://github.com/ferrarolabs/agent-kit/issues/51) | Nothing: there is no column limit (T11) |
 | jamly's [board page](https://github.com/ferrarolabs/jamly/blob/dev/docs/process/42-project-board.md) | Through the jamly-first port (ADR 0014): columns on Stage, both ways, *item added* off, Audit inbox on issue fields |

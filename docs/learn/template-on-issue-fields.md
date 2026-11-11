@@ -72,6 +72,9 @@ It is a text check, not a proof. But it turns "someone added an item write" from
   - the fix takes `Type` out of the spec's views and makes it a manual column.
 
   A fake is only as good as what you know about the real thing; the live run is where the unknowns show up.
+- In the UI, the owner found two more things no doc said:
+  - after `build`, five workflows showed a red **!**, because they pointed at Status values that no longer existed. Each had to be edited to a valid value before it could be switched;
+  - GitHub refuses a column limit on an issue-field column (T11), so the planned limit on `Working` was dropped.
 
 ## Where to look
 - `scripts/projects/project-template.json`: the spec.

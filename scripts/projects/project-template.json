@@ -23,7 +23,7 @@
       "layout": "BOARD_LAYOUT",
       "filter": "is:issue is:open",
       "fields": ["Title", "Priority", "Effort", "Review level"],
-      "manual": "Column field: Stage (test T8: drag a card and check the issue's Stage changed). Sort by Priority descending. Column limit 1 on Working (test T11). Add the Type column by hand if the UI offers it: the API exposes no Type field, so check does not verify it."
+      "manual": "Column field: Stage (test T8: drag a card and check the issue's Stage changed). Sort by Priority descending. No column limit: GitHub refuses one on an issue-field column (T11, 2026-11-11). Add the Type column by hand if the UI offers it: the API exposes no Type field, so check does not verify it."
     },
     {
       "name": "Stalled",
@@ -48,10 +48,10 @@
     }
   ],
   "workflows": [
-    "Set these after build: build replaces the Status options, and a workflow set before it loses its value (red !).",
+    "Set these after build: build replaces the Status options, and a workflow set before it shows a red ! until edited to a valid value.",
     "Item added to project → Status: OFF (through the reconciler it would overwrite Stage)",
     "Item closed → Set Status: Done (ON)",
-    "Auto-add to project: this repo, filter is:issue is:open (ON; test T10: the filter is accepted)",
+    "Auto-add to project: OFF on the template (no linked repo, and copies do not inherit it); ON in each repo project, filter is:issue is:open (test T10)",
     "Auto-add sub-issues to project (ON)",
     "Item reopened, Pull request linked to issue, Pull request merged, Code changes requested, Code review approved (OFF)",
     "Auto-archive items (OFF)",
