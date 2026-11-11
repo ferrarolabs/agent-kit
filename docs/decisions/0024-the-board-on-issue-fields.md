@@ -39,3 +39,7 @@ ADR 0007's decisions 1, 3 (the hub later), 4 (metrics order) and 5 (as amended b
   - "`Working` has a column limit of 1" is dropped. GitHub refuses a limit on an issue-field column (T11), and agents may run in parallel. The Stalled view is the signal of a stopped agent.
   - Auto-add is on in each repo project, not on the template. A template is linked to no repo, and copies don't inherit auto-add.
   - Stage as the board's column field works (T8). The drag test waits for the first repo project.
+- 2026-11-11, from the repo projects ([issue 22](https://github.com/ferrarolabs/agent-kit/issues/22)):
+  - **Access changes.** "base role No access, with Elia as its only admin" becomes: private to the org, **base role Write** for its members. Elia: "if I develop with other people, I can't be the only one moving cards". `Ready` is guarded instead by the [auto-start](https://github.com/ferrarolabs/agent-kit/issues/76), which starts an agent only on a `Ready` set by someone on an allowlist. The token still never writes `Ready`.
+  - **Auto-add becomes a stopgap.** The [periodic job](https://github.com/ferrarolabs/agent-kit/issues/78), every 10 minutes, will add missing issues to repo projects. Elia reframed it as a maintenance job with several tasks, Stage ⇄ Status being one of them.
+  - T8 (the drag), T9 and T10 passed live. `Ready` in T9 is untested: no issue had it.

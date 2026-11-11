@@ -67,6 +67,9 @@ build-project.js ┤                                                         ├
   - `check` on the template ([run 43023567604](https://github.com/ferrarolabs/agent-kit/actions/runs/43023567604)) was green on every line, including the group, sort and column field set by hand. `verticalGroupByFields` is indeed the board's column field.
   - The first copy for agent-kit ([run 43023650028](https://github.com/ferrarolabs/agent-kit/actions/runs/43023650028)) worked, and the copy was already private. Then **linking it to the repo was refused**: the project token has no permission on the repository. Linking only lists the project in the repo's Projects tab, so it is now a warning and a manual step, and the run goes on.
   - The first fix missed it: `gh` prints the GraphQL error on stdout and exits 1, so the reason is in the exception's `stdout`, not its `message`. A fake `gh` returning the same response caught it before the PR.
+  - After the fix ([run 43026506767](https://github.com/ferrarolabs/agent-kit/actions/runs/43026506767)): the rerun found project 4 and didn't copy again, added 120 issues, and `check` was green. Jamly the same ([run 43027163053](https://github.com/ferrarolabs/agent-kit/actions/runs/43027163053), project 5).
+  - **A project's search index lags.** The `check` right after adding counted 77 open issues out of 78; a second `check` a few minutes later counted 78. So a count right after a build is a lower bound, not a fact.
+  - T9 passed: the exclusion filter kept exactly the issues in `Asking`, `In validation` and the one with no Stage.
 
 ## Where to look
 - `scripts/projects/build-project.js`: the copy, private first, the view updates.
