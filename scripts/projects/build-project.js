@@ -90,6 +90,10 @@ if (!project) {
       { p: source[0].id, o: org.id, t: args.title },
     ).copyProjectV2.projectV2;
     log(`copied "${fromTemplate}" into ${project.url}`);
+    if (project.template) {
+      gql(`mutation($p:ID!){ unmarkProjectV2AsTemplate(input:{projectId:$p}){ clientMutationId } }`, { p: project.id });
+      log('unmarked the copy as a template');
+    }
   } else {
     project = gql(
       `mutation($o:ID!,$t:String!){ createProjectV2(input:{ownerId:$o,title:$t}){ projectV2{ ${PROJECT_FIELDS} } } }`,
@@ -109,13 +113,15 @@ const VIEWS_Q = `query($p:ID!){ node(id:$p){ ... on ProjectV2{ views(first:30){ 
   verticalGroupByFields(first:1){ nodes{ ... on ProjectV2FieldCommon{ name } } }
   sortByFields(first:5){ nodes{ direction field{ ... on ProjectV2FieldCommon{ name } } } } } } } } }`;
 const readFields = () => gql(FIELDS_Q, { p: P }).node.fields.nodes;
+// A node of a type the fragment doesn't cover comes back without a name: show it, don't crash.
+const nameOf = (f) => (f && f.name) || '(unreadable)';
 const readViews = () =>
   gql(VIEWS_Q, { p: P }).node.views.nodes.map((v) => ({
     id: v.id, name: v.name, layout: v.layout, filter: v.filter,
-    fields: v.fields.nodes.map((f) => f.name),
-    groupBy: v.groupByFields.nodes.map((f) => f.name),
-    columnBy: v.verticalGroupByFields.nodes.length ? v.verticalGroupByFields.nodes[0].name : null,
-    sortBy: v.sortByFields.nodes.map((s) => ({ field: s.field.name, direction: s.direction })),
+    fields: v.fields.nodes.map(nameOf),
+    groupBy: v.groupByFields.nodes.map(nameOf),
+    columnBy: v.verticalGroupByFields.nodes.length ? nameOf(v.verticalGroupByFields.nodes[0]) : null,
+    sortBy: v.sortByFields.nodes.map((s) => ({ field: nameOf(s.field), direction: s.direction })),
   }));
 
 if (!checkOnly) {
