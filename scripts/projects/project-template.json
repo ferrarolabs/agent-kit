@@ -59,11 +59,11 @@
     "Set these after build: build replaces the Status options, and a workflow set before it shows a red ! until edited to a valid value.",
     "Item added to project → Status: OFF (through the reconciler it would overwrite Stage)",
     "Item closed → Set Status: Done (ON)",
-    "Auto-add to project: OFF on the template (no linked repo, and copies do not inherit it); ON in each repo project, filter is:issue is:open (test T10)",
+    "Auto-add to project: OFF on the template (no linked repo, and copies do not inherit it); ON in each repo project, filter is:issue is:open, as a stopgap until the periodic job (issue 78) adds missing issues",
     "Auto-add sub-issues to project (ON)",
     "Item reopened, Pull request linked to issue, Pull request merged, Code changes requested, Code review approved (OFF)",
     "Auto-archive items (OFF)",
     "Auto-close issue (OFF)"
   ],
-  "access": "Settings → Manage access: base role No access; the owner is the only admin."
+  "access": "Settings → Manage access: visibility private to the org, base role Write for members. Ready is guarded by the auto-start allowlist (issue 76), not by the project's permissions."
 }
