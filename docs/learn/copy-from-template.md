@@ -63,7 +63,10 @@ build-project.js ┤                                                         ├
   - a rerun didn't copy again;
   - a title equal to the template's was refused;
   - with updates that reset group and sort, `check` failed on the updated view.
-- Live runs come in [Create the projects as copies](https://github.com/ferrarolabs/agent-kit/issues/22). The first `check` on the template also confirms that `verticalGroupByFields` is the board's column field.
+- Live, in [Create the projects as copies](https://github.com/ferrarolabs/agent-kit/issues/22):
+  - `check` on the template ([run 43023567604](https://github.com/ferrarolabs/agent-kit/actions/runs/43023567604)) was green on every line, including the group, sort and column field set by hand. `verticalGroupByFields` is indeed the board's column field.
+  - The first copy for agent-kit ([run 43023650028](https://github.com/ferrarolabs/agent-kit/actions/runs/43023650028)) worked, and the copy was already private. Then **linking it to the repo was refused**: the project token has no permission on the repository. Linking only lists the project in the repo's Projects tab, so it is now a warning and a manual step, and the run goes on.
+  - The first fix missed it: `gh` prints the GraphQL error on stdout and exits 1, so the reason is in the exception's `stdout`, not its `message`. A fake `gh` returning the same response caught it before the PR.
 
 ## Where to look
 - `scripts/projects/build-project.js`: the copy, private first, the view updates.

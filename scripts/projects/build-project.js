@@ -103,6 +103,7 @@ if (!project) {
   }
 } else log(`project ${project.url}`);
 const P = project.id;
+let manualLink = false;
 
 const FIELDS_Q = `query($p:ID!){ node(id:$p){ ... on ProjectV2{ fields(first:50){ nodes{
   ... on ProjectV2FieldCommon{ id name dataType }
@@ -132,7 +133,16 @@ if (!checkOnly) {
   if (!asTemplate) {
     const repoId = gql(`query($o:String!,$r:String!){ organization(login:$o){ repository(name:$r){ id } } }`, { o: args.owner, r: args.repo })
       .organization.repository.id;
-    gql(`mutation($p:ID!,$r:ID!){ linkProjectV2ToRepository(input:{projectId:$p,repositoryId:$r}){ clientMutationId } }`, { p: P, r: repoId });
+    // Linking only lists the project in the repo's Projects tab; views and items don't need it.
+    // A token without permission on the repo can't link (run 43023650028): say so, and go on.
+    try {
+      gql(`mutation($p:ID!,$r:ID!){ linkProjectV2ToRepository(input:{projectId:$p,repositoryId:$r}){ clientMutationId } }`, { p: P, r: repoId });
+    } catch (e) {
+      // gh prints the GraphQL error on stdout and exits 1, so the reason is in e.stdout, not e.message.
+      if (!/FORBIDDEN|not accessible/i.test(`${e.message}\n${e.stdout || ''}\n${e.stderr || ''}`)) throw e;
+      manualLink = true;
+      log(`warn could not link the project to ${args.repo}: the token has no permission on the repo. Link it by hand (listed below)`);
+    }
   }
   gql(`mutation($p:ID!,$d:String!){ updateProjectV2(input:{projectId:$p,shortDescription:$d}){ clientMutationId } }`, {
     p: P,
@@ -249,6 +259,7 @@ for (const v of views) {
 
 log('\nMANUAL, NOT SET BY THE SCRIPT:');
 if (!asTemplate) log('  - Workflow: Auto-add to project → ON, this repo, filter is:issue is:open (copies never inherit auto-add)');
+if (manualLink) log(`  - Link: in ${args.owner}/${args.repo} → Projects → Link a project → "${args.title}" (the token can't)`);
 for (const v of views) if (v.manual) log(`  - ${v.name}: ${v.manual}`);
 for (const w of spec.workflows) log(`  - Workflow: ${w}`);
 if (spec.access) log(`  - Access: ${spec.access}`);
