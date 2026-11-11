@@ -49,7 +49,7 @@ It is a text check, not a proof. But it turns "someone added an item write" from
 
 **A spec tied to its source.** Status must equal Stage's values. The test reads them from `docs/issue-structure.md`, not from a copy, so changing one side alone fails CI.
 
-**What the API can't see.** Group, sort, column field, column limits, workflows and access can't be set or read through the API. Each run ends with a `MANUAL, NOT CHECKED` list, so a green run is never read as "the board is done".
+**What the API can't see.** Group, sort, column field, column limits, workflows and access can't be set through the API. (Group, sort and column field can be *read*, which [the copy mode](copy-from-template.md) found out and now checks.) Each run ends with a `MANUAL, NOT CHECKED` list, so a green run is never read as "the board is done".
 
 ## Decisions
 - [ADR 0024](../decisions/0024-the-board-on-issue-fields.md): the board on issue fields.
