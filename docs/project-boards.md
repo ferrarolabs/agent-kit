@@ -60,6 +60,7 @@ Taken by Elia on [the issue](https://github.com/ferrarolabs/agent-kit/issues/140
 | F9 | A project holds up to 50,000 items, archived ones included | ✅ docs | Not a constraint. No auto-archive is needed |
 | F10 | A board can set a **column limit**: the count is highlighted when over it; nothing is blocked | ✅ docs for Status; ❌ live on an issue-field column (T11, 2026-11-11: the UI returns an error) | No limit on `Working`; the Stalled view is the signal (§5) |
 | F11 | Free allows **one** *auto-add to project* workflow per project. *Auto-add sub-issues* is a separate built-in workflow, not a copy of it | ✅ docs | One repo per project by auto-add. A hub needs an Action to add items (§8) |
+| F12 | A view's group, sort and column field can be **read** through the API (`groupByFields`, `sortByFields`, `verticalGroupByFields`), not set. A copy (`copyProjectV2`) keeps them, with the workflows except auto-add | ✅ schema (`c9d8b26`); ✅ docs for the copy | `check` compares them with the spec. A repo project is a copy of the template, so they are set by hand once, on the template |
 
 ---
 

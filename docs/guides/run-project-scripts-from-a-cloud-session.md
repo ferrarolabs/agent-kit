@@ -11,6 +11,7 @@
 | `repo` | e.g. `jamly`; empty | The repo in `ferrarolabs` the project belongs to. Empty means the org template (`--template`) |
 | `extra` | `true`, `false` | Also apply the repo's `.github/project-extra-views.json` |
 | `prune` | `true`, `false` | Template only, with `build`: delete the views and project-owned fields the spec doesn't name. A one-off: repo projects are never pruned, because syncing them is additive ([Project sync](https://github.com/ferrarolabs/agent-kit/issues/66)) |
+| `from_template` | `true`, `false` | Repo projects only, with `build`: if the project doesn't exist, copy the org template *Agent work* into it, so it keeps the template's group, sort, column field and workflows (all but auto-add). The template's title is fixed in the workflow |
 
 The workflow refuses anything else before it runs the script.
 
@@ -43,5 +44,5 @@ The call returns nothing on success (HTTP 204). Use `ref=main` unless you are te
 
 - **`The PROJECT_TOKEN secret is empty or missing`**: the secret isn't set. Only Elia can add it: an agent can't read or set secrets.
 - **`N difference(s) from the spec`**: real drift. The `FAIL` lines say what differs. A view or field "not in the spec" on the template goes with `build` and `prune`.
-- **The `MANUAL, NOT CHECKED` list** at the end is not a failure: it is what the API can't read or set (group, sort, column field and limits, workflows, access). A green run says nothing about it.
+- **The `MANUAL, NOT SET BY THE SCRIPT` list** at the end is not a failure: it is what the API can't set. Group, sort and the board's column field are set by hand, but the API can read them, so `check` compares them with the spec. Column limits, workflows and access it can neither set nor read: a green run says nothing about them.
 - **A GraphQL error**: usually the token lacks Projects read/write on the org.

@@ -1,5 +1,5 @@
 {
-  "$comment": "One template for every repo's GitHub Project, from docs/project-boards.md (ADR 0024). The board's columns are the Stage issue field. Status is aligned with Stage both ways by the reconciler (issue 78); no script writes it on items. Priority is the org number field 1-100 (100 = do first).",
+  "$comment": "One template for every repo's GitHub Project, from docs/project-boards.md (ADR 0024). groupBy, sortBy and columnBy are set by hand in the UI (the API cannot set them) and read back by check. The board's columns are the Stage issue field. Status is aligned with Stage both ways by the reconciler (issue 78); no script writes it on items. Priority is the org number field 1-100 (100 = do first).",
   "public": false,
   "status": [
     { "name": "Inbox", "color": "GRAY" },
@@ -16,6 +16,8 @@
       "layout": "TABLE_LAYOUT",
       "filter": "is:issue is:open -stage:Inbox,Ready,Working,Done",
       "fields": ["Title", "Stage", "Priority"],
+      "groupBy": ["Stage"],
+      "sortBy": [{ "field": "Priority", "direction": "DESC" }],
       "manual": "Group by Stage. Sort by Priority descending (100 first)."
     },
     {
@@ -23,6 +25,8 @@
       "layout": "BOARD_LAYOUT",
       "filter": "is:issue is:open",
       "fields": ["Title", "Priority", "Effort", "Review level"],
+      "columnBy": "Stage",
+      "sortBy": [{ "field": "Priority", "direction": "DESC" }],
       "manual": "Column field: Stage (test T8: drag a card and check the issue's Stage changed). Sort by Priority descending. No column limit: GitHub refuses one on an issue-field column (T11, 2026-11-11). Add the Type column by hand if the UI offers it: the API exposes no Type field, so check does not verify it."
     },
     {
@@ -30,6 +34,7 @@
       "layout": "TABLE_LAYOUT",
       "filter": "is:issue is:open stage:Working updated:<@today-1d",
       "fields": ["Title", "Stage", "Linked pull requests"],
+      "sortBy": [{ "field": "Updated", "direction": "ASC" }],
       "manual": "Sort by Updated, oldest first."
     },
     {
@@ -37,6 +42,8 @@
       "layout": "TABLE_LAYOUT",
       "filter": "is:issue is:open type:\"Epic\"",
       "fields": ["Title", "Sub-issues progress", "Target date"],
+      "groupBy": ["Milestone"],
+      "sortBy": [{ "field": "Priority", "direction": "DESC" }],
       "manual": "Group by Milestone. Sort by Priority descending."
     },
     {
@@ -44,6 +51,7 @@
       "layout": "TABLE_LAYOUT",
       "filter": "is:issue is:closed",
       "fields": ["Title", "Linked pull requests"],
+      "sortBy": [{ "field": "Updated", "direction": "DESC" }],
       "manual": "Sort by Updated, newest first. Add the Type column by hand if the UI offers it: the API exposes no Type field, so check does not verify it."
     }
   ],

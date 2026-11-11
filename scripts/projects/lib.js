@@ -18,7 +18,8 @@ function isCustomField(f, spec) {
 }
 
 // Compares the spec with a live project. `live` is plain data:
-//   { public, template, status: [{name, color}], fields: [{name, dataType}], views: [{name, layout, filter, fields: [names]}] }
+//   { public, template, status: [{name, color}], fields: [{name, dataType}],
+//     views: [{name, layout, filter, fields: [names], groupBy: [names], sortBy: [{field, direction}], columnBy: name|null}] }
 // `views` is the spec's views plus the repo's extra views. Returns [{ ok, msg }].
 function diff(spec, views, live, { asTemplate = false } = {}) {
   const out = [];
@@ -46,6 +47,16 @@ function diff(spec, views, live, { asTemplate = false } = {}) {
     add(l.filter === v.filter, `view "${v.name}" filter "${l.filter}"${l.filter === v.filter ? '' : `, spec says "${v.filter}"`}`);
     const missing = v.fields.filter((n) => !l.fields.includes(n));
     add(missing.length === 0, `view "${v.name}" fields${missing.length ? ' missing: ' + missing.join(', ') : ''}`);
+    // Set by hand in the UI, read back here: only for views whose spec declares them.
+    if (v.groupBy || v.sortBy || v.columnBy) {
+      const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+      const want = { groupBy: v.groupBy || [], sortBy: v.sortBy || [], columnBy: v.columnBy || null };
+      const have = { groupBy: l.groupBy || [], sortBy: l.sortBy || [], columnBy: l.columnBy || null };
+      const show = (x) => JSON.stringify(x);
+      add(same(want.groupBy, have.groupBy), `view "${v.name}" group by ${show(have.groupBy)}${same(want.groupBy, have.groupBy) ? '' : `, spec says ${show(want.groupBy)} (set by hand)`}`);
+      add(same(want.sortBy, have.sortBy), `view "${v.name}" sort ${show(have.sortBy)}${same(want.sortBy, have.sortBy) ? '' : `, spec says ${show(want.sortBy)} (set by hand)`}`);
+      add(want.columnBy === have.columnBy, `view "${v.name}" column field ${show(have.columnBy)}${want.columnBy === have.columnBy ? '' : `, spec says ${show(want.columnBy)} (set by hand)`}`);
+    }
   }
   const wanted = new Set(views.map((v) => v.name));
   for (const l of live.views.filter((x) => !wanted.has(x.name))) add(false, `view "${l.name}" is not in the spec (--prune removes it from the template)`);
@@ -62,4 +73,26 @@ function pruneTargets(spec, views, live) {
   };
 }
 
-module.exports = { BUILT_IN, USER_TYPES, isCustomField, diff, pruneTargets };
+// Guards on the command line, before anything touches GitHub. Returns an error message or null.
+function argError(args, spec, extraViews) {
+  const fromTemplate = typeof args['from-template'] === 'string' ? args['from-template'] : null;
+  if (args['from-template'] !== undefined && !fromTemplate) return '--from-template needs the template\'s title';
+  if (fromTemplate && args.template === true) return '--from-template is for repo projects, not with --template';
+  if (fromTemplate && !args.repo) return '--from-template needs --repo';
+  if (fromTemplate && args.title === fromTemplate) return `--title can't be the template's own title ("${fromTemplate}")`;
+  if (fromTemplate && args.check === true) return '--from-template builds; it can\'t run with --check';
+  if (args.prune === true && args.template !== true) return '--prune is for the template only: repo projects are never pruned';
+  if (args.prune === true && args.check === true) return '--prune changes the project; it can\'t run with --check';
+  const specNames = new Set(spec.views.map((v) => v.name));
+  const clash = (extraViews || []).map((v) => v.name).filter((n) => specNames.has(n));
+  if (clash.length) return `extra views can't reuse a spec view's name: ${clash.join(', ')}`;
+  return null;
+}
+
+// Does a live view need an update to match the spec? Only what the API can set: layout, filter, visible fields.
+function viewNeedsUpdate(v, live) {
+  if (!live) return true;
+  return live.layout !== v.layout || live.filter !== v.filter || v.fields.some((n) => !live.fields.includes(n));
+}
+
+module.exports = { BUILT_IN, USER_TYPES, isCustomField, diff, pruneTargets, argError, viewNeedsUpdate };

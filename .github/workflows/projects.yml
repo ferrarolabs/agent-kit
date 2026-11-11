@@ -28,6 +28,10 @@ on:
         description: "Template only, with build: delete views and project fields the spec doesn't name (one-off)"
         type: boolean
         default: false
+      from_template:
+        description: "Repo projects only, with build: copy the org template \"Agent work\" if the project doesn't exist yet"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -58,6 +62,7 @@ jobs:
           REPO: ${{ inputs.repo }}
           EXTRA: ${{ inputs.extra }}
           PRUNE: ${{ inputs.prune }}
+          FROM_TEMPLATE: ${{ inputs.from_template }}
         run: |
           if [ -z "$GH_TOKEN" ]; then
             echo "::error::The PROJECT_TOKEN secret is empty or missing. Add it in Settings > Secrets and variables > Actions (issue 83)."
@@ -80,6 +85,10 @@ jobs:
             echo "::error::prune is for the template only, with mode build: repo projects are never pruned"
             exit 1
           fi
+          if [ "$FROM_TEMPLATE" = "true" ] && { [ -z "$REPO" ] || [ "$MODE" != "build" ]; }; then
+            echo "::error::from_template needs a repo and mode build"
+            exit 1
+          fi
 
       - name: Fetch the repo's extra views
         if: inputs.extra
@@ -99,11 +108,14 @@ jobs:
           REPO: ${{ inputs.repo }}
           EXTRA: ${{ inputs.extra }}
           PRUNE: ${{ inputs.prune }}
+          FROM_TEMPLATE: ${{ inputs.from_template }}
         run: |
           set -- --owner ferrarolabs --title "$TITLE"
           if [ -n "$REPO" ]; then set -- "$@" --repo "$REPO"; else set -- "$@" --template; fi
           if [ "$EXTRA" = "true" ]; then set -- "$@" --extra "$RUNNER_TEMP/extra-views.json"; fi
           if [ "$PRUNE" = "true" ]; then set -- "$@" --prune; fi
+          # The template's title is fixed here, never an input.
+          if [ "$FROM_TEMPLATE" = "true" ]; then set -- "$@" --from-template "Agent work"; fi
           if [ "$MODE" = "check" ]; then set -- "$@" --check; fi
           echo "node scripts/projects/build-project.js $*"
           status=0
