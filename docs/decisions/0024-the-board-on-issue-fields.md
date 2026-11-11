@@ -33,3 +33,9 @@ ADR 0007's decisions 1, 3 (the hub later), 4 (metrics order) and 5 (as amended b
 - Four hypotheses (T8–T11) are checked on the live template before the repo projects are copied from it. If Stage can't be a board column (T8), Flow becomes a table grouped by Stage and nothing else changes.
 - jamly's [board page](https://github.com/ferrarolabs/jamly/blob/dev/docs/process/42-project-board.md) changes through the jamly-first port (ADR 0014).
 - A hub, when it comes, needs an Action with the same token to add items: Free allows one auto-add per project.
+
+## Later
+- 2026-11-11, from the live template ([issue 20](https://github.com/ferrarolabs/agent-kit/issues/20)):
+  - "`Working` has a column limit of 1" is dropped. GitHub refuses a limit on an issue-field column (T11), and agents may run in parallel. The Stalled view is the signal of a stopped agent.
+  - Auto-add is on in each repo project, not on the template. A template is linked to no repo, and copies don't inherit auto-add.
+  - Stage as the board's column field works (T8). The drag test waits for the first repo project.
