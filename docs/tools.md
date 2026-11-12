@@ -99,6 +99,8 @@ Elia ran `/context` on 2026-11-12, in the repo root, after the account skills an
 | `terminal` | 5 | Desktop app | Keep |
 | `ccd_*` (11 servers) | 68 | Desktop app: its own UI | Keep: the app needs them |
 
+After the merge, local `/context`: Skills 5.7k → 4.9k (−0.8k). The desktop app loads a different skill set, so most of the cut skills weren't there. Claude Docs still loaded.
+
 The local clone had no `.claude/settings.json` and a 403-token `CLAUDE.md`: it was behind `main`. A stale clone loads none of the project rules. Pull before working locally.
 
 ## Seen on the way
