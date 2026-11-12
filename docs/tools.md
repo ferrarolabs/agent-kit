@@ -78,5 +78,28 @@ Still to do:
 1. Settings → **Connettori**: turn off `Claude Docs` for Claude Code, and any travel or property connector.
 2. In one local session, run `/context` and paste it on the issue.
 
+## Local session (desktop app, Windows)
+Elia ran `/context` on 2026-11-12, in the repo root, after the account skills and connectors were cut. The session listed its servers itself. No server came from a local config: `~/.claude.json` and the repo have none.
+
+| | Local | Cloud |
+|---|---|---|
+| Total at start | 54.6k | 37.6k |
+| MCP tools, always loaded | 14.1k | 645 |
+| MCP tools, deferred | 48.9k | 1.5k |
+| MCP servers / tools | 18 / 132 | 4 / 8 |
+
+| Server | Tools | Source | Decision |
+|---|---|---|---|
+| Claude Docs (a UUID name) | 8 | claude.ai connector | **Cut on claude.ai.** Locally its name is a UUID, so the `mcp__Claude_Docs` rule doesn't match it |
+| `claude-in-chrome` | 20 | Chrome extension, bridged by the app | Off in Settings → Claude in Chrome when not used |
+| `mcp-registry` | 3 | Desktop app: connector search | Off with Settings → Funzionalità → *Ricerca connettori* |
+| `visualize` | 2 | Desktop app: inline widgets | Off with *Visualizzazioni nella chat*, if not used |
+| `Claude_Browser` | 19 | Desktop app: browser pane | Keep: previews of web work |
+| `scheduled-tasks` | 6 | Desktop app | Keep |
+| `terminal` | 5 | Desktop app | Keep |
+| `ccd_*` (11 servers) | 68 | Desktop app: its own UI | Keep: the app needs them |
+
+The local clone had no `.claude/settings.json` and a 403-token `CLAUDE.md`: it was behind `main`. A stale clone loads none of the project rules. Pull before working locally.
+
 ## Seen on the way
 This session ran on the `Default` environment, not the `Agent-kit` one. It had no `~/.claude/settings.json` and no `~/.claude/CLAUDE.md`: the account layer ([ADR 0017](decisions/0017-account-deny-floor.md)) was not installed. The project rules still held: the probe passed 19 of 19.
