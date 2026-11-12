@@ -61,12 +61,22 @@ Only the four built-in ones (`cc-plugin-agents-md`, `cc-plugin-telemetry`, `cc-p
 | `anthropic-skills:skill-creator` | account | keep | The kit will write skills (Phase 4) |
 | `session-start-hook`, `update-config`, `code-review`, `simplify`, `verify`, `debug`, `run`, `run-skill-generator`, `loop`, `batch`, `doctor`, `fewer-permission-prompts`, `claude-api`, `deep-research`, `plugin-authoring`, `workflow-authoring` | bundled | keep | Development |
 
-## What only Elia can cut
-The project cut works only in sessions that open in this repo's root ([guide](guides/open-sessions-from-the-repo-root.md)). A local session, a multi-repo cloud session, or jamly still load everything. The real cut is on claude.ai:
+## The account cut
+The project cut works only in sessions that open in this repo's root ([guide](guides/open-sessions-from-the-repo-root.md)). A local session, a multi-repo cloud session, or jamly still load everything. Account skills and connectors are claude.ai settings, and only Elia can change them.
 
-1. Settings → Capabilities: turn off the account skills marked *off* above.
-2. Settings → Connectors: turn off `Claude Docs` for Claude Code, and any travel or property connector.
-3. In one local session, run `/context` before and after, and paste both on the issue.
+Settings → Personalizzazione → **Skills** lists only the skills added to the account, each with a **⋯** menu and no toggle:
+
+| Skill | Done |
+|---|---|
+| `morning`, `import-memory`, `google-workspace` | **Deleted** by Elia, 2026-11-12 |
+| `skill-creator`, `deep-research` | Kept: useful in chats too |
+
+The other nine (`docx`, `pptx`, `xlsx`, `pdf`, `docs`, `computer-use`, `chrome-browser`, `built-in-browser`, `artifact-emulator`) are not on that page. They come with features: code execution, the Claude Docs connector, Claude in Chrome, computer use, Artifacts. Turning those off would also take them from chats, so they stay on at account level and are cut per project.
+
+Still to do:
+
+1. Settings → **Connettori**: turn off `Claude Docs` for Claude Code, and any travel or property connector.
+2. In one local session, run `/context` and paste it on the issue.
 
 ## Seen on the way
 This session ran on the `Default` environment, not the `Agent-kit` one. It had no `~/.claude/settings.json` and no `~/.claude/CLAUDE.md`: the account layer ([ADR 0017](decisions/0017-account-deny-floor.md)) was not installed. The project rules still held: the probe passed 19 of 19.

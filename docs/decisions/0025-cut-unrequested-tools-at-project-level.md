@@ -13,7 +13,7 @@ Claude Code has two project-level levers. `skillOverrides` hides a skill (`off`)
 - agent-kit's `.claude/settings.json` turns off the skills nobody asked for and denies `mcp__Claude_Docs`. The list and the reasons are in [tools.md](../tools.md).
 - Skills the host's own tools point at stay `name-only`, not `off`.
 - An agent may cut a tool at project level in a PR, with the before/after count. Adding or enabling one still goes through an issue ([Adding a tool](../guides/adding-a-tool.md)).
-- The account-level cut stays Elia's, and is the real fix.
+- The account-level cut stays Elia's. It removes only the skills added to the account; skills that come with a feature (code execution, Chrome, Artifacts) stay on there, because chats use them, and are cut per project.
 
 ## Consequences
 - An agent-kit session starts about 3,900 tokens lighter, about 10%.
