@@ -167,11 +167,6 @@ jobs:
             exit 1
           fi
 
-      - name: TEMPORARY drift by hand (validation of issue 175)
-        env:
-          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
-        run: node scripts/projects/tmp-drift.js
-
       - name: Sync the boards
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}

@@ -32,7 +32,7 @@
     {
       "name": "Stalled",
       "layout": "TABLE_LAYOUT",
-      "filter": "is:issue is:open stage:Working updated:<@today-2d",
+      "filter": "is:issue is:open stage:Working updated:<@today-1d",
       "fields": ["Title", "Stage", "Linked pull requests"],
       "sortBy": [{ "field": "Updated", "direction": "ASC" }],
       "manual": "Sort by Updated, oldest first."
