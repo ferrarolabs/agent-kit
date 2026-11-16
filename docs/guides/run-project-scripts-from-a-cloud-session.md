@@ -2,6 +2,8 @@
 
 `scripts/projects/build-project.js` talks to GraphQL. A cloud session can't: the proxy blocks GraphQL and org paths, whatever the token. It can start a workflow and read its run. So the script runs in the [Projects workflow](../../.github/workflows/projects.yml), with the `PROJECT_TOKEN` secret ([Project scripts run in an Action](https://github.com/ferrarolabs/agent-kit/issues/83)).
 
+The secret lives only in two environments ([ADR 0026](../decisions/0026-the-org-token-only-in-environments.md)). A run from `main` uses `projects` and starts at once. A run from any other branch uses `projects-branch` and **waits for Elia's approval**.
+
 ## Inputs
 
 | Input | Values | Means |
@@ -32,7 +34,7 @@ gh api -X POST repos/ferrarolabs/agent-kit/actions/workflows/projects.yml/dispat
   -f ref=main -f 'inputs[mode]=check' -f 'inputs[title]=Agent work'
 ```
 
-The call returns nothing on success (HTTP 204). Use `ref=main` unless you are testing a change to the workflow on a branch.
+The call returns nothing on success (HTTP 204). Use `ref=main` unless you are testing a change on a branch. A branch run waits for Elia's approval: batch your checks, and say on the issue that a run is waiting for him.
 
 ## Read the run
 
@@ -42,7 +44,9 @@ The call returns nothing on success (HTTP 204). Use `ref=main` unless you are te
 
 ## When it fails
 
-- **`The PROJECT_TOKEN secret is empty or missing`**: the secret isn't set. Only Elia can add it: an agent can't read or set secrets.
+- **`The PROJECT_TOKEN secret is empty or missing in the … environment`**: that environment has no secret. Only Elia can add it: an agent can't read or set secrets.
+- **The run stays `waiting`**: a branch run waits for Elia's approval in `projects-branch`. That is by design.
+- **A branch run starts without waiting**: the gate is open. Check that `projects-branch` has Elia as required reviewer and the administrators' bypass off ([ADR 0026](../decisions/0026-the-org-token-only-in-environments.md)).
 - **`N difference(s) from the spec`**: real drift. The `FAIL` lines say what differs. A view or field "not in the spec" on the template goes with `build` and `prune`.
 - **The `MANUAL, NOT SET BY THE SCRIPT` list** at the end is not a failure: it is what the API can't set. Group, sort and the board's column field are set by hand, but the API can read them, so `check` compares them with the spec. Column limits, workflows and access it can neither set nor read: a green run says nothing about them.
 - **A GraphQL error**: usually the token lacks Projects read/write on the org.
