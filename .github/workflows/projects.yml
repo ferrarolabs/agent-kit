@@ -3,19 +3,29 @@ name: Projects
 # Runs scripts/projects/build-project.js with an org token. Cloud sessions can't reach
 # GraphQL or org paths, but they can dispatch this workflow and read its run (issue 83).
 # Guide: docs/guides/run-project-scripts-from-a-cloud-session.md
+#
+# The sync (issue 175) keeps every board in scripts/projects/projects.json in line with the spec:
+# on every push to main that touches the project scripts, every night, or dispatched with mode sync.
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/projects/**"
+      - ".github/workflows/projects.yml"
+  schedule:
+    - cron: "17 3 * * *"
   workflow_dispatch:
     inputs:
       mode:
-        description: "check changes nothing; build creates what is missing"
+        description: "check changes nothing; build creates what is missing; sync runs on every registered board"
         type: choice
-        options: [check, build]
+        options: [check, build, sync]
         default: check
       title:
-        description: "Project title, e.g. Agent work or Jamly"
+        description: "Project title, e.g. Agent work or Jamly (not used by sync)"
         type: string
-        required: true
+        default: ""
       repo:
         description: "Repo in ferrarolabs the project belongs to. Empty = the org template (--template)"
         type: string
@@ -44,6 +54,8 @@ concurrency:
 jobs:
   run:
     name: build-project.js
+    # One project, by hand. Push and schedule have no inputs: they always mean sync.
+    if: github.event_name == 'workflow_dispatch' && inputs.mode != 'sync'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # The org token lives only in environment secrets (issue 173, ADR 0026).
@@ -132,3 +144,35 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
           exit "$status"
+
+  sync:
+    name: sync every board
+    if: github.event_name != 'workflow_dispatch' || inputs.mode == 'sync'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ github.ref == 'refs/heads/main' && 'projects' || 'projects-branch' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Check the token
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::The PROJECT_TOKEN secret is empty or missing in this run's environment. Only Elia can add it: Settings > Environments (issue 173)."
+            exit 1
+          fi
+
+      - name: Sync the boards
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: node scripts/projects/sync-projects.js --out "$RUNNER_TEMP/results.json"
+
+      - name: Report what needs Elia
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: node scripts/projects/report-sync.js "$RUNNER_TEMP/results.json"

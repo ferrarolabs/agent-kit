@@ -4,6 +4,7 @@
 //   node build-project.js --owner ferrarolabs --repo jamly --title Jamly --from-template "Agent work" [--extra extra-views.json]
 //   node build-project.js --owner ferrarolabs --repo jamly --title Jamly --check
 //   node build-project.js --owner ferrarolabs --template --title "Agent work" [--prune]
+//   node build-project.js --owner ferrarolabs --repo jamly --title Jamly --number 5 --sync --json out.json
 //
 // --from-template copies the org template into a new repo project, so the views
 // keep what only the UI can set (group, sort, column field) and the workflows
@@ -19,6 +20,9 @@
 // Check changes nothing: it diffs the live project against the spec, including
 // the group, sort and column field set by hand (the API can read them, not set
 // them), and runs each view's filter, so drift and broken filters show up as FAIL lines.
+// --sync is what the nightly sync runs (issue 175): find the project by --number,
+// never create it, add and fix views and fields, never delete, never add items,
+// never touch Status's options (issue 176). --json writes the results for the driver.
 // Neither ever writes a field value on an item: Status belongs to the
 // reconciler (issue 78), and only the owner sets Ready.
 // Needs `gh` with a token that has Projects read and write on the org.
@@ -26,7 +30,7 @@
 const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { diff, pruneTargets, argError, viewNeedsUpdate } = require('./lib');
+const { diff, pruneTargets, argError, viewNeedsUpdate, kindOf } = require('./lib');
 
 const args = Object.fromEntries(
   process.argv.slice(2).reduce((acc, a, i, all) => {
@@ -36,7 +40,10 @@ const args = Object.fromEntries(
 );
 const asTemplate = args.template === true;
 for (const k of asTemplate ? ['owner', 'title'] : ['owner', 'repo', 'title']) if (!args[k]) throw new Error(`missing --${k}`);
+const sync = args.sync === true;
 const checkOnly = args.check === true;
+const number = args.number === undefined ? null : Number(args.number);
+const jsonOut = typeof args.json === 'string' ? args.json : null;
 const prune = args.prune === true;
 const fromTemplate = typeof args['from-template'] === 'string' ? args['from-template'] : null;
 
@@ -61,13 +68,22 @@ function rest(p) {
 }
 const log = (...a) => console.log(...a);
 let failures = 0;
+// Every line the driver needs, with a kind: changed, ok, drift, manual (see lib.kindOf).
+const results = [];
+const changed = (msg) => { results.push({ kind: 'changed', msg }); log(msg); };
 const result = (ok, msg) => {
-  if (!ok) failures++;
+  const kind = kindOf(ok, msg);
+  results.push({ kind, msg });
+  // In sync, what only the UI can set doesn't fail the run: it is reported, not fixable.
+  if (!ok && !(sync && kind === 'manual')) failures++;
   log(`${ok ? 'ok  ' : 'FAIL'} ${msg}`);
+};
+const writeJson = (extra) => {
+  if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ title: args.title, number, results, ...extra }, null, 2));
 };
 
 // ---- owner, repo, project
-const PROJECT_FIELDS = 'id title number url template public';
+const PROJECT_FIELDS = 'id title number url template public shortDescription';
 const org = gql(`query($o:String!){ organization(login:$o){ id } }`, { o: args.owner }).organization;
 // Exact title match: the API's search is fuzzy.
 const findProject = (title) =>
@@ -75,9 +91,29 @@ const findProject = (title) =>
     o: args.owner, t: title,
   }).organization.projectsV2.nodes.filter((p) => p.title === title);
 
-const matches = findProject(args.title);
-if (matches.length > 1) throw new Error(`${matches.length} projects are titled "${args.title}": rename all but one`);
-let project = matches[0];
+let project;
+if (number !== null) {
+  // By number: a registered project is never searched by title, and never created again.
+  let found = null;
+  try {
+    found = gql(`query($o:String!,$n:Int!){ organization(login:$o){ projectV2(number:$n){ ${PROJECT_FIELDS} } } }`, { o: args.owner, n: number })
+      .organization.projectV2;
+  } catch (e) {
+    if (!/NOT_FOUND|Could not resolve/i.test(`${e.message}\n${e.stdout || ''}`)) throw e;
+  }
+  if (!found) {
+    log(`project number ${number} ("${args.title}") not found: not created again`);
+    writeJson({ missing: true });
+    process.exit(3);
+  }
+  if (found.title !== args.title) throw new Error(`project ${number} is titled "${found.title}", the registry says "${args.title}"`);
+  if (asTemplate !== found.template) throw new Error(`project ${number} is ${found.template ? '' : 'not '}a template, the registry says otherwise`);
+  project = found;
+} else {
+  const matches = findProject(args.title);
+  if (matches.length > 1) throw new Error(`${matches.length} projects are titled "${args.title}": rename all but one`);
+  project = matches[0];
+}
 if (project && !asTemplate && project.template) throw new Error(`"${args.title}" is a template, not a repo project: refusing to touch it`);
 
 if (!project) {
@@ -105,19 +141,24 @@ if (!project) {
 const P = project.id;
 let manualLink = false;
 
-const FIELDS_Q = `query($p:ID!){ node(id:$p){ ... on ProjectV2{ fields(first:50){ nodes{
+const FIELDS_Q = `query($p:ID!){ node(id:$p){ ... on ProjectV2{ fields(first:50){ totalCount nodes{
   ... on ProjectV2FieldCommon{ id name dataType }
   ... on ProjectV2SingleSelectField{ options{ id name color } } } } } } }`;
-const VIEWS_Q = `query($p:ID!){ node(id:$p){ ... on ProjectV2{ views(first:30){ nodes{ id name number layout filter
+const VIEWS_Q = `query($p:ID!){ node(id:$p){ ... on ProjectV2{ views(first:50){ totalCount nodes{ id name number layout filter
   fields(first:30){ nodes{ ... on ProjectV2FieldCommon{ name } } }
   groupByFields(first:5){ nodes{ ... on ProjectV2FieldCommon{ name } } }
   verticalGroupByFields(first:1){ nodes{ ... on ProjectV2FieldCommon{ name } } }
   sortByFields(first:5){ nodes{ direction field{ ... on ProjectV2FieldCommon{ name } } } } } } } } }`;
-const readFields = () => gql(FIELDS_Q, { p: P }).node.fields.nodes;
+// A truncated read would make build create a view or field that exists: stop instead.
+const all = (conn, what) => {
+  if (conn.totalCount > conn.nodes.length) throw new Error(`${what}: ${conn.totalCount} on the project, only ${conn.nodes.length} read`);
+  return conn.nodes;
+};
+const readFields = () => all(gql(FIELDS_Q, { p: P }).node.fields, 'fields');
 // A node of a type the fragment doesn't cover comes back without a name: show it, don't crash.
 const nameOf = (f) => (f && f.name) || '(unreadable)';
 const readViews = () =>
-  gql(VIEWS_Q, { p: P }).node.views.nodes.map((v) => ({
+  all(gql(VIEWS_Q, { p: P }).node.views, 'views').map((v) => ({
     id: v.id, name: v.name, layout: v.layout, filter: v.filter,
     fields: v.fields.nodes.map(nameOf),
     groupBy: v.groupByFields.nodes.map(nameOf),
@@ -127,10 +168,13 @@ const readViews = () =>
 
 if (!checkOnly) {
   // Private first: a copy takes the template's visibility, and nothing else should run while it is public.
-  gql(`mutation($p:ID!,$pub:Boolean!){ updateProjectV2(input:{projectId:$p,public:$pub}){ clientMutationId } }`, { p: P, pub: spec.public });
-  if (project.public !== spec.public) log(`set the project ${spec.public ? 'public' : 'private'}`);
+  if (!sync || project.public !== spec.public) {
+    gql(`mutation($p:ID!,$pub:Boolean!){ updateProjectV2(input:{projectId:$p,public:$pub}){ clientMutationId } }`, { p: P, pub: spec.public });
+    if (project.public !== spec.public) changed(`set the project ${spec.public ? 'public' : 'private'}`);
+  }
 
-  if (!asTemplate) {
+  // Linking is set-up, done once by build. The sync leaves it alone.
+  if (!asTemplate && !sync) {
     const repoId = gql(`query($o:String!,$r:String!){ organization(login:$o){ repository(name:$r){ id } } }`, { o: args.owner, r: args.repo })
       .organization.repository.id;
     // Linking only lists the project in the repo's Projects tab; views and items don't need it.
@@ -144,17 +188,18 @@ if (!checkOnly) {
       log(`warn could not link the project to ${args.repo}: the token has no permission on the repo. Link it by hand (listed below)`);
     }
   }
-  gql(`mutation($p:ID!,$d:String!){ updateProjectV2(input:{projectId:$p,shortDescription:$d}){ clientMutationId } }`, {
-    p: P,
-    d: asTemplate
-      ? 'Template for every repo: columns on the Stage issue field (ADR 0024). Built from agent-kit/scripts/projects.'
-      : `Agent work on ${args.owner}/${args.repo}. Columns on the Stage issue field (ADR 0024).`,
-  });
+  const description = asTemplate
+    ? 'Template for every repo: columns on the Stage issue field (ADR 0024). Built from agent-kit/scripts/projects.'
+    : `Agent work on ${args.owner}/${args.repo}. Columns on the Stage issue field (ADR 0024).`;
+  if (project.shortDescription !== description) {
+    gql(`mutation($p:ID!,$d:String!){ updateProjectV2(input:{projectId:$p,shortDescription:$d}){ clientMutationId } }`, { p: P, d: description });
+    if (sync) changed('set the description');
+  }
 
-  // ---- Status options
+  // ---- Status options: build only. The sync never replaces them: that wipes every card (issue 176).
   let fields = readFields();
   const status = fields.find((f) => f.name === 'Status');
-  const same = JSON.stringify(status.options.map((o) => [o.name, o.color])) === JSON.stringify(spec.status.map((s) => [s.name, s.color]));
+  const same = sync || JSON.stringify(status.options.map((o) => [o.name, o.color])) === JSON.stringify(spec.status.map((s) => [s.name, s.color]));
   if (!same) {
     gql(`mutation($f:ID!,$o:[ProjectV2SingleSelectFieldOptionInput!]){ updateProjectV2Field(input:{fieldId:$f,singleSelectOptions:$o}){ clientMutationId } }`, {
       f: status.id,
@@ -176,7 +221,7 @@ if (!checkOnly) {
       const f = orgIssueFields.find((x) => x.name === name);
       if (!f) throw new Error(`org has no issue field "${name}"`);
       gql(`mutation($p:ID!,$f:ID!){ createProjectV2IssueField(input:{projectId:$p,issueFieldId:$f}){ clientMutationId } }`, { p: P, f: f.id });
-      log(`added issue field "${name}"`);
+      changed(`added issue field "${name}"`);
     }
     fields = readFields();
   }
@@ -197,8 +242,8 @@ if (!checkOnly) {
       live = gql(`mutation($p:ID!,$n:String!,$l:ProjectV2ViewLayout!){ createProjectV2View(input:{projectId:$p,name:$n,layout:$l}){ projectV2View{ id name } } }`, {
         p: P, n: v.name, l: v.layout,
       }).createProjectV2View.projectV2View;
-      log(`created view "${v.name}"`);
-    } else log(`updated view "${v.name}"`);
+      changed(`created view "${v.name}"`);
+    } else changed(`updated view "${v.name}"`);
     gql(`mutation($v:ID!,$n:String!,$l:ProjectV2ViewLayout!,$f:String!,$ids:[ID!]){ updateProjectV2View(input:{viewId:$v,name:$n,layout:$l,filter:$f,configuration:{visibleFieldIds:$ids}}){ clientMutationId } }`, {
       v: live.id, n: v.name, l: v.layout, f: v.filter, ids,
     });
@@ -218,7 +263,7 @@ if (!checkOnly) {
   }
 
   // ---- items (repo projects): open issues, plus those closed in the last 30 days, every page. No field values are written.
-  if (!asTemplate) {
+  if (!asTemplate && !sync) {
     const since = new Date(Date.now() - 30 * 864e5).toISOString();
     const issues = rest(`repos/${args.owner}/${args.repo}/issues?state=all&since=${since}&per_page=100`).filter(
       (i) => !i.pull_request && (i.state === 'open' || new Date(i.closed_at) > new Date(since)),
@@ -265,4 +310,5 @@ for (const w of spec.workflows) log(`  - Workflow: ${w}`);
 if (spec.access) log(`  - Access: ${spec.access}`);
 log(`  Open: ${project.url}`);
 log(failures ? `\n${failures} difference(s) from the spec` : '\nproject matches the spec');
+writeJson({ missing: false, url: project.url });
 process.exit(failures ? 1 : 0);

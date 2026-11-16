@@ -19,7 +19,9 @@ test('no script writes a field value on an item (Status is the reconciler\'s; on
   const dir = __dirname;
   for (const f of fs.readdirSync(dir).filter((n) => n.endsWith('.js') && !n.endsWith('.test.js'))) {
     const src = fs.readFileSync(path.join(dir, f), 'utf8');
-    assert.doesNotMatch(src, /updateProjectV2ItemFieldValue|clearProjectV2ItemFieldValue|issue-field-values/, `${f} writes an item field`);
+    assert.doesNotMatch(src, /updateProjectV2ItemFieldValue|clearProjectV2ItemFieldValue/, `${f} writes an item field`);
+    // report-sync.js sets Stage and Priority on the report issue it creates, and only there (sync.test.js).
+    if (f !== 'report-sync.js') assert.doesNotMatch(src, /issue-field-values/, `${f} writes an issue field`);
   }
 });
 
