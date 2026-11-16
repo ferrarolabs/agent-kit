@@ -167,6 +167,11 @@ jobs:
             exit 1
           fi
 
+      - name: TEMPORARY set up a test field and a test board (issue 176)
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: node scripts/projects/tmp/setup.js
+
       - name: Sync the boards
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
@@ -176,3 +181,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
         run: node scripts/projects/report-sync.js "$RUNNER_TEMP/results.json"
+
+      - name: TEMPORARY verify card by card (issue 176)
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: node scripts/projects/tmp/verify.js
+
+      - name: TEMPORARY delete the test board and field (issue 176)
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: node scripts/projects/tmp/cleanup.js

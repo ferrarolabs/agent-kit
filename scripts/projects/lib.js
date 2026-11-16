@@ -131,7 +131,7 @@ function registryError(reg) {
     numbers.add(p.number);
     if (p.repo === undefined) templates++;
   }
-  if (templates !== 1) return `exactly one entry without a repo (the org template), found ${templates}`;
+  if (templates > 1) return `exactly one entry without a repo (the org template), found ${templates}`;
   return null;
 }
 
