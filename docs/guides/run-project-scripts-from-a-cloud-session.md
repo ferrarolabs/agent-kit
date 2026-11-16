@@ -44,6 +44,7 @@ The call returns nothing on success (HTTP 204). Use `ref=main` unless you are te
 - The run summary has one row per board: what changed, and what only the UI can set and differs.
 - Errors, missing boards and what it could not fix go to one issue, "Project sync: action needed". It closes itself when a run is clean.
 - A new board goes into `projects.json` by PR, with its number.
+- **Stage and Status** come from `stage` in the spec ([ADR 0028](../decisions/0028-stage-and-status-from-the-spec.md)). The sync updates the org's Stage field first, keeping each option's id, then each board's Status, putting every card back. To rename a value, write the new name with `"was": "<old name>"`.
 
 ## Read the run
 

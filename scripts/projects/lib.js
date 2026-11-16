@@ -166,6 +166,7 @@ function boardOutcome(entry, json, code, stderrTail) {
     changed: pick('changed'),
     drift: pick('drift'),
     manual: pick('manual'),
+    actions: json.actions || [],
   };
 }
 
@@ -185,10 +186,12 @@ function reportLines(outcomes) {
     if (!hit.length) continue;
     lines.push(`### ${state === 'error' ? 'Errors' : state === 'missing' ? 'Missing boards' : 'Not fixed'}`, ACTIONS[state]);
     for (const o of hit) {
-      lines.push(`- **${o.title}** (project ${o.number})${state === 'error' ? `: ${String(o.error).split('\n').filter(Boolean).pop() || 'failed'}` : ''}`);
+      lines.push(`- **${o.title}**${o.number ? ` (project ${o.number})` : ""}${state === 'error' ? `: ${String(o.error).split('\n').filter(Boolean).pop() || 'failed'}` : ''}`);
       if (state === 'drift') for (const d of o.drift.slice(0, 10)) lines.push(`  - ${d}`);
     }
   }
+  const todo = outcomes.flatMap((o) => (o.actions || []).map((a) => `- **${o.title}**: ${a}`));
+  if (todo.length) lines.push('### To do by hand', 'The API can\'t do these.', ...todo.slice(0, 30));
   return lines.length ? lines : null;
 }
 
