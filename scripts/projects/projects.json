@@ -2,8 +2,24 @@
   "$comment": "Every board the nightly sync keeps in line with project-template.json (issue 175). No repo = the org template. Found by number, never by title. A new board from --from-template is added here by PR.",
   "owner": "ferrarolabs",
   "projects": [
-    { "title": "Agent work", "number": 3 },
-    { "title": "agent-kit", "number": 4, "repo": "agent-kit" },
-    { "title": "Jamly", "number": 5, "repo": "jamly" }
+    {
+      "title": "Agent work",
+      "number": 3
+    },
+    {
+      "title": "agent-kit",
+      "number": 4,
+      "repo": "agent-kit"
+    },
+    {
+      "title": "Jamly",
+      "number": 5,
+      "repo": "jamly"
+    },
+    {
+      "title": "Gone",
+      "number": 999,
+      "repo": "agent-kit"
+    }
   ]
 }
