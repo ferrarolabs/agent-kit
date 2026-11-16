@@ -10,7 +10,7 @@ Branch runs are still needed. An agent must test a change to the project scripts
 ## Decision
 - **Two environments in agent-kit**, both holding `PROJECT_TOKEN`:
   - `projects`: deployment branches limited to `main`. No approval, so the nightly and on-merge runs need no click.
-  - `projects-branch`: any branch, with Elia as required reviewer. A branch run waits until he approves it.
+  - `projects-branch`: any branch, with Elia as required reviewer. A branch run waits until he approves it. **"Allow administrators to bypass configured protection rules" is off**: agents trigger runs as Elia, an org admin, so with the bypass on the reviewer is skipped. Seen on 2026-11-16: [a branch run](https://github.com/ferrarolabs/agent-kit/actions/runs/43957878794) started without waiting, then, with the bypass off, [the next one](https://github.com/ferrarolabs/agent-kit/actions/runs/43958851799) waited for Elia.
 - `projects.yml` picks the environment from the ref: `main` gets `projects`, anything else gets `projects-branch`.
 - **No repository secret.** The old one is deleted after the switch.
 - The token is a new one, made only for the Actions (`projects-actions`). No cloud session holds it.
