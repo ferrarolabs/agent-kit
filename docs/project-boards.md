@@ -139,6 +139,8 @@ Stage says whose turn it is ([issue structure §3](issue-structure.md#stage-in-d
 | Auto-archive | **off** | 50,000 items is far away (F9), and Shipped needs the history |
 | Auto-close issue | **off** | Closing drives Status, never the other way |
 
+**The sync.** Every board is kept in line with the spec by a nightly job ([ADR 0027](decisions/0027-the-sync-is-additive.md), [guide](guides/run-project-scripts-from-a-cloud-session.md#the-sync)). It can't read or set workflows: those stay by hand.
+
 GitHub's two defaults are *closed → Done* and *merged → Done* ([S1](#11-sources)). The first is kept. The second is moot: no PR is in the project.
 
 ---

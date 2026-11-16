@@ -8,7 +8,7 @@ The secret lives only in two environments ([ADR 0026](../decisions/0026-the-org-
 
 | Input | Values | Means |
 |---|---|---|
-| `mode` | `check` (default), `build` | `check` changes nothing and exits 1 on drift. `build` creates what is missing |
+| `mode` | `check` (default), `build`, `sync` | `check` changes nothing and exits 1 on drift. `build` creates what is missing. `sync` runs on every registered board ([below](#the-sync)) |
 | `title` | e.g. `Agent work`, `Jamly` | The project's title. Letters, digits, spaces, `.`, `-`, `_` |
 | `repo` | e.g. `jamly`; empty | The repo in `ferrarolabs` the project belongs to. Empty means the org template (`--template`) |
 | `extra` | `true`, `false` | Also apply the repo's `.github/project-extra-views.json` |
@@ -35,6 +35,15 @@ gh api -X POST repos/ferrarolabs/agent-kit/actions/workflows/projects.yml/dispat
 ```
 
 The call returns nothing on success (HTTP 204). Use `ref=main` unless you are testing a change on a branch. A branch run waits for Elia's approval: batch your checks, and say on the issue that a run is waiting for him.
+
+## The sync
+
+`mode: sync` runs on every board in [`scripts/projects/projects.json`](../../scripts/projects/projects.json), with `build-project.js --sync` ([ADR 0027](../decisions/0027-the-sync-is-additive.md)). The same job runs on every push to `main` that touches the project scripts, and every night at 03:17 UTC. `title` and the other inputs are not used.
+
+- It adds and fixes views, filters and fields. It never deletes, never adds items, never touches Status's options.
+- The run summary has one row per board: what changed, and what only the UI can set and differs.
+- Errors, missing boards and what it could not fix go to one issue, "Project sync: action needed". It closes itself when a run is clean.
+- A new board goes into `projects.json` by PR, with its number.
 
 ## Read the run
 
