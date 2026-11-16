@@ -53,7 +53,7 @@ for (const entry of reg.projects) {
     if (entry.repo) {
       argv.push('--repo', entry.repo);
       const extra = extraViews(entry.repo);
-      if (extra) {
+      if (extra && extra.views.length) {
         const f = path.join(tmp, `${entry.number}-extra.json`);
         fs.writeFileSync(f, JSON.stringify(extra));
         argv.push('--extra', f);
