@@ -3,11 +3,14 @@
   "public": false,
   "stage": {
     "$comment": "The org's Stage field, and every board's Status, follow these options (issue 176, ADR 0028). Order is the column order. A rename keeps the issues' values: write the new name and \"was\": the old one.",
-    "field": "Stage test",
+    "field": "Stage",
     "options": [
-      { "name": "A", "color": "gray", "description": "" },
-      { "name": "B", "color": "blue", "description": "" },
-      { "name": "New", "color": "red", "description": "", "was": "Old" }
+      { "name": "Inbox", "color": "gray", "description": "" },
+      { "name": "Ready", "color": "blue", "description": "" },
+      { "name": "Working", "color": "yellow", "description": "" },
+      { "name": "Asking", "color": "red", "description": "" },
+      { "name": "In validation", "color": "purple", "description": "" },
+      { "name": "Done", "color": "green", "description": "" }
     ]
   },
   "issueFields": ["Stage", "Priority", "Effort", "Review level", "Target date"],
