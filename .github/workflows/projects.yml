@@ -47,8 +47,10 @@ permissions:
   contents: read
 
 # Two runs writing the same project at once would race on its views.
+# A branch run waits for Elia's approval, and a waiting run holds its group:
+# so branch runs get their own group, and never block the nightly run from main (issue 176).
 concurrency:
-  group: projects
+  group: ${{ github.ref == 'refs/heads/main' && 'projects' || 'projects-branch' }}
   cancel-in-progress: false
 
 jobs:
