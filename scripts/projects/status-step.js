@@ -76,20 +76,21 @@ function writeStatus(gql, projectId, writes) {
     if (!o) throw new Error(`Status has no option "${name}"`);
     return o.id;
   };
-  for (const batch of chunks(writes, 50)) {
+  // Small batches: 50 writes in one request timed out on GitHub's side (HTTP 504, 2026-11-17).
+  for (const batch of chunks(writes, 10)) {
     const parts = batch.map((w, i) => `w${i}: updateProjectV2ItemFieldValue(input:{projectId:$p,itemId:"${w.id}",fieldId:"${status.id}",value:{singleSelectOptionId:"${optionId(w.want)}"}}){ clientMutationId }`);
     withRetry(() => gql(`mutation($p:ID!){ ${parts.join(' ')} }`, { p: projectId }));
   }
 }
 
 // Secondary rate limits come back as errors; wait and try again, a few times.
-function withRetry(fn, tries = 4) {
+function withRetry(fn, tries = 5) {
   for (let i = 0; ; i++) {
     try {
       return fn();
     } catch (e) {
       const text = `${e.message}\n${e.stdout || ''}`;
-      if (i + 1 >= tries || !/rate limit|secondary|abuse|timeout|502|503/i.test(text)) throw e;
+      if (i + 1 >= tries || !/rate limit|secondary|abuse|timeout|50[234]/i.test(text)) throw e;
       const until = Date.now() + 2000 * 2 ** i;
       while (Date.now() < until) { /* wait: the script is synchronous on purpose */ }
     }

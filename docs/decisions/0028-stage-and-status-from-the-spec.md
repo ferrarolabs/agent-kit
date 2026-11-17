@@ -21,4 +21,4 @@ Two API facts shape it, both checked in GitHub's published API descriptions:
 ## Consequences
 - Changing Stage is a one-line PR. It reaches the org and every board in one run.
 - The sync is now a second writer of Status, next to the [reconciler](https://github.com/ferrarolabs/agent-kit/issues/78) to come. It only puts back or copies values set by people, so the `Ready` rule holds.
-- A replace costs one write per card, in batches of 50, with retries on rate limits.
+- A replace costs one write per card, in batches of 10, with retries on rate limits and timeouts. Batches of 50 timed out (HTTP 504) on agent-kit on 2026-11-17.

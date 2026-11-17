@@ -77,8 +77,8 @@ test('verify is card by card: swapped values fail even when counts match', () =>
   assert.deepStrictEqual(verifyRestore(expected, new Map([['a', 'B'], ['b', 'B']]), new Set(['a'])), [], 'a card set by someone is skipped');
 });
 
-test('chunks of 50', () => {
-  assert.deepStrictEqual(chunks(Array(120).fill(0), 50).map((c) => c.length), [50, 50, 20]);
+test('chunks', () => {
+  assert.deepStrictEqual(chunks(Array(25).fill(0), 10).map((c) => c.length), [10, 10, 5]);
 });
 
 // ---- a fake board: GraphQL and REST in memory

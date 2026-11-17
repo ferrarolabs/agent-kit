@@ -5,7 +5,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const {
-  argError, kindOf, registryError, extraViewsError, boardOutcome, MARKER, reportLines, reportAction, reportBody,
+  argError, kindOf, errorLine, registryError, extraViewsError, boardOutcome, MARKER, reportLines, reportAction, reportBody,
 } = require('./lib');
 const spec = require('./project-template.json');
 
@@ -36,6 +36,13 @@ test('sync arguments: a number is required, and nothing that deletes or creates'
   assert.match(a({ sync: true, number: '5', check: true }), /can't run with/);
   assert.match(a({ sync: true, number: '5', 'from-template': 'Agent work' }), /can't run with/);
   assert.match(a({ number: '5; rm' }), /project number/);
+});
+
+test('the error line is the error, not the Node version that ends the stack', () => {
+  const stack = 'gh: HTTP 502\ngh: HTTP 504\n/x/status-step.js:92\n   throw e;\n\nError: Command failed: gh api graphql --input -\ngh: HTTP 504\n\n    at gql (x.js:59:15)\n}\n\nNode.js v22.23.4\n';
+  assert.strictEqual(errorLine(stack), 'gh: HTTP 504');
+  assert.strictEqual(errorLine('Error: boom\n'), 'Error: boom');
+  assert.strictEqual(errorLine(''), 'failed');
 });
 
 test('a line set by hand is manual, any other difference is drift', () => {
