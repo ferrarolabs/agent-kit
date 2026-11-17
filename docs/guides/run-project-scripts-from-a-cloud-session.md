@@ -55,7 +55,7 @@ The call returns nothing on success (HTTP 204). Use `ref=main` unless you are te
 ## When it fails
 
 - **`The PROJECT_TOKEN secret is empty or missing in the … environment`**: that environment has no secret. Only Elia can add it: an agent can't read or set secrets.
-- **The run stays `waiting`**: a branch run waits for Elia's approval in `projects-branch`. That is by design.
+- **The run stays `waiting`**: a branch run waits for Elia's approval in `projects-branch`. That is by design. A waiting run holds its concurrency group, so branch runs have their own group: they never block the nightly run from `main`. Cancel a branch run nobody will approve.
 - **A branch run starts without waiting**: the gate is open. Check that `projects-branch` has Elia as required reviewer and the administrators' bypass off ([ADR 0026](../decisions/0026-the-org-token-only-in-environments.md)).
 - **`N difference(s) from the spec`**: real drift. The `FAIL` lines say what differs. A view or field "not in the spec" on the template goes with `build` and `prune`.
 - **The `MANUAL, NOT SET BY THE SCRIPT` list** at the end is not a failure: it is what the API can't set. Group, sort and the board's column field are set by hand, but the API can read them, so `check` compares them with the spec. Column limits, workflows and access it can neither set nor read: a green run says nothing about them.
