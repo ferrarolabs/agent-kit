@@ -5,12 +5,12 @@
     "$comment": "The org's Stage field, and every board's Status, follow these options (issue 176, ADR 0028). Order is the column order. A rename keeps the issues' values: write the new name and \"was\": the old one.",
     "field": "Stage",
     "options": [
-      { "name": "Inbox", "color": "gray", "description": "" },
-      { "name": "Ready", "color": "blue", "description": "" },
-      { "name": "Working", "color": "yellow", "description": "" },
-      { "name": "Asking", "color": "red", "description": "" },
-      { "name": "In validation", "color": "purple", "description": "" },
-      { "name": "Done", "color": "green", "description": "" }
+      { "name": "Inbox", "color": "gray", "description": "Written, not yet ready for an agent. The default." },
+      { "name": "Ready", "color": "blue", "description": "Spec complete. An agent may start." },
+      { "name": "Working", "color": "yellow", "description": "An agent is on it. Don't start a second one." },
+      { "name": "Asking", "color": "red", "description": "The agent asked the owner something. The last comment says what to do. No PR yet." },
+      { "name": "In validation", "color": "purple", "description": "Work done. A complete PR waits for the owner: review, try it, check it." },
+      { "name": "Done", "color": "green", "description": "Closed." }
     ]
   },
   "issueFields": ["Stage", "Priority", "Effort", "Review level", "Target date"],
