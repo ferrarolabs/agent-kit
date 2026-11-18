@@ -70,16 +70,16 @@ function rest(p) {
 }
 const log = (...a) => console.log(...a);
 let failures = 0;
-// Every line the driver needs, with a kind: changed, ok, drift, manual (see lib.kindOf).
+// Every line the driver needs, with a kind: changed, ok, drift, manual, spec (see lib.diff).
 const results = [];
 // What only Elia can do, found by this run (issue 176): reported in the sync issue.
 const actions = [];
 const changed = (msg) => { results.push({ kind: 'changed', msg }); log(msg); };
-const result = (ok, msg) => {
-  const kind = kindOf(ok, msg);
-  results.push({ kind, msg });
-  // In sync, what only the UI can set doesn't fail the run: it is reported, not fixable.
-  if (!ok && !(sync && kind === 'manual')) failures++;
+const result = (ok, msg, kindHint, todo) => {
+  const kind = kindOf(ok, kindHint);
+  results.push(todo ? { kind, msg, todo } : { kind, msg });
+  // In sync, what only the UI can set, or what the spec doesn't know yet, doesn't fail the run: it is reported.
+  if (!ok && !(sync && (kind === 'manual' || kind === 'spec'))) failures++;
   log(`${ok ? 'ok  ' : 'FAIL'} ${msg}`);
 };
 const writeJson = (extra) => {
@@ -167,7 +167,7 @@ const readFields = () => all(gql(FIELDS_Q, { p: P }).node.fields, 'fields');
 const nameOf = (f) => (f && f.name) || '(unreadable)';
 const readViews = () =>
   all(gql(VIEWS_Q, { p: P }).node.views, 'views').map((v) => ({
-    id: v.id, name: v.name, layout: v.layout, filter: v.filter,
+    id: v.id, name: v.name, number: v.number, layout: v.layout, filter: v.filter,
     fields: v.fields.nodes.map(nameOf),
     groupBy: v.groupByFields.nodes.map(nameOf),
     columnBy: v.verticalGroupByFields.nodes.length ? nameOf(v.verticalGroupByFields.nodes[0]) : null,
@@ -303,19 +303,15 @@ if (!checkOnly) {
 // ---- compare with the spec (after a build, this is its own check)
 const fresh = gql(`query($p:ID!){ node(id:$p){ ... on ProjectV2{ template public
   workflows(first:50){ totalCount nodes{ name number enabled } } } } }`, { p: P }).node;
-// TEMPORARY (issue 67, step 1): print the live workflows and what the API exposes on one.
-log('\nWORKFLOWS (live):');
-for (const w of fresh.workflows.nodes) log(`  - ${w.number} ${JSON.stringify(w.name)} enabled=${w.enabled}`);
-log(`  totalCount ${fresh.workflows.totalCount}`);
-log(`  ProjectV2Workflow fields: ${gql('{ __type(name:"ProjectV2Workflow"){ fields{ name } } }').__type.fields.map((f) => f.name).join(', ')}`);
 const live = {
   template: fresh.template,
   public: fresh.public,
   status: readFields().find((f) => f.name === 'Status').options,
   fields: readFields(),
   views: readViews(),
+  workflows: fresh.workflows,
 };
-for (const r of diff(spec, views, live, { asTemplate })) result(r.ok, r.msg);
+for (const r of diff(spec, views, live, { asTemplate })) result(r.ok, r.msg, r.kind, r.todo);
 
 // ---- run every view's filter against the live items (the API evaluates it). Issue numbers only, never field values.
 for (const v of views) {
@@ -330,10 +326,13 @@ for (const v of views) {
 }
 
 log('\nMANUAL, NOT SET BY THE SCRIPT:');
-if (!asTemplate) log('  - Workflow: Auto-add to project → ON, this repo, filter is:issue is:open (copies never inherit auto-add)');
 if (manualLink) log(`  - Link: in ${args.owner}/${args.repo} → Projects → Link a project → "${args.title}" (the token can't)`);
 for (const v of views) if (v.manual) log(`  - ${v.name}: ${v.manual}`);
-for (const w of spec.workflows) log(`  - Workflow: ${w}`);
+log(`  - Workflows, on ${project.url}/workflows. ${spec.workflowNote}`);
+for (const w of spec.workflowStates) {
+  const on = asTemplate ? w.template : w.repo;
+  log(`    - ${w.name}: ${on ? 'ON' : 'OFF'}${w.note ? `. ${w.note}` : ''}`);
+}
 if (spec.access) log(`  - Access: ${spec.access}`);
 log(`  Open: ${project.url}`);
 log(failures ? `\n${failures} difference(s) from the spec` : '\nproject matches the spec');

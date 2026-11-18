@@ -29,7 +29,7 @@ const open = JSON.parse(gh(['api', '--paginate', '--slurp', `repos/${REPO}/issue
   .flat()
   .find((i) => !i.pull_request && (i.body || '').startsWith(MARKER)) || null;
 
-const lines = reportLines(outcomes);
+const lines = reportLines(outcomes, { runUrl });
 const action = reportAction(lines, open);
 const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
 console.log(`report: ${action}${open ? ` (issue ${open.number})` : ''}`);

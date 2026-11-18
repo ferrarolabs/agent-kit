@@ -139,7 +139,7 @@ Stage says whose turn it is ([issue structure §3](issue-structure.md#stage-in-d
 | Auto-archive | **off** | 50,000 items is far away (F9), and Shipped needs the history |
 | Auto-close issue | **off** | Closing drives Status, never the other way |
 
-**The sync.** Stage's values and every board's Status come from the spec, card by card ([ADR 0028](decisions/0028-stage-and-status-from-the-spec.md)). Every board is kept in line with the spec by a nightly job ([ADR 0027](decisions/0027-the-sync-is-additive.md), [guide](guides/run-project-scripts-from-a-cloud-session.md#the-sync)). It can't read or set workflows: those stay by hand.
+**The sync.** Stage's values and every board's Status come from the spec, card by card ([ADR 0028](decisions/0028-stage-and-status-from-the-spec.md)). Every board is kept in line with the spec by a nightly job ([ADR 0027](decisions/0027-the-sync-is-additive.md), [guide](guides/run-project-scripts-from-a-cloud-session.md#the-sync)). It can't set workflows: those stay by hand. It reads whether each one is on, compares that with `workflowStates` in the spec, and reports a difference with a link to the board's workflows ([ADR 0029](decisions/0029-hand-set-drift-is-reported.md)). It can't read a workflow's target value, so a workflow retargeted to `Ready` is not seen: [Guard against a board workflow that sets Status Ready](https://github.com/ferrarolabs/agent-kit/issues/182). On also doesn't prove valid: after Status's options change, "Item closed" needs a re-save, which the sync lists.
 
 GitHub's two defaults are *closed → Done* and *merged → Done* ([S1](#11-sources)). The first is kept. The second is moot: no PR is in the project.
 
