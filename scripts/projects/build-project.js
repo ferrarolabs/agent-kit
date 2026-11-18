@@ -301,7 +301,13 @@ if (!checkOnly) {
 }
 
 // ---- compare with the spec (after a build, this is its own check)
-const fresh = gql(`query($p:ID!){ node(id:$p){ ... on ProjectV2{ template public } } }`, { p: P }).node;
+const fresh = gql(`query($p:ID!){ node(id:$p){ ... on ProjectV2{ template public
+  workflows(first:50){ totalCount nodes{ name number enabled } } } } }`, { p: P }).node;
+// TEMPORARY (issue 67, step 1): print the live workflows and what the API exposes on one.
+log('\nWORKFLOWS (live):');
+for (const w of fresh.workflows.nodes) log(`  - ${w.number} ${JSON.stringify(w.name)} enabled=${w.enabled}`);
+log(`  totalCount ${fresh.workflows.totalCount}`);
+log(`  ProjectV2Workflow fields: ${gql('{ __type(name:"ProjectV2Workflow"){ fields{ name } } }').__type.fields.map((f) => f.name).join(', ')}`);
 const live = {
   template: fresh.template,
   public: fresh.public,
