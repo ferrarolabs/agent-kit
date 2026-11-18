@@ -10,7 +10,7 @@ A board is copied from the spec once. After that, spec changes don't reach it, a
 - **It adds and fixes, never deletes.** Views, filters, visible fields and issue fields are created or corrected. Nothing is removed. Pruning stays a one-off, by hand, on the template.
 - **It never touches Status's options** and never adds items. Status is [its own piece](https://github.com/ferrarolabs/agent-kit/issues/176); items are auto-add's job, later the [reconciler](https://github.com/ferrarolabs/agent-kit/issues/78)'s.
 - **A board is found by its number, never by title, and never created again.** A board that can't be found is reported.
-- **What only the UI can set** (group, sort, column field) is shown in the run summary, not fixed and not reported.
+- **What only the UI can set** (group, sort, column field) is shown in the run summary, not fixed and not reported. *Superseded by [ADR 0029](0029-hand-set-drift-is-reported.md): it is reported, workflows included.*
 - **One report issue** says what needs Elia: errors, missing boards, differences the sync could not fix. It comments only when that list changes, and closes itself when a run finds nothing. The run goes red only on an error.
 - A repo's `.github/project-extra-views.json` is read from its default branch every night, and passes a schema before use.
 

@@ -10,7 +10,7 @@ With all three, one injected sentence in an issue can make an agent read a secre
 
 **Update it** when an environment, a credential or a network rule changes, and at the end of every phase.
 
-Checked on 2026-11-02, against agent-kit `main` at `c853da5` and jamly's `.claude/settings.json` on the same day.
+Checked on 2026-11-02, against agent-kit `main` at `c853da5` and jamly's `.claude/settings.json` on the same day. Leg 2's lines on the project sync updated 2026-11-18 ([ADR 0029](decisions/0029-hand-set-drift-is-reported.md)).
 
 ## The sessions
 
@@ -54,7 +54,8 @@ What narrows it:
 - **No agent starts on its own yet.** Every session is started by Elia. When [An agent starts on its own](https://github.com/ferrarolabs/agent-kit/issues/76) is built, the trigger must check who set Stage `Ready`.
 - **The project can't set `Ready` for someone else.** The board's columns are Stage, and a drag writes it ([ADR 0024](decisions/0024-the-board-on-issue-fields.md)). The project is private to the org, so a stranger can't drag a card; org members can (base role *Write*), so the project's permissions don't guard `Ready`. The [auto-start](https://github.com/ferrarolabs/agent-kit/issues/76) does: it starts an agent only on a `Ready` set by someone on an allowlist. Until it exists, every session is started by Elia. The project token, held only by Actions, never writes `Ready` to Stage or Status: the reconciler only copies values the owner set, and sets `Done` on close.
 - **The sync writes Status on cards** ([ADR 0028](decisions/0028-stage-and-status-from-the-spec.md)). Only values it read from the card itself or from Stage, never one of its own, so it can't put a card in `Ready` that nobody set.
-- **A repo's extra views are a nightly input.** The project sync reads `.github/project-extra-views.json` from each registered repo's default branch, with the org token. Only known keys and bounded strings pass ([ADR 0027](decisions/0027-the-sync-is-additive.md)), and the board it applies to comes from the registry, never from the file.
+- **A repo's extra views are a nightly input.** The project sync reads `.github/project-extra-views.json` from each registered repo's default branch, with the org token. Only known keys and bounded strings pass ([ADR 0027](decisions/0027-the-sync-is-additive.md)), and the board it applies to comes from the registry, never from the file. Its group, sort, column field and `manual` text are bounded too ([ADR 0029](decisions/0029-hand-set-drift-is-reported.md)).
+- **Board names reach a public issue.** The sync reports differences in its report issue, with names a board controls: views, fields, workflows. They are escaped (one line, no backticks, at most 64 characters, in a code span), so no mention, link or markup comes out, and they never decide whether a line is drift or a click. A workflow retargeted to `Ready` can't be read by the API: [Guard against a board workflow that sets Status Ready](https://github.com/ferrarolabs/agent-kit/issues/182).
 - **The agent treats fetched text as data, not instructions.** That is a rule in the session's own prompt, so it's a promise, not a boundary.
 
 What doesn't: a stranger's comment on a `Ready` issue is still read by the agent. Accepted, because the other two legs are kept thin.

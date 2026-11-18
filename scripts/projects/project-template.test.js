@@ -44,3 +44,20 @@ test('every view filters on issues: PRs carry no Stage (board design F5)', () =>
 test('the project is private (ADR 0024)', () => {
   assert.strictEqual(spec.public, false);
 });
+
+test('workflowStates: one entry per workflow, on or off for the template and for repo boards (issue 67)', () => {
+  assert.strictEqual(spec.workflows, undefined, 'the on/off values live only in workflowStates');
+  assert.strictEqual(typeof spec.workflowNote, 'string');
+  const names = spec.workflowStates.map((w) => w.name);
+  assert.strictEqual(new Set(names).size, names.length, 'names are unique');
+  for (const w of spec.workflowStates) {
+    assert.deepStrictEqual(Object.keys(w).filter((k) => !['name', 'template', 'repo', 'note'].includes(k)), [], w.name);
+    assert.strictEqual(typeof w.template, 'boolean', w.name);
+    assert.strictEqual(typeof w.repo, 'boolean', w.name);
+  }
+  // Board design §7: closed → Done on, item added → Status off, auto-add only on repo boards.
+  const by = Object.fromEntries(spec.workflowStates.map((w) => [w.name, w]));
+  assert.deepStrictEqual([by['Item closed'].template, by['Item closed'].repo], [true, true]);
+  assert.deepStrictEqual([by['Item added to project'].template, by['Item added to project'].repo], [false, false]);
+  assert.deepStrictEqual([by['Auto-add to project'].template, by['Auto-add to project'].repo], [false, true]);
+});

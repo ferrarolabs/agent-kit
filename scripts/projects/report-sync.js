@@ -11,7 +11,7 @@
 'use strict';
 const { execFileSync } = require('child_process');
 const fs = require('fs');
-const { MARKER, reportLines, reportAction, reportBody } = require('./lib');
+const { MARKER, reportLines, reportAction, reportBody, closedBody } = require('./lib');
 
 const REPO = 'ferrarolabs/agent-kit';
 const TITLE = 'Project sync: action needed';
@@ -29,7 +29,7 @@ const open = JSON.parse(gh(['api', '--paginate', '--slurp', `repos/${REPO}/issue
   .flat()
   .find((i) => !i.pull_request && (i.body || '').startsWith(MARKER)) || null;
 
-const lines = reportLines(outcomes);
+const lines = reportLines(outcomes, { runUrl });
 const action = reportAction(lines, open);
 const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
 console.log(`report: ${action}${open ? ` (issue ${open.number})` : ''}`);
@@ -56,7 +56,7 @@ if (action === 'create') {
   }
 } else if (action === 'close') {
   api(['-X', 'POST', `repos/${REPO}/issues/${open.number}/comments`], { body: `All clear: the last [run](${runUrl}) found nothing to report. Closing.` });
-  api(['-X', 'PATCH', `repos/${REPO}/issues/${open.number}`], { state: 'closed', state_reason: 'completed' });
+  api(['-X', 'PATCH', `repos/${REPO}/issues/${open.number}`], { state: 'closed', state_reason: 'completed', body: closedBody(runUrl, now) });
 }
 
 const errors = outcomes.filter((o) => o.state === 'error');

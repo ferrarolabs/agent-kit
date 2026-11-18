@@ -59,15 +59,15 @@
       "manual": "Sort by Updated, newest first. Add the Type column by hand if the UI offers it: the API exposes no Type field, so check does not verify it."
     }
   ],
-  "workflows": [
-    "Set these after build: build replaces the Status options, and a workflow set before it shows a red ! until edited to a valid value.",
-    "Item added to project → Status: OFF (through the reconciler it would overwrite Stage)",
-    "Item closed → Set Status: Done (ON)",
-    "Auto-add to project: OFF on the template (no linked repo, and copies do not inherit it); ON in each repo project, filter is:issue is:open, as a stopgap until the periodic job (issue 78) adds missing issues",
-    "Auto-add sub-issues to project (ON)",
-    "Item reopened, Pull request linked to issue, Pull request merged, Code changes requested, Code review approved (OFF)",
-    "Auto-archive items (OFF)",
-    "Auto-close issue (OFF)"
+  "workflowNote": "Set them after build: build replaces the Status options, and a workflow set before it shows a red ! until edited. The API reads only whether each one is on: not its target value, not auto-add's filter. It doesn't list Item reopened, Code changes requested, Code review approved or Auto-archive items: keep those OFF by hand.",
+  "workflowStates": [
+    { "name": "Item closed", "template": true, "repo": true, "note": "Set Status: Done" },
+    { "name": "Item added to project", "template": false, "repo": false, "note": "Through the reconciler it would overwrite Stage" },
+    { "name": "Auto-add to project", "template": false, "repo": true, "note": "Repo boards: this repo, filter is:issue is:open, until the periodic job (issue 78) adds missing issues. The template has none: it is linked to no repo, and copies don't inherit it" },
+    { "name": "Auto-add sub-issues to project", "template": true, "repo": true },
+    { "name": "Pull request linked to issue", "template": false, "repo": false },
+    { "name": "Pull request merged", "template": false, "repo": false },
+    { "name": "Auto-close issue", "template": false, "repo": false }
   ],
   "access": "Settings → Manage access: visibility private to the org, base role Write for members. Ready is guarded by the auto-start allowlist (issue 76), not by the project's permissions."
 }
