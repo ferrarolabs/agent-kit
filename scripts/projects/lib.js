@@ -59,14 +59,16 @@ function diff(spec, views, live, { asTemplate = false } = {}) {
       const haveV = { groupBy: l.groupBy || [], sortBy: l.sortBy || [], columnBy: l.columnBy || null };
       const show = (x) => JSON.stringify(x);
       // The todo's text comes from the spec only: never a live value, so it can be grouped across boards and is safe to print.
-      const todo = (what, text) => ({ key: `view ${v.name} ${what}`, view: v.name, viewNumber: l.number, text });
-      for (const [what, label, sentence] of [
-        ['groupBy', 'group by', groupSentence(wantV.groupBy)],
-        ['sortBy', 'sort', sortSentence(wantV.sortBy)],
-        ['columnBy', 'column field', wantV.columnBy ? `column field ${wantV.columnBy}` : 'no column field'],
+      // `now` is the board's value: board-controlled, so the report prints it only escaped.
+      const todo = (what, text, now) => ({ key: `view ${v.name} ${what}`, view: v.name, viewNumber: l.number, text, now });
+      const column = (c) => (c ? `column field ${c}` : 'no column field');
+      for (const [what, label, sentence, now] of [
+        ['groupBy', 'group by', groupSentence(wantV.groupBy), groupSentence(haveV.groupBy)],
+        ['sortBy', 'sort', sortSentence(wantV.sortBy), sortSentence(haveV.sortBy)],
+        ['columnBy', 'column field', column(wantV.columnBy), column(haveV.columnBy)],
       ]) {
         const ok = same(wantV[what], haveV[what]);
-        add(ok, `view "${v.name}" ${label} ${show(haveV[what])}${ok ? '' : `, spec says ${show(wantV[what])}`}`, 'manual', todo(what, sentence));
+        add(ok, `view "${v.name}" ${label} ${show(haveV[what])}${ok ? '' : `, spec says ${show(wantV[what])}`}`, 'manual', todo(what, sentence, now));
       }
     }
   }
@@ -88,7 +90,7 @@ function diff(spec, views, live, { asTemplate = false } = {}) {
       const on = asTemplate ? w.template : w.repo;
       const is = l ? l.enabled : false;
       add(is === on, `workflow "${w.name}" is ${l ? (is ? 'ON' : 'OFF') : 'absent'}${is === on ? '' : `, spec says ${on ? 'ON' : 'OFF'}`}`,
-        'manual', { key: `workflow ${w.name} ${on}`, workflows: true, text: `turn **${w.name}** ${on ? 'on' : 'off'}` });
+        'manual', { key: `workflow ${w.name} ${on}`, workflows: true, text: `turn **${w.name}** ${on ? 'on' : 'off'}`, now: l ? (is ? 'on' : 'off') : 'absent' });
     }
   }
 
@@ -277,12 +279,12 @@ function reportLines(outcomes, { runUrl = null } = {}) {
   const link = (o, t) => {
     if (!o.url) return o.title;
     const href = t.workflows ? `${o.url}/workflows` : t.viewNumber ? `${o.url}/views/${t.viewNumber}` : o.url;
-    return `[${o.title}](${href})`;
+    return `[${o.title}](${href})${t.now ? ` (now ${code(t.now)})` : ''}`;
   };
   const todo = [];
   for (const { todo: t, boards } of groups.values()) {
     const where = t.view ? `${code(t.view)}: ` : '';
-    todo.push(`- ${where}${t.text}. Differs on: ${boards.map((b) => link(b.o, b.t)).join(', ')}`);
+    todo.push(`- ${where}should be: ${t.text}. Differs on: ${boards.map((b) => link(b.o, b.t)).join(', ')}`);
   }
   for (const o of outcomes) for (const a of o.actions || []) todo.push(`- ${board(o)}: ${a}`);
   if (todo.length) lines.push('### To do by hand', 'The API can\'t do these. Each link opens the view, or the board\'s workflows.', ...todo);
@@ -311,6 +313,11 @@ function linesHashOf(body) {
   return m ? m[1] : null;
 }
 
+// The body once closed: nothing left to do, so no stale to-do reads as open work on a phone.
+function closedBody(runUrl, now) {
+  return [MARKER, 'All clear: the [run](' + runUrl + ') found nothing to report, so this issue is closed.', '', `Closed: ${now}.`].join('\n');
+}
+
 function reportBody(lines, runUrl, now) {
   return [
     MARKER,
@@ -325,5 +332,5 @@ function reportBody(lines, runUrl, now) {
 
 module.exports = {
   BUILT_IN, USER_TYPES, isCustomField, diff, pruneTargets, argError, viewNeedsUpdate,
-  kindOf, errorLine, code, groupSentence, sortSentence, registryError, extraViewsError, boardOutcome, MARKER, reportLines, reportAction, reportBody, hashLines,
+  kindOf, errorLine, code, groupSentence, sortSentence, registryError, extraViewsError, boardOutcome, MARKER, reportLines, reportAction, reportBody, closedBody, hashLines,
 };

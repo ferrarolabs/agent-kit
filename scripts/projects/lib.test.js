@@ -154,6 +154,7 @@ test('a sort, group or column field set by hand is manual, with what to click fr
   assert.deepStrictEqual(r.map((x) => x.kind), ['manual', 'manual', 'manual']);
   const stalled = r.find((x) => x.todo.view === 'Stalled');
   assert.strictEqual(stalled.todo.text, 'sort by Updated, ascending');
+  assert.strictEqual(stalled.todo.now, 'sort by Updated, descending');
   assert.strictEqual(stalled.todo.viewNumber, 3);
   assert.strictEqual(r.find((x) => x.todo.view === 'Needs me').todo.text, 'group by Stage');
   assert.strictEqual(r.find((x) => x.todo.view === 'Flow').todo.text, 'column field Stage');

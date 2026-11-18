@@ -11,7 +11,7 @@
 'use strict';
 const { execFileSync } = require('child_process');
 const fs = require('fs');
-const { MARKER, reportLines, reportAction, reportBody } = require('./lib');
+const { MARKER, reportLines, reportAction, reportBody, closedBody } = require('./lib');
 
 const REPO = 'ferrarolabs/agent-kit';
 const TITLE = 'Project sync: action needed';
@@ -56,7 +56,7 @@ if (action === 'create') {
   }
 } else if (action === 'close') {
   api(['-X', 'POST', `repos/${REPO}/issues/${open.number}/comments`], { body: `All clear: the last [run](${runUrl}) found nothing to report. Closing.` });
-  api(['-X', 'PATCH', `repos/${REPO}/issues/${open.number}`], { state: 'closed', state_reason: 'completed' });
+  api(['-X', 'PATCH', `repos/${REPO}/issues/${open.number}`], { state: 'closed', state_reason: 'completed', body: closedBody(runUrl, now) });
 }
 
 const errors = outcomes.filter((o) => o.state === 'error');

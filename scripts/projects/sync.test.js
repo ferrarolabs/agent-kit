@@ -5,7 +5,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const {
-  argError, errorLine, code, registryError, extraViewsError, boardOutcome, MARKER, reportLines, reportAction, reportBody,
+  argError, errorLine, code, closedBody, registryError, extraViewsError, boardOutcome, MARKER, reportLines, reportAction, reportBody,
 } = require('./lib');
 const spec = require('./project-template.json');
 
@@ -108,7 +108,7 @@ test('the report lists only what needs action: errors, missing boards, what was 
 });
 
 // Three boards, as the sync sees them. Only the ones given a todo differ.
-const sortTodo = { key: 'view Stalled sortBy', view: 'Stalled', viewNumber: 3, text: 'sort by Updated, ascending' };
+const sortTodo = { key: 'view Stalled sortBy', view: 'Stalled', viewNumber: 3, text: 'sort by Updated, ascending', now: 'sort by Updated, descending' };
 const boardsWith = (todos) => [
   { title: 'Agent work', number: 3, url: 'https://github.com/orgs/o/projects/3', state: 'ok', drift: [], todos: todos[3] || [] },
   { title: 'agent-kit', number: 4, url: 'https://github.com/orgs/o/projects/4', state: 'ok', drift: [], todos: todos[4] || [] },
@@ -120,17 +120,17 @@ test('a difference set by hand is reported, for the boards that differ only, wit
   assert.ok(lines, 'a hand-set difference is reported');
   const text = lines.join('\n');
   assert.match(text, /### To do by hand/);
-  assert.match(text, /`Stalled`: sort by Updated, ascending\. Differs on: \[Jamly\]\(https:\/\/github\.com\/orgs\/o\/projects\/5\/views\/3\)$/m);
+  assert.match(text, /^- `Stalled`: should be: sort by Updated, ascending\. Differs on: \[Jamly\]\(https:\/\/github\.com\/orgs\/o\/projects\/5\/views\/3\) \(now `sort by Updated, descending`\)$/m);
   assert.doesNotMatch(text, /Agent work|agent-kit/, 'boards that match are not listed');
 });
 
 test('the same click on several boards is one line, with a link per board', () => {
-  const wf = { key: 'workflow Item closed true', workflows: true, text: 'turn **Item closed** on' };
+  const wf = { key: 'workflow Item closed true', workflows: true, text: 'turn **Item closed** on', now: 'off' };
   const lines = reportLines(boardsWith({ 3: [sortTodo, wf], 5: [{ ...sortTodo, viewNumber: 7 }, wf] }));
   const todo = lines.filter((l) => l.startsWith('- '));
   assert.strictEqual(todo.length, 2, todo.join('\n'));
-  assert.match(todo[0], /Differs on: \[Agent work\]\(.*\/projects\/3\/views\/3\), \[Jamly\]\(.*\/projects\/5\/views\/7\)$/);
-  assert.match(todo[1], /^- turn \*\*Item closed\*\* on\. Differs on: \[Agent work\]\(.*\/projects\/3\/workflows\), \[Jamly\]\(.*\/projects\/5\/workflows\)$/);
+  assert.match(todo[0], /Differs on: \[Agent work\]\(.*\/projects\/3\/views\/3\) \(now `[^`]+`\), \[Jamly\]\(.*\/projects\/5\/views\/7\) \(now `[^`]+`\)$/);
+  assert.match(todo[1], /^- should be: turn \*\*Item closed\*\* on\. Differs on: \[Agent work\]\(.*\/projects\/3\/workflows\) \(now `off`\), \[Jamly\]\(.*\/projects\/5\/workflows\) \(now `off`\)$/);
 });
 
 test('a spec behind GitHub is its own section, with the new names escaped', () => {
@@ -149,6 +149,7 @@ test('a board-controlled name comes out on one line, without backticks, cut, in 
   o[0].state = 'drift';
   o[0].drift = ['view "`](http://evil)\n@someone' + 'y'.repeat(500)];
   o[2].spec = [{ key: 'workflows spec', text: 't', added: ['`@x` [link](http://evil)'] }];
+  o[1].todos = [{ ...sortTodo, now: 'sort by `@x` [link](http://evil)' }];
   const text = reportLines(o).join('\n');
   for (const l of text.split('\n').filter((x) => /evil|@/.test(x))) {
     const spans = l.match(/`[^`]*`/g) || [];
@@ -202,4 +203,13 @@ test('the sync never replaces Status options, never adds items, never creates a 
   const driver = fs.readFileSync(path.join(__dirname, 'sync-projects.js'), 'utf8');
   assert.doesNotMatch(driver, /--prune|--from-template|--check/);
   assert.match(driver, /'--sync'/);
+});
+
+test('a closed report keeps no stale to-do in its body', () => {
+  const body = closedBody('https://run/9', '2026-11-18T20:40:59Z');
+  assert.ok(body.startsWith(MARKER), 'still found by its marker');
+  assert.doesNotMatch(body, /To do by hand|Differs on|<!-- lines:/);
+  assert.match(body, /All clear: the \[run\]\(https:\/\/run\/9\)/);
+  const src = fs.readFileSync(path.join(__dirname, 'report-sync.js'), 'utf8');
+  assert.match(src, /state: 'closed', state_reason: 'completed', body: closedBody\(runUrl, now\)/, 'the close replaces the body');
 });
