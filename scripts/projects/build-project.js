@@ -31,6 +31,8 @@ const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { diff, pruneTargets, argError, viewNeedsUpdate, kindOf } = require('./lib');
+const { syncStatus } = require('./status-step');
+const { statusTarget } = require('./status-plan');
 
 const args = Object.fromEntries(
   process.argv.slice(2).reduce((acc, a, i, all) => {
@@ -70,6 +72,8 @@ const log = (...a) => console.log(...a);
 let failures = 0;
 // Every line the driver needs, with a kind: changed, ok, drift, manual (see lib.kindOf).
 const results = [];
+// What only Elia can do, found by this run (issue 176): reported in the sync issue.
+const actions = [];
 const changed = (msg) => { results.push({ kind: 'changed', msg }); log(msg); };
 const result = (ok, msg) => {
   const kind = kindOf(ok, msg);
@@ -79,12 +83,16 @@ const result = (ok, msg) => {
   log(`${ok ? 'ok  ' : 'FAIL'} ${msg}`);
 };
 const writeJson = (extra) => {
-  if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ title: args.title, number, results, ...extra }, null, 2));
+  if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ title: args.title, number, results, actions, ...extra }, null, 2));
 };
 
 // ---- owner, repo, project
 const PROJECT_FIELDS = 'id title number url template public shortDescription';
 const org = gql(`query($o:String!){ organization(login:$o){ id } }`, { o: args.owner }).organization;
+// Status's options are Stage's (issue 176): names, colours and order come from the org's field.
+const stageField = rest(`orgs/${args.owner}/issue-fields`).find((f) => f.name === spec.stage.field);
+if (!stageField) throw new Error(`the org has no issue field "${spec.stage.field}"`);
+spec.status = statusTarget(stageField.options || []);
 // Exact title match: the API's search is fuzzy.
 const findProject = (title) =>
   gql(`query($o:String!,$t:String!){ organization(login:$o){ projectsV2(first:20, query:$t){ nodes{ ${PROJECT_FIELDS} } } } }`, {
@@ -247,6 +255,19 @@ if (!checkOnly) {
     gql(`mutation($v:ID!,$n:String!,$l:ProjectV2ViewLayout!,$f:String!,$ids:[ID!]){ updateProjectV2View(input:{viewId:$v,name:$n,layout:$l,filter:$f,configuration:{visibleFieldIds:$ids}}){ clientMutationId } }`, {
       v: live.id, n: v.name, l: v.layout, f: v.filter, ids,
     });
+  }
+
+  // ---- Status follows Stage, card by card (issue 176). Sync only; build sets the options above.
+  if (sync) {
+    const snap = jsonOut ? jsonOut.replace(/\.json$/, '') + '-snapshot.json' : null;
+    const r = syncStatus({
+      gql, rest: (p) => JSON.parse(execFileSync('gh', ['api', p], { encoding: 'utf8', maxBuffer: 1 << 26 })),
+      projectId: P, stageField, write: true, log: changed,
+      saveSnapshot: (items) => { if (snap) fs.writeFileSync(snap, JSON.stringify(items)); },
+    });
+    if (r.replaced) actions.push(`re-save the "Item closed" workflow on ${project.url}/workflows: Status's options changed`);
+    for (const u of r.unplaced) actions.push(`card for issue ${u.number} has no Stage, so no Status on ${project.url}`);
+    for (const m of r.mismatches) result(false, `card ${m.id}: Status "${m.got}", expected "${m.want}"`);
   }
 
   // ---- prune (template only): after the spec's views exist, so the project never has none

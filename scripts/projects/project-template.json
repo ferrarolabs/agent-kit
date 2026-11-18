@@ -1,14 +1,18 @@
 {
-  "$comment": "One template for every repo's GitHub Project, from docs/project-boards.md (ADR 0024). groupBy, sortBy and columnBy are set by hand in the UI (the API cannot set them) and read back by check. The board's columns are the Stage issue field. Status is aligned with Stage both ways by the reconciler (issue 78); no script writes it on items. Priority is the org number field 1-100 (100 = do first).",
+  "$comment": "One template for every repo's GitHub Project, from docs/project-boards.md (ADR 0024). groupBy, sortBy and columnBy are set by hand in the UI (the API cannot set them) and read back by check. The board's columns are the Stage issue field. Status's options and its value on every card follow Stage (issue 176); the sync is the one script that writes Status on items. Priority is the org number field 1-100 (100 = do first).",
   "public": false,
-  "status": [
-    { "name": "Inbox", "color": "GRAY" },
-    { "name": "Ready", "color": "BLUE" },
-    { "name": "Working", "color": "YELLOW" },
-    { "name": "Asking", "color": "RED" },
-    { "name": "In validation", "color": "PURPLE" },
-    { "name": "Done", "color": "GREEN" }
-  ],
+  "stage": {
+    "$comment": "The org's Stage field, and every board's Status, follow these options (issue 176, ADR 0028). Order is the column order. A rename keeps the issues' values: write the new name and \"was\": the old one.",
+    "field": "Stage",
+    "options": [
+      { "name": "Inbox", "color": "gray", "description": "Written, not yet ready for an agent. The default." },
+      { "name": "Ready", "color": "blue", "description": "Spec complete. An agent may start." },
+      { "name": "Working", "color": "yellow", "description": "An agent is on it. Don't start a second one." },
+      { "name": "Asking", "color": "red", "description": "The agent asked the owner something. The last comment says what to do. No PR yet." },
+      { "name": "In validation", "color": "purple", "description": "Work done. A complete PR waits for the owner: review, try it, check it." },
+      { "name": "Done", "color": "green", "description": "Closed." }
+    ]
+  },
   "issueFields": ["Stage", "Priority", "Effort", "Review level", "Target date"],
   "views": [
     {

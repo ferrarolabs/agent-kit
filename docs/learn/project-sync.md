@@ -28,6 +28,10 @@ projects.json ──▶ sync-projects.js ──for each board──▶ build-pro
 
 **Identity by number, not by name.** A title can be renamed or duplicated. A number can't. Finding a board by number means a rename never makes the job create an empty copy.
 
+**Snapshot and restore.** Some changes can't be made in place: replacing a board's Status options wipes every card. So the job first saves where every card is, then changes the options, then puts each card back and checks them one by one. A crash in the middle is safe because every run also fills any card left empty.
+
+**Keep the identity, change the label.** The org's Stage field can be renamed in place: each option keeps its id, so issues follow the new name. Sending the old id is what makes a rename a rename and not a delete plus an add.
+
 **Quiet alerts.** A red run every night for a known problem trains you to ignore red. One issue that comments only when something changes, and closes itself, keeps the signal clear.
 
 ## Where to read the code

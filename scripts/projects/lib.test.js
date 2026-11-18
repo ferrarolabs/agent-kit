@@ -2,7 +2,10 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const { diff, pruneTargets, argError, viewNeedsUpdate } = require('./lib');
+const { statusTarget } = require('./status-plan');
 const spec = require('./project-template.json');
+// build-project.js derives Status from the org's Stage field; here, from the spec's options.
+spec.status = statusTarget(spec.stage.options.map((o, i) => ({ ...o, priority: i + 1 })));
 
 // A live project that matches the spec exactly. Each test breaks one thing.
 function matching() {

@@ -166,7 +166,15 @@ function boardOutcome(entry, json, code, stderrTail) {
     changed: pick('changed'),
     drift: pick('drift'),
     manual: pick('manual'),
+    actions: json.actions || [],
   };
+}
+
+// The line of a stack that says what went wrong: the error itself, not Node's version at the end.
+function errorLine(text) {
+  const lines = String(text || '').split('\n').map((l) => l.trim()).filter(Boolean);
+  const hit = lines.filter((l) => /^(\w*Error\b|gh: )/.test(l)).pop();
+  return hit || lines.pop() || 'failed';
 }
 
 const MARKER = '<!-- project-sync-report -->';
@@ -185,10 +193,12 @@ function reportLines(outcomes) {
     if (!hit.length) continue;
     lines.push(`### ${state === 'error' ? 'Errors' : state === 'missing' ? 'Missing boards' : 'Not fixed'}`, ACTIONS[state]);
     for (const o of hit) {
-      lines.push(`- **${o.title}** (project ${o.number})${state === 'error' ? `: ${String(o.error).split('\n').filter(Boolean).pop() || 'failed'}` : ''}`);
+      lines.push(`- **${o.title}**${o.number ? ` (project ${o.number})` : ""}${state === 'error' ? `: ${errorLine(o.error)}` : ''}`);
       if (state === 'drift') for (const d of o.drift.slice(0, 10)) lines.push(`  - ${d}`);
     }
   }
+  const todo = outcomes.flatMap((o) => (o.actions || []).map((a) => `- **${o.title}**: ${a}`));
+  if (todo.length) lines.push('### To do by hand', 'The API can\'t do these.', ...todo.slice(0, 30));
   return lines.length ? lines : null;
 }
 
@@ -222,5 +232,5 @@ function reportBody(lines, runUrl, now) {
 
 module.exports = {
   BUILT_IN, USER_TYPES, isCustomField, diff, pruneTargets, argError, viewNeedsUpdate,
-  kindOf, registryError, extraViewsError, boardOutcome, MARKER, reportLines, reportAction, reportBody, hashLines,
+  kindOf, errorLine, registryError, extraViewsError, boardOutcome, MARKER, reportLines, reportAction, reportBody, hashLines,
 };
