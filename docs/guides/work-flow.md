@@ -6,7 +6,7 @@ How an idea in the owner's head becomes an issue, a plan, code and a PR the owne
 
 ```text
  OWNER                          AGENT
- idea ──▶ spec skill: questions, one at a time ──▶ issue body (goal, FR, NFR, Done when)
+ idea ──▶ writing-issues: type, questions one at a time, cold read ──▶ issue body of that type
  Stage: Ready ─────────────────▶ draft plan
                                  refuters in parallel, one per area ──▶ final plan
                                  review level: green / yellow / red
@@ -24,28 +24,25 @@ The owner acts four times: describe the idea and answer the questions, mark it r
 
 ## 2. Step by step
 
-### 2.1 Idea → issue: the spec skill
-The owner calls the spec skill and describes the idea roughly. It will have gaps and cases not thought of. That is expected.
+### 2.1 Idea → issue: the writing-issues skill
+Every issue is written with the [writing-issues skill](../../.claude/skills/writing-issues/SKILL.md) ([ADR 0030](../decisions/0030-every-issue-is-written-with-one-procedure.md)). Nobody calls it by name: it loads whenever an issue is created, rewritten or split. That covers an owner describing a rough idea and an agent opening a follow-up on its own.
 
-The agent then asks questions, **one at a time**, until nothing material is open. They have two goals:
+The idea will have gaps and cases not thought of. That is expected. The skill's questions have two goals:
 
-1. **Take the idea apart.** Most features users ask for are not the ones they need. Ask about the problem behind the request, who has it, what happens today without the feature, what would make it not worth building. Questions may be uncomfortable; that is their job.
+1. **Take the idea apart.** Most features users ask for are not the ones they need. Ask about the problem behind the request, who has it, what happens today without it, what would make it not worth building. Questions may be uncomfortable; that is their job.
 2. **Leave no room for interpretation.** Every case the agent would otherwise guess is asked instead: edge cases, errors, who sees what, what is out.
 
-The output is the **issue body**, and everything below lives in it:
+In seven steps:
 
-| Section | What it says | Rule |
-|---|---|---|
-| **Problem** | What hurts today, for whom. No solution here | Separate from the goal, so the goal can be challenged |
-| **Goal** | The outcome the agent must reach | One paragraph. A reader, human or agent, knows at once what is asked |
-| **Functional requirements** | What it must do | Each one testable, written as *Given / When / Then*, each with how it is verified |
-| **Non-functional requirements** | How well: performance, security, accessibility, cost | Each one measurable: a number, not "fast" |
-| **Out of scope** | What it will not do | Explicit, so nobody adds it |
-| **Done when** | Anything not already covered by the requirements: tests passing, a configuration in place, a dependency unblocked | Each line checkable |
+1. **Read first.** Never ask what the repo answers. Start from `CLAUDE.md` and read at most 10 files.
+2. **Pick the type**: Feature, Bug, Task, Decision or Epic ([issue structure §2](../issue-structure.md#2-issue-types)). The type decides the questions and the body.
+3. **Find the real need**, with that type's questions. Ask about past events, not hypotheticals (*The Mom Test*). Separate the solution asked for from the problem behind it. For a Feature or an Epic, write the job story: *When … I want … so I can …*. Free text, one question per message.
+4. **Close every gap**, one multiple-choice question at a time, the recommended option first. The owner can say **enough**: what is still open is settled by the recommendation and marked as an assumption.
+5. **Write the body** from the type's template ([the body of each type](../issue-structure.md#the-body-of-each-type)): self-contained, *Given / When / Then* with *Verified by*, numbers instead of adjectives.
+6. **Cold read.** The `cold-reader` agent reads **only the body**. It lists what it would build, every line it could read two ways, every requirement it can't test, and every case it would guess. Each finding becomes a question. At most two rounds.
+7. **File it**, with one OK for every write. Type, Priority ([ADR 0018](../decisions/0018-agents-set-the-priority-of-the-issues-they-open.md)) and Effort are set. Stage stays `Inbox`. Work needing more than one PR becomes an Epic ([§4](#4-epics)).
 
-Before the issue is saved, a second agent reads **only the body**, without the conversation, and lists anything it could read two ways. Each one becomes a question to the owner. This *cold read* is the test that nobody can misunderstand it.
-
-If the work needs more than one PR, the skill makes it an Epic with sub-issues ([§4](#4-epics)). The skill sets Priority ([ADR 0018](../decisions/0018-agents-set-the-priority-of-the-issues-they-open.md)) and Effort. Stage stays `Inbox`.
+**Alone**, with nobody to interview, the agent runs the same steps. It answers what the repo answers and puts the rest in **Open questions**, each with its recommended answer. The interview resumes from there the next time the owner works on the issue.
 
 After `Ready`, the body is frozen: only the owner changes it.
 
@@ -130,8 +127,8 @@ The full flow costs usage ([PLAN §9](../PLAN.md#9-cost-and-limits)). A small, s
 
 | Issue | Refuters | E2E | Questions |
 |---|---|---|---|
-| Effort `S` and Review level `green` | none: the planner reviews its own draft against the areas table | by the implementing agent, no separate agent | as many as needed |
-| Anything else | every area | a separate agent | as many as needed |
+| Effort `S` and Review level `green` | none: the planner reviews its own draft against the areas table | by the implementing agent, no separate agent | the gaps only; the real-need questions are skipped, except for a Decision |
+| Anything else | every area | a separate agent | every step of [§2.1](#21-idea--issue-the-writing-issues-skill) |
 
 The plan verdict and the PR are never skipped.
 
@@ -143,7 +140,6 @@ The flow is decided; some of its tools are not built yet. They are the sub-issue
 
 | Piece | Until it exists |
 |---|---|
-| Spec skill | The owner writes the issue from the form; the agent asks its questions on the issue before planning |
 | Refuters | The planning agent starts them itself, with the Agent tool, one per area |
 | Review-level check | The independent agent's verdict is a line in the PR description |
 | PR template | The PR follows [§2.7](#27-the-pr) |

@@ -40,6 +40,29 @@ Five types, org-wide. Three are GitHub's defaults, kept with their names. Two ar
 - **Task, not Chore or Technical story.** Same reason: it's the default. One word covers chore, docs and refactor; the title says which.
 - **Decision, not Discussion.** The deliverable is an answer recorded as an ADR, not an open conversation. Open-ended talk belongs in GitHub Discussions ([S2](#6-sources)), if it's ever needed.
 
+### The body of each type
+Every issue is written with the [writing-issues skill](../.claude/skills/writing-issues/SKILL.md) ([ADR 0030](decisions/0030-every-issue-is-written-with-one-procedure.md)). It finds the type first, then writes that type's body. The templates are in [its `templates/` folder](../.claude/skills/writing-issues/templates/). A test keeps them equal to this table (`scripts/check/issue-bodies.test.js`).
+
+| Type | Sections, in order |
+|---|---|
+| **Feature** | Problem · Goal · Context · Functional requirements · Non-functional requirements · Out of scope · Done when · Open questions |
+| **Bug** | Problem · Steps to reproduce · Expected · Actual · Impact · Context · Out of scope · Done when · Open questions |
+| **Task** | Problem · Goal · Context · Requirements · Out of scope · Done when · Open questions |
+| **Epic** | Problem · Goal · Context · Sub-issues · Out of scope · Done when · Open questions |
+| **Decision** | Question · Why now · Context · Options · Recommendation · What it blocks · Done when · Open questions |
+
+Each body ends with the Priority line ([ADR 0018](decisions/0018-agents-set-the-priority-of-the-issues-they-open.md)).
+
+- **Context** is optional. It holds the files, ADRs and issues an agent must read, the decisions already taken, and the terms the body uses.
+- **Open questions** appears only while an agent parks questions that only the owner can answer: when it opened the issue alone, or when the owner said "enough". It goes once it is empty.
+- **Problem comes before the solution in every type**, so the goal can be challenged. That is Kubernetes' "Why is this needed?" next to "What would you like to be added?" ([S11](#6-sources)).
+- **Functional requirements** are *Given / When / Then*, each with *Verified by*, numbered FR1, FR2 ([S16](#6-sources)). **Non-functional requirements** each have a number, such as a time, a size or a cost.
+- **A Bug keeps expected, actual and steps apart** ([S11](#6-sources)). It asks where the expected behaviour is written: if it is written nowhere and never worked, it is a Feature. *Impact* asks for the last version that worked ([S12](#6-sources)). The first Done when line is the regression test.
+- **A Task's requirements are checkable lines (R1, R2)**, not user scenarios, since no user sees the change.
+- **An Epic is a hub** ([S13](#6-sources)). Its sub-issues carry the work, one per PR, in "blocked by" order. It has no Effort.
+- **A Decision is a short MADR** ([S14](#6-sources)): question, options, recommendation. *Done when* is MADR's "confirmation": the ADR is written. It has no Effort.
+- **Out of scope** is the KEP's Non-goals ([S15](#6-sources)). A reframe the owner rejected goes there, with the reason.
+
 ## 3. Issue fields
 
 Org-level fields, the same in every repo. Six, against a limit of 25 ([S1](#6-sources)). Review level was added by [ADR 0023](decisions/0023-the-work-flow-from-an-idea-to-a-pr.md).
@@ -149,6 +172,12 @@ Read on 2026-11-02. GitHub's docs were read from their source, [github/docs](htt
 | S8 | Next.js: [issue forms](https://github.com/vercel/next.js/tree/canary/.github/ISSUE_TEMPLATE) | Uses org issue types from forms: `type: Bug`, `type: Documentation` |
 | S9 | GitHub Docs: [Syntax for issue forms](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms) | The `type` key sets the issue type on create |
 | S10 | VS Code: [issue templates](https://github.com/microsoft/vscode/tree/main/.github/ISSUE_TEMPLATE) and triage bot config | Still labels (`bug`, `feature-request`, `info-needed`), set by a bot. A counter-example: it predates issue types |
+| S11 | Kubernetes: [bug form](https://raw.githubusercontent.com/kubernetes/kubernetes/master/.github/ISSUE_TEMPLATE/bug-report.yaml), [enhancement form](https://raw.githubusercontent.com/kubernetes/kubernetes/master/.github/ISSUE_TEMPLATE/enhancement.yaml) (read 2026-11-19) | Happened, expected and a minimal repro as separate fields; a feature asks "Why is this needed?" |
+| S12 | Rust: [regression template](https://raw.githubusercontent.com/rust-lang/rust/HEAD/.github/ISSUE_TEMPLATE/regression.md) | The version that worked next to the broken one |
+| S13 | Rust: [tracking issue template](https://raw.githubusercontent.com/rust-lang/rust/HEAD/.github/ISSUE_TEMPLATE/tracking_issue.md) | The hub lists steps; each matter is its own issue |
+| S14 | [MADR template](https://raw.githubusercontent.com/adr/madr/develop/template/adr-template.md) | Problem, options, outcome, and "confirmation" |
+| S15 | Kubernetes: [KEP template](https://raw.githubusercontent.com/kubernetes/enhancements/master/keps/NNNN-kep-template/README.md) | Goals and explicit Non-goals |
+| S16 | GitHub: [Spec Kit spec template](https://raw.githubusercontent.com/github/spec-kit/main/templates/spec-template.md); [Gherkin reference](https://raw.githubusercontent.com/cucumber/docs/main/content/docs/gherkin/reference.md) | Numbered FRs, Given/When/Then acceptance scenarios, measurable success criteria, assumptions |
 
 ### Where the sources disagree, and what is followed
 - **Priority: bands or a number?** Every source uses bands: GitHub (Urgent…Low), Kubernetes (`critical-urgent`…`backlog`), Rust (`P-critical`…`P-low`). The kit keeps a number (ADR 0008): with 60+ issues, four bands left fifteen tied. Bands suit a team that triages weekly; one person ordering everything needs a total order.
