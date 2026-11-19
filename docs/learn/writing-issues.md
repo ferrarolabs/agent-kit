@@ -68,6 +68,8 @@ The cold reader flagged "fast" (no number, no percentile, server or browser?) an
 - **The cost.** The skill costs 231 input tokens on the first turn of every agent-kit session.
 - **The template test fails when it should.** Renaming *Functional requirements* in the Feature template turned it red.
 
+- **A cold reader with no bar is too strict to finish.** On the first real issue it wrote, [Copy the writing-issues skill to jamly](https://github.com/ferrarolabs/agent-kit/issues/185), it listed about 40 points. Most were already settled by `CLAUDE.md`. Giving it `CLAUDE.md` and a materiality bar cut that to the points that change the build. It still flagged both traps in the seeded body.
+
 ## Where to look
 - `.claude/skills/writing-issues/SKILL.md`: the seven steps.
 - `.claude/skills/writing-issues/reference.md` §1: the questions per type.

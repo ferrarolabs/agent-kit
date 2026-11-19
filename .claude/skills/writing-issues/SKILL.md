@@ -44,20 +44,22 @@ What the owner asks for is often a solution. Find the problem behind it before w
 - **Ask about the past, never the hypothetical.** "When did this last happen? What did you do? What did it cost?" Never "would you use…?": everyone says yes.
 - **Ask why until the problem is one this project owns.** Then stop.
 - **Write the job story**, for a Feature or an Epic: *When [situation], I want [motivation], so I can [outcome]*. It names no solution.
-- **Ask the kill question.** "What happens if we build nothing?"
+- **Ask the kill question, as a fact.** "How have you managed without it so far?" If the answer is "fine", say so: it may not be worth building.
 - **Reframe when the evidence says so.** If the need is smaller or different, propose it. The owner chooses. A rejected reframe goes in Out of scope, with the owner's reason, so nobody proposes it again.
 
-These are **free-text questions**, one per message. Don't invent options about the owner's own past.
+These are **free-text questions**. **One question per message: one sentence, one question mark.** "When did it last happen?" and "What did it cost?" are two messages, not one. Don't invent options about the owner's own past.
 
 Skip this step for small, atomic work (a rename, a typo, one setting), except for a Decision: "does this need answering now?" is the point of one.
 
 ## 4. Close every gap
 Keep a list of open points and show it as it shrinks. For each case an agent would otherwise guess, ask: empty states, errors, limits, who sees what, what is out, how it is checked.
 
-- **One question at a time**, with the AskUserQuestion tool when it is available: 2 to 4 options, labels under 40 characters, your recommended option first, and one line on why the question matters.
+- **One question at a time**, one question mark, with the AskUserQuestion tool when it is available: 2 to 4 options, labels under 40 characters, your recommended option first, and one line on why the question matters.
 - **Stop** when the list is empty, or when the owner says **enough**. From "enough" on, settle every point still open with your recommendation, the cold read's findings included, and mark each as an assumption. Show all the assumptions in one message, for one confirmation.
+- **Never guess a figure only the owner knows**: a budget, a deadline, a price, a headcount. Ask it, even after "enough". If the owner doesn't know, it goes in Open questions.
+- **"I don't know, you pick" is an assumption**, not a fact. It keeps its `Assumption:` label in the body.
 
-**Save early.** Once the problem is agreed (after step 3), create the issue with the owner's OK, in Stage `Inbox`, and update its body after each round. A session that dies loses nothing: the next one resumes from the issue's link.
+**Save early.** Once the problem is agreed (after step 3), ask once, as its own question: "Shall I save the draft now, in `Inbox`, so nothing is lost?" On a yes, create it and update its body after each round. A session that dies loses nothing: the next one resumes from the issue's link. **Say you saved, filed or wrote something only after the tool call returned.** Before that, it is "I will".
 
 ## 5. Write the body
 Copy `templates/<type>.md` and fill it in. Keep its sections, in its order, and replace every `<!-- … -->` comment with content. Then:
@@ -72,7 +74,7 @@ Copy `templates/<type>.md` and fill it in. Keep its sections, in its order, and 
 - **Done when** holds only what the requirements don't already cover, and every line can be checked.
 
 ## 6. Cold read
-Start the `cold-reader` agent (`.claude/agents/cold-reader.md`). Give it **only the body**, pasted in the prompt: no conversation, no plan, no links to follow. If that agent isn't available, start a fresh subagent on `claude-opus-5-5` with the brief from `reference.md`, and tell it to use no tools.
+Start the `cold-reader` agent (`.claude/agents/cold-reader.md`). Give it **only the body** and, under it, the project's `CLAUDE.md` as "standing rules": the implementer has those too. No conversation, no plan, no links to follow. If that agent isn't available, start a fresh subagent on `claude-opus-5-5` with the brief from `reference.md`, and tell it to use no tools.
 
 It returns what it would build, every line it could read two ways, every requirement it can't test, and every case missing.
 
@@ -82,6 +84,8 @@ It returns what it would build, every line it could read two ways, every require
 - At most **two** cold reads per issue.
 
 ## 7. File it
+Write the full body first, then summarize **that** body. Nothing is added after the owner's OK: a change after it is shown again. Every line you settled without the owner is marked `Assumption:`.
+
 Before writing to GitHub, show the owner **one summary** of every write: the type, the Goal, the requirement titles, the assumptions, the split into sub-issues, and the Priority with its reason. One OK covers it all. Alone, nobody approves, so write only issues and fields; never close, relabel or reopen anything else.
 
 - **Type**: the issue type from step 2.
