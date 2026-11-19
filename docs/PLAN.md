@@ -111,7 +111,7 @@ idea → [spec writer ⇄ me] → issue → [planner ⇄ refuters] → plan + re
 [explainer] → docs/learn
 ```
 
-I step in at three points: **I answer the spec writer's questions**, **I approve the plan** and **I merge**, reading as much as the review level says. Everything else runs on its own. Changes to the plan and blockers are comments on the issue; a PR arrives only when the work is complete (ADR 0023). The whole flow is in [guides/work-flow.md](guides/work-flow.md).
+I step in at three points: **I answer the spec writer's questions**, **I approve the plan** and **I merge**, reading as much as the review level says. Everything else runs on its own. Changes to the plan and blockers are comments on the issue; a PR arrives only when the work is complete (ADR 0023). A small issue judged trivial by one reviewer agent needs no plan approval (ADR 0031). The whole flow is in [guides/work-flow.md](guides/work-flow.md).
 
 ## 6. Long autonomy and resuming after limits
 

@@ -127,10 +127,11 @@ The full flow costs usage ([PLAN §9](../PLAN.md#9-cost-and-limits)). A small, s
 
 | Issue | Refuters | E2E | Questions |
 |---|---|---|---|
+| Effort `S` and judged trivial by one reviewer ([ADR 0031](../decisions/0031-trivial-small-issues-need-no-plan-verdict.md)) | none, and **no plan verdict**: the plan is posted as a record and the agent implements. The reviewer sets the Review level; nobody re-checks it | by the implementing agent, no separate agent | the gaps only; the real-need questions are skipped, except for a Decision |
 | Effort `S` and Review level `green` | none: the planner reviews its own draft against the areas table | by the implementing agent, no separate agent | the gaps only; the real-need questions are skipped, except for a Decision |
 | Anything else | every area | a separate agent | every step of [§2.1](#21-idea--issue-the-writing-issues-skill) |
 
-The plan verdict and the PR are never skipped.
+The PR is never skipped. The plan verdict is skipped only for a trivial `S` issue, the first row. **Trivial** means the body already says exactly what to do, with no choice left to make. One agent on a clean context judges it from the body and the repo's `CLAUDE.md`. If the work then needs a choice the body doesn't settle, the agent goes back to the full flow: plan comment, `Asking`.
 
 ## 4. Epics
 An issue becomes an Epic when it needs more than one PR, or its Effort would be `L` ([issue structure §3](../issue-structure.md#effort-in-detail)). Each sub-issue goes through the whole flow on its own. Order between them is "blocked by" ([issue structure §1](../issue-structure.md#1-rules-of-thumb)).
