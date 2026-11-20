@@ -114,6 +114,22 @@ test('a project copy without the guide still checks its agents', () => {
   fs.rmSync(root, { recursive: true });
 });
 
+test('a refuter in template/ is held to the refuter rules too', () => {
+  const os = require('node:os');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agents-'));
+  const dir = path.join(root, 'template', '.claude', 'agents');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.copyFileSync(path.join(ROOT, '.claude', 'agents', 'refuter-tests.md'), path.join(dir, 'refuter-tests.md'));
+  assert.deepEqual(check(root), []);
+  const text = fs.readFileSync(path.join(dir, 'refuter-tests.md'), 'utf8');
+  fs.writeFileSync(path.join(dir, 'refuter-tests.md'), text.replace('tools: Read, Grep, Glob', 'tools: Read, Bash'));
+  fs.writeFileSync(path.join(dir, 'refuter-x.md'), text.replace('name: refuter-tests', 'name: refuter-x').replace('Stay in your area.', 'Stay anywhere.'));
+  const out = check(root).join('\n');
+  assert.match(out, /template\/\.claude\/agents\/refuter-tests\.md: tool "Bash" is not allowed/);
+  assert.match(out, /refuter-x\.md: shared block differs/);
+  fs.rmSync(root, { recursive: true });
+});
+
 test('the guide parser reads only the §2.2 table', () => {
   const text = '### 2.2 Ready\n| Area | Agent | Looks for |\n|---|---|---|\n| Tests | `refuter-tests` | x |\n\n### 2.3 Next\n| Other | `refuter-other` | y |\n';
   assert.deepEqual(agentsFromGuide(text), ['refuter-tests']);

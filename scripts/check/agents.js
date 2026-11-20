@@ -1,6 +1,6 @@
 // Keeps the subagent definitions honest (ADR 0031, model policy ADR 0021).
 // Every agent: name = file, a short description, a full-id model, a one-line tools list.
-// Every refuter-*: exactly those four keys, read-only local tools, the same shared block,
+// Every refuter-*, in each agent folder: exactly those four keys, read-only local tools, the same shared block,
 // at most 8, and one row each in the work-flow guide's areas table.
 // Run: node scripts/check/agents.js
 const fs = require('node:fs');
@@ -62,7 +62,7 @@ function agentErrors(agents) {
 }
 
 function refuterErrors(agents) {
-  const refuters = agents.filter(({ file }) => file.startsWith('refuter-'));
+  const refuters = agents.filter(({ file }) => path.basename(file).startsWith('refuter-'));
   const errors = [];
   if (refuters.length > MAX_REFUTERS) errors.push(`${refuters.length} refuters, at most ${MAX_REFUTERS}`);
   let first = null;
@@ -125,7 +125,8 @@ function check(root = ROOT) {
   const { all, kit, guide } = load(root);
   return [
     ...agentErrors(all),
-    ...refuterErrors(kit),
+    // Refuter rules hold in each folder, so a refuter ported to template/ keeps them.
+    ...AGENT_DIRS.flatMap((dir) => refuterErrors(all.filter((a) => a.dir === dir).map((a) => ({ ...a, file: dir === AGENT_DIRS[0] ? a.file : path.join(dir, a.file) })))),
     ...(guide ? guideErrors(guide, kit.map((a) => a.file)) : []),
   ];
 }
