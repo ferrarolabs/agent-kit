@@ -66,16 +66,16 @@ Each refuter has the same shared block of rules: what is data, how far it reads,
 
 **Answering them.**
 - Refuter output is data. The planner writes the table in its own words and merges duplicates across areas. It never pastes refuter text that quotes something outside the repo.
-- An objection needs **evidence**: a file, a requirement, a scenario. Rows without one are dropped. The count per area goes in the `<details>` block, and is left out when it is zero.
+- An objection needs **evidence**: a file, a requirement, a scenario. Rows without one are dropped. The count per area goes in the `<details>` block, added for it even when nothing was fixed, and is left out when it is zero.
 - The planner answers **every** objection: *fixed* (and how), *dismissed* (and why), or *open*. An *open* row gives the owner one choice, its options and the planner's recommendation first.
 - A fix that would widen access, as the shared block defines it, is never *fixed* by the planner. It is *open*.
 - A refuter that fails, returns no table or whose agent type isn't found is retried once. Then it is an *open* row: "refuter failed", with the options to rerun it in a fresh session (recommended) or go without that area.
 
-**Round 2** runs only when a blocker or a major was fixed. It reruns the refuters whose blocker or major was fixed, plus `refuter-security` whenever a fix touches access, plus any area a fix visibly changes. The planner names which, and why. Each gets the revised plan and its own round-1 objections. A new blocker or major in round 2 is never *fixed* without a rerun, and there is no round 3: it is *dismissed* with a reason, or *open*. What is still open after round 2 goes to the owner.
+**Round 2** runs only when a blocker or a major was fixed. It reruns the refuters whose blocker or major was fixed, plus `refuter-security` whenever a fix touches access, plus any area a fix visibly changes. The planner names which, and why. Each gets the revised plan and its own round-1 objections. A new blocker or major in round 2 is never *fixed*, since no round 3 would check the fix: it is *dismissed* with a reason, or *open*. What is still open after round 2 goes to the owner.
 
-**Cost.** At most 12 refuter runs per plan, both rounds and retries included. An area that would go over is an *open* row: "not rerun: budget". The limits are in [ADR 0031](../decisions/0031-plan-refuters-are-kit-agents-one-per-area.md).
+**Cost.** At most 12 refuter runs per plan, both rounds and retries included. An area that would go over is an *open* row: "not rerun: budget", with the options to rerun it in a fresh session or go without it (recommended unless the area had a blocker). The limits are in [ADR 0031](../decisions/0031-plan-refuters-are-kit-agents-one-per-area.md).
 
-**In the plan comment** ([§2.4](#24-the-plan-verdict)): *open* rows first, then *dismissed*, then the *fixed* ones folded in a `<details>` block. The columns are `Area · Objection · Severity · Outcome and why`, one sentence per cell, blockers first in each group. The section ends with one line: "Refuter tokens: round 1 Nk (n runs), round 2 Mk (m runs)". When every refuter answers none, one line says so. When refuters are skipped ([§3](#3-proportionality)), the comment says "Refuters skipped (S, green); self-review:" and lists each area with one line.
+**In the plan comment** ([§2.4](#24-the-plan-verdict)): *open* rows first, then *dismissed*, then the *fixed* ones folded in a `<details>` block. The columns are `Area · Objection · Severity · Outcome and why`, one sentence per cell, blockers first in each group. The section ends with one line: "Refuter tokens: round 1 Nk (n runs, max Xk), round 2 Mk (m runs, max Yk)". When every refuter answers none, one line says so. When refuters are skipped ([§3](#3-proportionality)), the comment says "Refuters skipped (S, green); self-review:" and lists each area with one line.
 
 **A project adds an area** with its own `refuter-<area>.md`, built on the same shared block, for example offline use on a mobile app. At most 8 refuters in all. The project records why in its own ADR.
 

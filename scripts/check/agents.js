@@ -47,7 +47,7 @@ function agentErrors(agents) {
       continue;
     }
     for (const line of bad) errors.push(`${file}: frontmatter line is not "key: value" on one line: "${line.trim()}"`);
-    const base = file.replace(/\.md$/, '');
+    const base = path.basename(file).replace(/\.md$/, '');
     if (fields.name !== base) errors.push(`${file}: name is "${fields.name ?? ''}", must be "${base}"`);
     if (!fields.description) errors.push(`${file}: description is missing or empty`);
     else if (fields.description.length > MAX_DESCRIPTION) {
@@ -111,7 +111,9 @@ function load(root = ROOT) {
     const abs = path.join(root, dir);
     if (!fs.existsSync(abs)) continue;
     for (const file of fs.readdirSync(abs).filter((f) => f.endsWith('.md')).sort()) {
-      all.push({ dir, file, text: fs.readFileSync(path.join(abs, file), 'utf8') });
+      // Kit files keep their bare name; others carry their folder, so an error names the right file.
+      const shown = dir === AGENT_DIRS[0] ? file : path.join(dir, file);
+      all.push({ dir, file: shown, text: fs.readFileSync(path.join(abs, file), 'utf8') });
     }
   }
   const kit = all.filter((a) => a.dir === AGENT_DIRS[0]);
@@ -125,8 +127,9 @@ function check(root = ROOT) {
   const { all, kit, guide } = load(root);
   return [
     ...agentErrors(all),
-    // Refuter rules hold in each folder, so a refuter ported to template/ keeps them.
-    ...AGENT_DIRS.flatMap((dir) => refuterErrors(all.filter((a) => a.dir === dir).map((a) => ({ ...a, file: dir === AGENT_DIRS[0] ? a.file : path.join(dir, a.file) })))),
+    // Refuter rules hold per folder: the cap and the shared block are compared within each one,
+    // so a refuter ported to template/ keeps them.
+    ...AGENT_DIRS.flatMap((dir) => refuterErrors(all.filter((a) => a.dir === dir))),
     ...(guide ? guideErrors(guide, kit.map((a) => a.file)) : []),
   ];
 }

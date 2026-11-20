@@ -127,6 +127,8 @@ test('a refuter in template/ is held to the refuter rules too', () => {
   const out = check(root).join('\n');
   assert.match(out, /template\/\.claude\/agents\/refuter-tests\.md: tool "Bash" is not allowed/);
   assert.match(out, /refuter-x\.md: shared block differs/);
+  fs.writeFileSync(path.join(dir, 'refuter-y.md'), text.replace('name: refuter-tests', 'name: refuter-y').replace('model: claude-opus-5-5', 'model: opus'));
+  assert.match(check(root).join('\n'), /template\/\.claude\/agents\/refuter-y\.md: model "opus"/);
   fs.rmSync(root, { recursive: true });
 });
 
