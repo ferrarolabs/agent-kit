@@ -115,7 +115,9 @@ function load(root = ROOT) {
     }
   }
   const kit = all.filter((a) => a.dir === AGENT_DIRS[0]);
-  const guide = agentsFromGuide(fs.readFileSync(path.join(root, GUIDE), 'utf8'));
+  // A project copy has no work-flow guide: its refuters are checked, the guide rows aren't.
+  const guidePath = path.join(root, GUIDE);
+  const guide = fs.existsSync(guidePath) ? agentsFromGuide(fs.readFileSync(guidePath, 'utf8')) : null;
   return { all, kit, guide };
 }
 
@@ -124,7 +126,7 @@ function check(root = ROOT) {
   return [
     ...agentErrors(all),
     ...refuterErrors(kit),
-    ...guideErrors(guide, kit.map((a) => a.file)),
+    ...(guide ? guideErrors(guide, kit.map((a) => a.file)) : []),
   ];
 }
 
@@ -132,7 +134,7 @@ if (require.main === module) {
   const errors = check();
   for (const e of errors) console.error(`::error::${e}`);
   if (errors.length) process.exit(1);
-  console.log('agents: frontmatter, refuters and the guide agree');
+  console.log(load().guide ? 'agents: frontmatter, refuters and the guide agree' : `agents: frontmatter and refuters agree (no ${GUIDE} here, so no guide rows checked)`);
 }
 
 module.exports = {

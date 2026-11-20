@@ -96,6 +96,24 @@ test('a guide row with no file, and a file with no row, are caught', () => {
   assert.match(errs(guideErrors, ['refuter-a'], ['refuter-a.md', 'refuter-c.md', 'cold-reader.md']), /refuter-c\.md: no row/);
 });
 
+test('a project copy without the guide still checks its agents', () => {
+  const os = require('node:os');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agents-'));
+  const dir = path.join(root, '.claude', 'agents');
+  fs.mkdirSync(dir, { recursive: true });
+  for (const f of ['refuter-security.md', 'refuter-tests.md']) {
+    fs.copyFileSync(path.join(ROOT, '.claude', 'agents', f), path.join(dir, f));
+  }
+  assert.equal(load(root).guide, null);
+  assert.deepEqual(check(root), []);
+  fs.appendFileSync(path.join(dir, 'refuter-x.md'), '---\nname: refuter-x\ndescription: d\nmodel: sonnet\ntools: Read, Bash\n---\n');
+  const out = check(root).join('\n');
+  assert.match(out, /model "sonnet"/);
+  assert.match(out, /tool "Bash" is not allowed/);
+  assert.match(out, /refuter-x\.md: no shared block/);
+  fs.rmSync(root, { recursive: true });
+});
+
 test('the guide parser reads only the §2.2 table', () => {
   const text = '### 2.2 Ready\n| Area | Agent | Looks for |\n|---|---|---|\n| Tests | `refuter-tests` | x |\n\n### 2.3 Next\n| Other | `refuter-other` | y |\n';
   assert.deepEqual(agentsFromGuide(text), ['refuter-tests']);

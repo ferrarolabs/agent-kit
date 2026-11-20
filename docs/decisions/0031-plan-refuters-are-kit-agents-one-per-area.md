@@ -19,7 +19,7 @@ The first plan to go through refuters was this issue's own. Six ad-hoc refuters 
 - **At most 8 refuters** per project. A project that adds one records why in its own ADR.
 - **Cost limits.** At most 400 tokens of session listing for the six; measured 355. At most 900k subagent tokens per plan, both rounds, and about 100k per refuter run. Going over any of them reopens this ADR.
 - **A check keeps it true.** `scripts/check/agents.js` checks every agent: `name` matches the file, a description of at most 250 characters, a full-id model, a one-line `tools`. Each `refuter-*` has exactly those four keys, tools only from the set above, and the same shared block. There are at most 8, and each one matches a row of the guide's §2.2 table, both ways. Each rule was seen failing.
-- **A kit original.** Built in agent-kit, which plans an issue every day. jamly gets a copy, with `agents.js`, by its own issue. `template/` follows once jamly has used it.
+- **A kit original.** Built in agent-kit, which plans an issue every day. jamly gets a copy, with `agents.js`, by its own issue. Where the work-flow guide is absent, as on jamly, `agents.js` checks the agents and skips the guide rows. `template/` follows once jamly has used it.
 
 ## Consequences
 - Every session on agent-kit lists six more agents: 355 more input tokens on the first turn (35,680 → 36,035).
