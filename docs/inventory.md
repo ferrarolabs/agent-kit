@@ -59,6 +59,13 @@ Checked against jamly `dev` at `35b6077` (2026-11-01). Every harness merge since
 |---|---|---|---|---|
 | `.claude/hooks/command-log.js` + its test, the `hooks` block in `.claude/settings.json`, `.claude/logs/` gitignored | generic | [jamly#31](https://github.com/ferrarolabs/jamly/pull/31): a real session logged ok, failed, denied and redacted commands, and upserted the comment; each of the 11 redaction patterns seen failing (D58) | `.claude/hooks/command-log.js` · ported | The kit's test uses `node:test`, jamly's uses Jest ([ADR 0020](decisions/0020-template-hooks-tested-with-node-test.md)). Same cases. Comment examples made generic |
 
+## Built in the kit first
+A piece built in agent-kit, because agent-kit is the real project that proves it. The kit holds the original; jamly gets a copy by PR, and `template/` follows once jamly has used it ([ADR 0030](decisions/0030-every-issue-is-written-with-one-procedure.md)).
+
+| Piece in agent-kit | Scope | Proven | On jamly | Template | Notes |
+|---|---|---|---|---|---|
+| `.claude/skills/writing-issues/` and `.claude/agents/cold-reader.md` | generic | [Spec skill: turn an idea into a complete issue](https://github.com/ferrarolabs/agent-kit/issues/151) | to copy | `.claude/skills/`, `.claude/agents/` · to port | Every issue is written with it. Its templates are tested against [the body of each type](issue-structure.md#the-body-of-each-type) |
+
 ## Not on jamly yet
 
 Skills, subagents, the other hooks and `docs/progress.md`. They are Phase 2 and 3. Each gets a row here when its first PR merges on jamly.

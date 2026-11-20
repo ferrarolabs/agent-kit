@@ -42,10 +42,10 @@ The technical constraint that shapes everything: **a cloud session sees only wha
 
 | Level | Where it lives | What it holds | Applies to |
 |---|---|---|---|
-| **Account** | Skills on my claude.ai account | The *method*: writing specs, implementing an issue, critiquing, explaining, resuming work | Every cloud session, on every repo |
+| **Account** | Skills on my claude.ai account | The *method* that needs no repo: implementing an issue, critiquing, explaining, resuming work | Every cloud session, on every repo |
 | **Account rules** | `account/CLAUDE.md`, installed as `~/.claude/CLAUDE.md` by the setup script and on my machine | Rules that hold everywhere, always on (a skill only loads when it matches) | Every session, cloud or local, on every repo |
 | **Account deny floor** | `account/settings.json` and its SessionStart hook, installed in `~/.claude/` | The generic denies, and a warning when a project's own rules didn't load | Every session, wherever it starts |
-| **Kit** | This repo, copied into projects | Roles (subagents), hooks, permissions, rules, issue templates, baseline CI, a `CLAUDE.md` skeleton | Every project that adopts it |
+| **Kit** | This repo, copied into projects | Roles (subagents), hooks, permissions, rules, issue templates, baseline CI, a `CLAUDE.md` skeleton, and the skills everyone on a repo must use, such as writing issues (ADR 0030) | Every project that adopts it |
 | **Project** | The project's repo | Project-specific `CLAUDE.md`, architectural decisions, `progress.md`, `docs/learn/` | That project only |
 
 The kit is distributed like a library: **this repo is the original**, each project holds a **copy**. Until `sync-kit` exists, jamly holds the original of each piece and the kit follows it at every merge; [inventory.md](inventory.md) tracks each one (ADR 0014). Each project needs its own copy because a cloud session clones only the repo it works on. A sync script updates the generic files without touching the project-specific ones. No git submodules.
@@ -55,6 +55,7 @@ The kit is distributed like a library: **this repo is the original**, each proje
 ```text
 agent-kit/
 ├── CLAUDE.md                 # how to work on this repo
+├── .claude/                  # agent-kit's own harness; its skills/ and agents/ hold originals built here (ADR 0030)
 ├── docs/
 │   ├── PLAN.md               # this file
 │   ├── ROADMAP.md            # phases and checklists
