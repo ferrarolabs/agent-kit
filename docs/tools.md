@@ -58,6 +58,7 @@ Only the four built-in ones (`cc-plugin-agents-md`, `cc-plugin-telemetry`, `cc-p
 | `design`, `design-sync`, `slides` | bundled | off | Visual design and decks |
 | `artifact-capabilities`, `artifact-diagramming`, `dataviz` | bundled | name-only | The Artifact tool tells the model to load them; a name is enough to find them |
 | `writing-issues` | project (`.claude/skills/`) | keep | Every issue is written with it ([ADR 0030](decisions/0030-every-issue-is-written-with-one-procedure.md)). Added 2026-11-19: 231 input tokens on the first turn (35,333 → 35,564, same method). It comes with the `cold-reader` agent |
+| `refuter-*` agents (six) | project (`.claude/agents/`) | keep | Every plan goes through them ([ADR 0031](decisions/0031-plan-refuters-are-kit-agents-one-per-area.md)). Added 2026-11-20: 355 input tokens on the first turn (35,680 → 36,035, same method, in the repo root). Budget: 400 for the six. Over it, shorten the descriptions or reopen the ADR. A round of six costs about 420k subagent tokens: re-count it with the listing at the end of every phase |
 | `anthropic-skills:pdf` | account | keep | Reading PDFs a task brings |
 | `anthropic-skills:skill-creator` | account | keep | The kit will write skills (Phase 4) |
 | `session-start-hook`, `update-config`, `code-review`, `simplify`, `verify`, `debug`, `run`, `run-skill-generator`, `loop`, `batch`, `doctor`, `fewer-permission-prompts`, `claude-api`, `deep-research`, `plugin-authoring`, `workflow-authoring` | bundled | keep | Development |

@@ -64,6 +64,7 @@ A piece built in agent-kit, because agent-kit is the real project that proves it
 
 | Piece in agent-kit | Scope | Proven | On jamly | Template | Notes |
 |---|---|---|---|---|---|
+| `.claude/agents/refuter-*.md` (six) and `scripts/check/agents.js` | generic | [Plan refuters](https://github.com/ferrarolabs/agent-kit/issues/152) | to copy, with the check | `.claude/agents/` · to port | Every plan goes through them ([ADR 0031](decisions/0031-plan-refuters-are-kit-agents-one-per-area.md)). The check keeps the shared block identical and the tools read-only |
 | `.claude/skills/writing-issues/` and `.claude/agents/cold-reader.md` | generic | [Spec skill: turn an idea into a complete issue](https://github.com/ferrarolabs/agent-kit/issues/151) | to copy | `.claude/skills/`, `.claude/agents/` · to port | Every issue is written with it. Its templates are tested against [the body of each type](issue-structure.md#the-body-of-each-type) |
 
 ## Not on jamly yet
