@@ -1,6 +1,6 @@
 # 0023 · The work flow, from an idea to a PR
 
-**Status:** accepted · 2026-11-03 · supersedes the plan line of [ADR 0002](0002-state-lives-in-the-repo.md); adds a field to [ADR 0022](0022-issue-structure-types-and-fields.md)
+**Status:** accepted · 2026-11-03 · supersedes the plan line of [ADR 0002](0002-state-lives-in-the-repo.md); adds a field to [ADR 0022](0022-issue-structure-types-and-fields.md) · decision 4 amended by [ADR 0032](0032-the-review-level-is-the-prs-own-field.md)
 
 ## Context
 How an idea becomes an issue, a plan, a PR and something in production wasn't written down. Each session improvised. In the 2026-11-02 issue sweep, agents opened PRs with partial solutions, the `needs:elia` label and "Elia's steps" in the description. Elia had to review a PR that wasn't finished and also act on its instructions.
@@ -12,6 +12,7 @@ Elia first set four rules, then defined the whole flow and decided its open poin
 2. **The plan lives on the issue.** The agent drafts it, refuters in parallel (one per area) try to break it, and every objection is fixed or dismissed with a reason. The final plan is a comment on the issue.
 3. **Plan approval is a Stage loop, with no new value.** The agent posts the plan and sets `Asking`. The owner comments a verdict and always sets `Ready` again. The agent reads the comment: it proceeds, or it changes the plan and sets `Asking` again. This answers [Plan before code](https://github.com/ferrarolabs/agent-kit/issues/114).
 4. **A review level, set before and checked after.** A sixth issue field, **Review level**: `green` (the owner approves and merges without reading), `yellow` (he reads the PR description), `red` (he reviews the code). A third agent sets it on the plan; an independent agent re-assesses it on the PR. On the PR it is a check run named `Review level`, which also fails under a floor set by the files touched. This settles the levels of [Three review levels](https://github.com/ferrarolabs/agent-kit/issues/98).
+   *On the PR, the level is the PR's own `Review level` field, written by one script and shown by that check run ([ADR 0032](0032-the-review-level-is-the-prs-own-field.md)).*
 5. **Green never means the agent merges.** It means the owner can merge without reading. [Principle 7](../PLAN.md#2-principles) is unchanged.
 6. **Changes and blocks go on the issue, never in a partial PR.** A change of plan is a comment. A change to a requirement or a higher review level, or a block only the owner can lift, is a comment plus `Asking`.
 7. **A PR only when complete.** Every FR, NFR and Done when is validated, and an agent has used the result as a real user, reading only the issue body. Then the PR, from a template. No owner's steps in it.

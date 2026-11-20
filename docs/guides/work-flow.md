@@ -90,6 +90,8 @@ A **third agent**, which neither planned nor refuted, sets the issue field **Rev
 
 There is a floor the agent can't go under, set by the files the plan touches: harness, CI, deny rules, `settings.json`, auth, migrations and user data are always `red`. The check in [§2.7](#27-the-pr) enforces it ([Protect the grader](https://github.com/ferrarolabs/agent-kit/issues/61)).
 
+The same field is set again on the PR, as **the PR's `Review level` field** ([§2.7](#27-the-pr)).
+
 ### 2.4 The plan verdict
 The agent posts the **final plan** as a comment on the issue:
 
@@ -122,13 +124,23 @@ Only when §2.5 and §2.6 are all met, the agent opens the PR from the repo's PR
 
 - what was done, in a few lines, and the core of the issue;
 - the requirements table: each FR, NFR and Done when, its test, its result;
-- what the owner should look at, for the review level;
+- what the owner should look at, for the review level, and where to read it: "the latest comment marked Review level". No value and no link: the comment holds them;
 - what only the owner can check;
 - the learn note ([ADR 0013](../decisions/0013-every-feature-pr-ships-a-learn-note.md)).
 
-An **independent agent**, on a clean context, re-assesses the review level against what was really built. It confirms it or changes it, and says why.
+An **independent agent**, on a clean context, re-assesses the review level against what was really built, right after the PR opens. It sets **the PR's `Review level` field**, the same field the issues use, with one script ([ADR 0032](../decisions/0032-the-review-level-is-the-prs-own-field.md)):
 
-The level appears on the PR as a **check run** named `Review level`: a line in the PR's *Checks* list, with the value and the reason. The check also fails when the level is under the floor set by the files touched. One day a ruleset can require it, for auto-merge.
+```sh
+echo "<the reason, at most 300 characters>" | node scripts/review-level/set.js <pr> <green|yellow|red>
+```
+
+- The reason goes on stdin, never as an argument, so no shell expands it.
+- The script writes only that field, only on an open PR of this repo. It reads the value back, then posts a new PR comment, marked `<!-- review-level -->`: **`Review level: red`**, or **`Review level: red (was yellow)`** after a change, then the reason. It prints one line. The GitHub MCP can't write a field on a PR, and raw `gh api` could write any field, `Stage` included.
+- Exit 1 means nothing is shown. Recover first ([ADR 0010](../decisions/0010-agents-recover-before-they-escalate.md)). *Field set to X, comment not posted* is fixed by running it again. If it still fails, comment on the issue and set `Asking`.
+- When the PR's level is above the issue's, the agent raises the issue's field to match. It never lowers it.
+- It runs again only when asked, or when a push changes the files the PR touches.
+
+GitHub stores the field on the PR but doesn't show it on the PR page. A **check run** named `Review level` will show it: a line in the PR's *Checks* list, with the value and the reason. The check also fails when the level is under the floor set by the files touched. One day a ruleset can require it, for auto-merge. Until that check exists, the owner reads the level in the comment.
 
 The agent follows the PR to the end ([ADR 0012](../decisions/0012-agents-own-their-pr-to-the-end.md)) and sets Stage `In validation`.
 
@@ -153,5 +165,5 @@ The flow is decided; some of its tools are not built yet. They are the sub-issue
 
 | Piece | Until it exists |
 |---|---|
-| Review-level check | The independent agent's verdict is a line in the PR description |
+| Review-level check | The independent agent sets the PR's `Review level` field with the script; the level comment is where the owner reads it. Nothing enforces the floor yet |
 | PR template | The PR follows [§2.7](#27-the-pr) |
