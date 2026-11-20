@@ -55,7 +55,7 @@ The kit is distributed like a library: **this repo is the original**, each proje
 ```text
 agent-kit/
 ├── CLAUDE.md                 # how to work on this repo
-├── .claude/                  # agent-kit's own harness; its skills/ and agents/ hold originals built here (ADR 0030)
+├── .claude/                  # agent-kit's own harness; its skills/ and agents/ hold originals built here (ADR 0030, ADR 0031)
 ├── docs/
 │   ├── PLAN.md               # this file
 │   ├── ROADMAP.md            # phases and checklists

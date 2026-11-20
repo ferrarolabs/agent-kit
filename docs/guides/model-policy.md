@@ -21,7 +21,7 @@ When a new model family ships, update the ids in this guide and in every place l
 ## Where it applies
 
 - **Main session:** start it with the full id (`claude --model claude-opus-5-5`, or the model picker in the app). Coordination work runs here, so it is usually Opus.
-- **Subagents:** the `model:` field in `.claude/agents/<role>.md` frontmatter names a full id. The kit has no subagent definitions yet; every one added must follow this rule.
+- **Subagents:** the `model:` field in `.claude/agents/<role>.md` frontmatter names a full id. Every agent must follow this rule; `scripts/check/agents.js` fails CI on a missing model or an alias.
 - **Agent tool calls:** when an orchestrating session starts a worker with a `model` override, it follows the table above. A fork always runs on the parent's model.
 - **Scheduled tasks and sessions started by an agent:** pass the full id as the model.
 

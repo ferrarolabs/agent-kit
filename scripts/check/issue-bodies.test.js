@@ -5,7 +5,6 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { TYPES, SKILL, sectionsFromDoc, sectionsFromTemplate, compare, priorityLineErrors, frontmatter, load } = require('./issue-bodies');
 
-const ROOT = path.join(__dirname, '..', '..');
 
 test('every type has a template, and its sections match the doc', () => {
   const { doc, templates, raw } = load();
@@ -40,12 +39,9 @@ test('the doc parser reads only its own table', () => {
   assert.deepEqual(sectionsFromTemplate('## A\ntext\n### not this\n## B\n'), ['A', 'B']);
 });
 
-test('the skill and the cold reader load with what they need', () => {
+// The cold reader's frontmatter is checked in agents.test.js, with every other agent.
+test('the skill loads with what it needs', () => {
   const skill = frontmatter(fs.readFileSync(path.join(SKILL, 'SKILL.md'), 'utf8'));
   assert.equal(skill.name, 'writing-issues');
   assert.ok(skill.description.length > 0 && skill.description.length <= 1024, 'description is 1–1024 characters');
-  const agent = frontmatter(fs.readFileSync(path.join(ROOT, '.claude', 'agents', 'cold-reader.md'), 'utf8'));
-  assert.equal(agent.name, 'cold-reader');
-  assert.match(agent.model, /^claude-[a-z]+-\d+-\d+$/, 'model is a full id (model policy)');
-  assert.equal(agent.tools, 'Read', 'Read only: no shell, no network, no MCP');
 });
