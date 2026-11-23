@@ -1,0 +1,74 @@
+# The `Review level` check (ADR 0033): the PR's own level, against the floor set by the files it touches.
+#
+# It runs only on the default branch's code, so the App key in the `review-level` environment
+# (deployment branch: the default branch only) is never reachable from a PR's own workflow:
+#   - issue_comment: the marked comment set.js posts every time it writes the level;
+#   - workflow_run:  CI finished on a merge-queue commit. The queue's own merge_group run executes
+#                    the PR's copy of the workflows, so it is never trusted with the key.
+# It posts the check as the App `ferrarolabs-review-level`; the ruleset requires it from that App.
+# It never checks out or runs the PR's code: the PR's files are read as data, through the API.
+name: Review level
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_run:
+    # Must equal `name:` in ci.yml (review-level.test.js checks it).
+    workflows: [CI]
+    types: [completed]
+    branches: ['gh-readonly-queue/**']
+
+permissions: {}
+
+concurrency:
+  # One group per PR for comments (a newer comment cancels an older run), one per commit in the queue.
+  group: review-level-${{ github.event.issue.number || github.event.workflow_run.head_sha }}
+  cancel-in-progress: ${{ github.event_name == 'issue_comment' }}
+
+jobs:
+  post:
+    name: post review level
+    if: >-
+      (github.event_name == 'issue_comment'
+        && github.event.issue.pull_request
+        && startsWith(github.event.comment.body, '<!-- review-level -->')
+        && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
+      || (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'merge_group')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: review-level
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - name: check out the default branch's script and red list only
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/review-level/
+            .github/review-level-red.txt
+
+      - name: mint the App token (fails here if the environment refused this run)
+        id: app
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
+        with:
+          app-id: ${{ vars.REVIEW_LEVEL_APP_ID }}
+          private-key: ${{ secrets.REVIEW_LEVEL_APP_KEY }}
+          permission-checks: write
+
+      - name: compute and post the check
+        env:
+          MODE: ${{ github.event_name == 'issue_comment' && 'comment' || 'queue' }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          READ_TOKEN: ${{ github.token }}
+          APP_TOKEN: ${{ steps.app.outputs.token }}
+        run: node scripts/review-level/check.js

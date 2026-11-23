@@ -1,3 +1,4 @@
+# review-level.yml starts the merge queue's Review level check when this workflow ends (workflow_run, by name): rename it there too.
 name: CI
 
 on:

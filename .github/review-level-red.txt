@@ -1,0 +1,9 @@
+# The red list (ADR 0033): a PR that touches any of these paths has the floor `red`.
+# One glob per line. `**` is any depth, zero directories included; `*` stays inside one name.
+# This file is itself under .github/**, so a PR that edits it is red too.
+.claude/**
+account/**
+.github/**
+scripts/**
+template/**
+**/CLAUDE.md

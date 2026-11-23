@@ -18,7 +18,7 @@ Elia chose, on the issue: the field holds the value, and the `Review level` chec
 
 ## Limits, said plainly
 - "Set by the independent agent", "never Stage `Ready`" and "only this script writes" are rules, not guards. Raw `gh api` and the MCP can still write issue fields; nothing in the deny rules stops them ([threat model](../threat-model.md)). Whether the deny floor should block raw `gh api` writes is [its own decision](https://github.com/ferrarolabs/agent-kit/issues/194).
-- The real guard is the floor check of the Review-level check. Until it exists, nothing enforces the floor.
+- The real guard is the floor check, the `Review level` check run ([ADR 0033](0033-the-review-level-check.md)). It enforces the floor once the ruleset requires it.
 - The API is undocumented. If GitHub stops accepting the field on PRs, the script exits 1 and the check fails "no level", so the break is loud. Then this ADR is revisited.
 
 ## Alternatives rejected
