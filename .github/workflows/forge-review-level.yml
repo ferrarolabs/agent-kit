@@ -1,0 +1,16 @@
+# Throwaway live test R11 for the Review-level check: this PR's own workflow posts a passing
+# `Review level` with Actions' built-in token. The ruleset requires it from the App, so it must not count.
+# Never merged.
+name: forge review level
+on: pull_request
+permissions:
+  checks: write
+jobs:
+  forge:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: gh api -X POST "repos/$REPO/check-runs" -f name="Review level" -f head_sha="$SHA" -f status=completed -f conclusion=success -f 'output[title]=green · no floor' -f 'output[summary]=forged by the PR' --jq .id
