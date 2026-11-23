@@ -74,7 +74,7 @@ Org-level fields, the same in every repo. Six, against a limit of 25 ([S1](#6-so
 | **Effort** | Single select | `S`, `M`, `L` | Whoever writes the spec | GitHub default, T-shirt sizes suggested ([S1](#6-sources)); [board design §3.4](https://github.com/ferrarolabs/agent-kit/blob/89f8515/docs/project-boards.md#34-size-s--m--l) |
 | **Start date** | Date | any | Optional | GitHub default ([S1](#6-sources)) |
 | **Target date** | Date | any | Optional | GitHub default ([S1](#6-sources)) |
-| **Review level** | Single select | `green`, `yellow`, `red` | A separate agent on the plan; re-checked on the PR | [Work flow §2.3](guides/work-flow.md#23-the-review-level), ADR 0023 |
+| **Review level** | Single select | `green`, `yellow`, `red` | A separate agent on the plan. On the PR, an independent agent sets the PR's `Review level` field, the only field also set on PRs ([work flow §2.7](guides/work-flow.md#27-the-pr), [ADR 0032](decisions/0032-the-review-level-is-the-prs-own-field.md)) | [Work flow §2.3](guides/work-flow.md#23-the-review-level), ADR 0023 |
 
 ### Stage, in detail
 Stage answers one question: **whose turn is it?** That's what Rust's `S-waiting-on-author` / `S-waiting-on-review` do with labels ([S6](#6-sources)), and what Kubernetes' `triage/needs-information` does ([S5](#6-sources)).
