@@ -4,6 +4,5 @@
 .claude/**
 account/**
 .github/**
-scripts/**
 template/**
 **/CLAUDE.md
