@@ -3,7 +3,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { FIELD, MARKER, repoFromRemote, setReviewLevel } = require('./set');
+const { repoFromRemote, setReviewLevel } = require('./set');
+const { FIELD, MARKER } = require('./lib');
 
 const REPO = 'ferrarolabs/agent-kit';
 
@@ -116,12 +117,12 @@ test('a failed comment exits 1 saying the field is set; the next run posts it', 
   const gh = fakeGitHub({ failComment: true });
   const r = run(gh);
   assert.equal(r.ok, false);
-  assert.equal(r.line, 'failed: field set to red, comment not posted; run again to post it');
+  assert.equal(r.line, "failed: field set to red, comment not posted, so the check didn't run; run again");
   const again = fakeGitHub({ value: 'red' });
   const r2 = run(again);
   assert.equal(r2.ok, true, r2.line);
   assert.equal(again.comments.length, 1);
-  assert.doesNotMatch(again.comments[0].body, /was/);
+  assert.match(again.comments[0].body, /\*\*Review level: red\*\* \(re-checked\)/);
 });
 
 test('a change posts a second comment, marked with the old level', () => {
@@ -133,20 +134,13 @@ test('a change posts a second comment, marked with the old level', () => {
   assert.equal(gh.value, 'red');
 });
 
-test('the same level twice, already shown, posts nothing new', () => {
+test('the same level twice posts a second comment, marked re-checked: the comment starts the check', () => {
   const gh = fakeGitHub();
   run(gh);
   const r = run(gh);
-  assert.equal(r.ok, true);
-  assert.match(r.line, /unchanged/);
-  assert.equal(gh.comments.length, 1);
-});
-
-test('a marked comment by someone else does not count as shown', () => {
-  const forged = { user: { login: 'stranger' }, body: `${MARKER}\n**Review level: red**` };
-  const gh = fakeGitHub({ value: 'red', comments: [forged] });
-  assert.equal(run(gh).ok, true);
-  assert.equal(gh.comments.length, 2, 'the agent posts its own');
+  assert.equal(r.ok, true, r.line);
+  assert.equal(gh.comments.length, 2);
+  assert.match(gh.comments[1].body, /^<!-- review-level -->\n\*\*Review level: red\*\* \(re-checked\)/);
 });
 
 test('owner/repo is read from https, ssh and proxy remotes', () => {
@@ -159,7 +153,7 @@ test('owner/repo is read from https, ssh and proxy remotes', () => {
 // ADR 0032: agents are told to use one writer. Under scripts/, only these touch issue-field-values.
 test('under scripts/, only report-sync.js and set.js write issue field values', () => {
   const root = path.join(__dirname, '..');
-  const writers = { 'projects/report-sync.js': true, 'review-level/set.js': true, 'projects/status-step.js': false };
+  const writers = { 'projects/report-sync.js': true, 'review-level/set.js': true, 'projects/status-step.js': false, 'review-level/lib.js': false };
   for (const file of listJs(root)) {
     const rel = path.relative(root, file).split(path.sep).join('/');
     const lines = fs.readFileSync(file, 'utf8').split('\n').filter((l) => l.includes('issue-field-values'));

@@ -1,0 +1,126 @@
+// Run with: node --test (from the repo root)
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const lib = require('./lib');
+
+const RED = lib.parseGlobs(fs.readFileSync(path.join(__dirname, '..', '..', '.github', 'review-level-red.txt'), 'utf8'));
+const f = (filename, previous_filename) => ({ filename, previous_filename });
+
+test('the red list holds the six globs of the issue', () => {
+  assert.deepEqual(RED, ['.claude/**', 'account/**', '.github/**', 'scripts/**', 'template/**', '**/CLAUDE.md']);
+});
+
+test('red and not red, edges included', () => {
+  const red = [
+    'CLAUDE.md', 'template/CLAUDE.md', 'a/b/CLAUDE.md', '.claude/settings.json', '.claude/a/b.md',
+    'account/settings.json', '.github/workflows/ci.yml', '.github/review-level-red.txt',
+    'scripts/review-level/set.js', 'template/.claude/hooks/x.js',
+  ];
+  const notRed = [
+    'docs/PLAN.md', 'README.md', '.claudex/a', 'docs/scripts/a.md', 'template-notes.md',
+    'CLAUDE.md.bak', 'docs/CLAUDE.mdx', 'my.claude/x', 'xscripts/a.js', '.githubx/a',
+  ];
+  for (const p of red) assert.deepEqual(lib.redFiles([f(p)], RED), [p], `${p} is red`);
+  for (const p of notRed) assert.deepEqual(lib.redFiles([f(p)], RED), [], `${p} is not red`);
+});
+
+test('a renamed file counts by its old path and by its new one', () => {
+  assert.deepEqual(lib.redFiles([f('docs/settings.json', '.claude/settings.json')], RED), ['docs/settings.json']);
+  assert.deepEqual(lib.redFiles([f('.claude/x.md', 'docs/x.md')], RED), ['.claude/x.md']);
+  assert.deepEqual(lib.redFiles([f('docs/b.md', 'docs/a.md')], RED), []);
+});
+
+test('the red list protects itself: editing it is red', () => {
+  assert.deepEqual(lib.redFiles([f('.github/review-level-red.txt')], RED), ['.github/review-level-red.txt']);
+});
+
+test('the title table of the issue, row by row', () => {
+  const cases = [
+    [{ level: null, red: [] }, 'failure', 'no review level yet'],
+    [{ level: null, red: ['CLAUDE.md'] }, 'failure', 'no review level yet'],
+    [{ level: 'green', red: ['CLAUDE.md'] }, 'failure', 'green · floor red'],
+    [{ level: 'yellow', red: ['CLAUDE.md'] }, 'failure', 'yellow · floor red'],
+    [{ level: 'red', red: ['CLAUDE.md'] }, 'success', 'red · floor red'],
+    [{ level: 'yellow', red: [] }, 'success', 'yellow · no floor'],
+    [{ level: 'green', red: [] }, 'success', 'green · no floor'],
+  ];
+  for (const [input, conclusion, title] of cases) {
+    const v = lib.verdict(input);
+    assert.equal(v.conclusion, conclusion, title);
+    assert.equal(v.title, title);
+  }
+  assert.match(lib.verdict({ level: null, red: [] }).summary, /set\.js.*§2\.7/);
+});
+
+test('under the floor, the summary names the files; over 50, it caps the list', () => {
+  const v = lib.verdict({ level: 'green', red: ['.claude/settings.json'] });
+  assert.match(v.summary, /- `\.claude\/settings\.json`/);
+  const many = Array.from({ length: 5000 }, (_, i) => `scripts/f${i}.js`);
+  const big = lib.verdict({ level: 'green', red: many });
+  assert.match(big.summary, /- and 4950 more/);
+  assert.ok(big.summary.length < 65535, `${big.summary.length} characters`);
+});
+
+test('the reason is quoted as plain text, with no backticks to break out, at most 300 characters', () => {
+  const v = lib.verdict({ level: 'red', red: [], reason: 'x```\n[link](https://evil) ' + 'y'.repeat(400) });
+  const quoted = v.summary.split('```text\n')[1];
+  assert.doesNotMatch(quoted.split('\n```')[0], /`/);
+  assert.ok(quoted.split('\n```')[0].length <= 300);
+});
+
+test('an error is a failure titled error: <first line>', () => {
+  const v = lib.errorVerdict(new Error('HTTP 403\nmore'));
+  assert.equal(v.conclusion, 'failure');
+  assert.equal(v.title, 'error: HTTP 403');
+});
+
+test('readLevel: a value, none, a wrong field name, an unknown option', () => {
+  const api = (values) => () => values;
+  const val = (name, option) => [{ issue_field_id: lib.FIELD.id, issue_field_name: name, single_select_option: { name: option } }];
+  assert.equal(lib.readLevel(api(val('Review level', 'red')), 'o/r', 1), 'red');
+  assert.equal(lib.readLevel(api([]), 'o/r', 1), null);
+  assert.throws(() => lib.readLevel(api(val('Stage', 'Ready')), 'o/r', 1), /is "Stage", not "Review level"/);
+  assert.throws(() => lib.readLevel(api(val('Review level', 'purple')), 'o/r', 1), /unknown review level "purple"/);
+});
+
+test('the comment round-trips: what comment() writes, parseComment() reads back', () => {
+  for (const [before, note] of [[null, ''], ['yellow', ' (was yellow)'], ['red', ' (re-checked)']]) {
+    const body = lib.comment('red', before, '  Touches CLAUDE.md.  ');
+    assert.match(body, new RegExp(`^<!-- review-level -->\\n\\*\\*Review level: red\\*\\*${note.replace(/[()]/g, '\\$&')}\\n`));
+    assert.deepEqual(lib.parseComment(body), { level: 'red', reason: 'Touches CLAUDE.md.' });
+  }
+  const withFooter = `${lib.comment('green', null, 'Docs only.')}\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_`;
+  assert.deepEqual(lib.parseComment(withFooter), { level: 'green', reason: 'Docs only.' });
+  assert.equal(lib.parseComment('no marker'), null);
+  assert.equal(lib.parseComment(`${lib.MARKER}\nsomething else`), null);
+});
+
+test('queue branch: the PR number, or an error', () => {
+  const sha = 'a'.repeat(40);
+  assert.equal(lib.parseQueueBranch(`gh-readonly-queue/main/pr-196-${sha}`, 'main'), 196);
+  assert.equal(lib.parseQueueBranch(`gh-readonly-queue/dev/pr-7-${sha}`, 'dev'), 7);
+  for (const bad of [`gh-readonly-queue/dev/pr-196-${sha}`, `gh-readonly-queue/main/pr-196-abc`, 'main', `x/gh-readonly-queue/main/pr-1-${sha}`, `gh-readonly-queue/main/pr-1-${sha}; rm -rf /`]) {
+    assert.throws(() => lib.parseQueueBranch(bad, 'main'), /not a merge queue branch of main/, bad);
+  }
+});
+
+test('queue group: the PRs of the merge commits, oldest first; anything odd fails closed', () => {
+  const mc = (n, sha = String(n).padStart(40, '0')) => ({ sha, message: `Merge pull request #${n} from ferrarolabs/x\n\nbody` });
+  assert.deepEqual(lib.groupPrs([mc(9), mc(8), mc(7)], 9), [7, 8, 9]);
+  assert.throws(() => lib.groupPrs([], 9), /no merge commit/);
+  assert.throws(() => lib.groupPrs([mc(9), { sha: 'b'.repeat(40), message: 'fix: something' }], 9), /is not a PR merge commit/);
+  assert.throws(() => lib.groupPrs([mc(8)], 9), /head merges #8, the branch names #9/);
+  assert.throws(() => lib.groupPrs([1, 2, 3, 4, 5, 6].map((n) => mc(n)).reverse(), 6), /6 commits, at most 5/);
+});
+
+test('a group fails if one PR fails, and its title names that PR', () => {
+  const ok = (pr) => ({ pr, verdict: lib.verdict({ level: 'red', red: ['CLAUDE.md'] }) });
+  const bad = { pr: 196, verdict: lib.verdict({ level: 'green', red: ['CLAUDE.md'] }) };
+  const g = lib.groupVerdict([ok(195), bad, ok(197)]);
+  assert.equal(g.conclusion, 'failure');
+  assert.equal(g.title, '#196 green · floor red (1 of 3)');
+  assert.match(g.summary, /^Merge queue group:\n- #196: green · floor red\n/);
+  assert.equal(lib.groupVerdict([ok(195)]).conclusion, 'success');
+});

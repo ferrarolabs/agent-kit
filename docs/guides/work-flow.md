@@ -135,12 +135,20 @@ echo "<the reason, at most 300 characters>" | node scripts/review-level/set.js <
 ```
 
 - The reason goes on stdin, never as an argument, so no shell expands it.
-- The script writes only that field, only on an open PR of this repo. It reads the value back, then posts a new PR comment, marked `<!-- review-level -->`: **`Review level: red`**, or **`Review level: red (was yellow)`** after a change, then the reason. It prints one line. The GitHub MCP can't write a field on a PR, and raw `gh api` could write any field, `Stage` included.
+- The script writes only that field, only on an open PR of this repo. It reads the value back, then posts a new PR comment, marked `<!-- review-level -->`: **`Review level: red`**, **`Review level: red (was yellow)`** after a change, or **`Review level: red (re-checked)`** when the level didn't change. Then comes the reason. It prints one line. The GitHub MCP can't write a field on a PR, and raw `gh api` could write any field, `Stage` included.
+- **That comment starts the `Review level` check**, so the script posts one on every run.
 - Exit 1 means nothing is shown. Recover first ([ADR 0010](../decisions/0010-agents-recover-before-they-escalate.md)). *Field set to X, comment not posted* is fixed by running it again. If it still fails, comment on the issue and set `Asking`.
 - When the PR's level is above the issue's, the agent raises the issue's field to match. It never lowers it.
-- It runs again only when asked, or when a push changes the files the PR touches.
+- **Run it again after every push.** The check is attached to a commit, so a new head has no `Review level` until the script runs again, and the PR can't merge.
 
-GitHub stores the field on the PR but doesn't show it on the PR page. A **check run** named `Review level` will show it: a line in the PR's *Checks* list, with the value and the reason. The check also fails when the level is under the floor set by the files touched. One day a ruleset can require it, for auto-merge. Until that check exists, the owner reads the level in the comment.
+GitHub stores the field on the PR but doesn't show it on the PR page. The **check run** `Review level` shows it ([ADR 0033](../decisions/0033-the-review-level-check.md)). It is a line in the PR's *Checks* list, for example `green · floor red`, and its summary quotes the reason.
+- **It fails when the level is under the floor.** The floor is `red` when the PR touches a path in `.github/review-level-red.txt`, and there is none otherwise.
+- **It fails when the level is missing**, when the file list is cut short, or when anything can't be read.
+- **It runs only on PRs into the default branch** (`dev` in a project, `main` here). Promotion PRs are never checked.
+- **It is posted as the App `ferrarolabs-review-level`**, whose key only the default branch's workflow can use, so a PR's own workflow can't fake it.
+- **The merge queue gets its own check**, covering every PR in the group.
+- **Read only `Review level`.** The job beside it, `post review level`, is green whenever it posted.
+- **If `Review level` is missing or stale**, open that job's log. A failed *mint the App token* step means the App or its environment is broken: the agent comments on the issue and sets `Asking`.
 
 The agent follows the PR to the end ([ADR 0012](../decisions/0012-agents-own-their-pr-to-the-end.md)) and sets Stage `In validation`.
 
@@ -165,5 +173,5 @@ The flow is decided; some of its tools are not built yet. They are the sub-issue
 
 | Piece | Until it exists |
 |---|---|
-| Review-level check | The independent agent sets the PR's `Review level` field with the script; the level comment is where the owner reads it. Nothing enforces the floor yet |
+| `Review level` required in the default branch's ruleset | The check shows on every PR but blocks nothing. The owner adds it, from the App `ferrarolabs-review-level`, once it is proven live |
 | PR template | The PR follows [§2.7](#27-the-pr) |
