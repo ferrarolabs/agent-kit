@@ -1,0 +1,19 @@
+# Throwaway probe for the Review-level check: a run that isn't on the default branch must be
+# refused the review-level environment, so it can't mint the App token. Never merged.
+name: probe review-level env
+on:
+  push:
+    branches: [test/153-env-probe]
+  pull_request:
+permissions: {}
+jobs:
+  try:
+    runs-on: ubuntu-latest
+    environment: review-level
+    steps:
+      - name: try to mint the App token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
+        with:
+          app-id: ${{ vars.REVIEW_LEVEL_APP_ID }}
+          private-key: ${{ secrets.REVIEW_LEVEL_APP_KEY }}
+          permission-checks: write
