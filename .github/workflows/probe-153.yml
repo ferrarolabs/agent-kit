@@ -1,0 +1,17 @@
+# Throwaway probe for the Review-level check issue: can GITHUB_TOKEN read issue fields? Never merged.
+name: probe-153
+on: pull_request
+permissions:
+  issues: read
+  pull-requests: read
+  checks: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "== fields on PR 196"; gh api repos/${{ github.repository }}/issues/196/issue-field-values --jq '.[] | "\(.issue_field_id) \(.issue_field_name)=\(.single_select_option.name)"' || echo "FIELDS FAILED"
+          echo "== files of PR 196"; gh api "repos/${{ github.repository }}/pulls/196/files?per_page=100" --jq 'length' || echo "FILES FAILED"
+          echo "== check run on this PR's head"; gh api -X POST repos/${{ github.repository }}/check-runs -f name="probe-153 title" -f head_sha=${{ github.event.pull_request.head.sha }} -f status=completed -f conclusion=success -f 'output[title]=green · no floor' -f 'output[summary]=probe' --jq .id || echo "CHECK FAILED"
