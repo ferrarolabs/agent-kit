@@ -135,7 +135,7 @@ echo "<the reason, at most 300 characters>" | node scripts/review-level/set.js <
 ```
 
 - The reason goes on stdin, never as an argument, so no shell expands it.
-- The script writes only that field, only on an open PR of this repo. It reads the value back, then posts a new PR comment, marked `<!-- review-level -->`: **`Review level: red`**, **`Review level: red (was yellow)`** after a change, or **`Review level: red (re-checked)`** when the level didn't change. Then comes the reason. It prints one line. The GitHub MCP can't write a field on a PR, and raw `gh api` could write any field, `Stage` included.
+- The script writes only that field, only on an open PR of this repo. It reads the value back, then posts a new PR comment, marked `<!-- review-level -->`: **`Review level: red`**, **`Review level: red (was yellow)`** after a change, or **`Review level: red (re-checked)`** when the level didn't change. Then comes the reason. It prints one line. Raw `gh api` would write the field with no check of its id or its value, and no comment.
 - **That comment starts the `Review level` check**, so the script posts one on every run.
 - Exit 1 means nothing is shown. Recover first ([ADR 0010](../decisions/0010-agents-recover-before-they-escalate.md)). *Field set to X, comment not posted* is fixed by running it again. If it still fails, comment on the issue and set `Asking`.
 - When the PR's level is above the issue's, the agent raises the issue's field to match. It never lowers it.

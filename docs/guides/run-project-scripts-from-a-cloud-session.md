@@ -19,15 +19,7 @@ The workflow refuses anything else before it runs the script.
 
 ## Start a run
 
-With the GitHub MCP tool:
-
-```text
-actions_run_trigger  method=run_workflow  owner=ferrarolabs  repo=agent-kit
-                     workflow_id=projects.yml  ref=main
-                     inputs={"mode": "check", "title": "Agent work"}
-```
-
-Or over REST:
+Over REST:
 
 ```bash
 gh api -X POST repos/ferrarolabs/agent-kit/actions/workflows/projects.yml/dispatches \
@@ -48,9 +40,20 @@ The call returns nothing on success (HTTP 204). Use `ref=main` unless you are te
 
 ## Read the run
 
-1. `actions_list  method=list_workflow_runs  resource_id=projects.yml` and take the newest run. Wait for `status: completed`.
-2. `conclusion: success` means the project matches the template (`check`) or was built (`build`).
-3. For the output, `actions_list  method=list_workflow_jobs  resource_id=<run id>`, then `get_job_logs  job_id=<job id>  return_content=true`. Each line of the script is `ok` or `FAIL`. The same output is in the run's summary page.
+1. Take the newest run, and wait for `status` to read `completed`:
+
+   ```bash
+   gh api "repos/ferrarolabs/agent-kit/actions/workflows/projects.yml/runs?per_page=1" \
+     --jq '.workflow_runs[0] | "\(.id) \(.status) \(.conclusion)"'
+   ```
+
+2. `success` means the project matches the template (`check`) or was built (`build`).
+3. For the output, list the run's jobs, then read a job's log. Each line of the script is `ok` or `FAIL`. The same output is in the run's summary page.
+
+   ```bash
+   gh api repos/ferrarolabs/agent-kit/actions/runs/<run id>/jobs --jq '.jobs[] | "\(.id) \(.name) \(.conclusion)"'
+   gh api repos/ferrarolabs/agent-kit/actions/jobs/<job id>/logs
+   ```
 
 ## When it fails
 
