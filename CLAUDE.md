@@ -27,7 +27,23 @@ This repo is the **kit**, not an application. It holds the plan and, over time, 
 These hold whenever you work on your own, for example in a cloud session started from an issue.
 
 - **One issue, one branch, one PR.** Branch `<type>/<issue>-<slug>`, e.g. `chore/55-harness-agent-kit`, cut from `main`. Open the PR against `main`; never merge it, never push to `main`. It merges through the merge queue after my approval (ADR 0015). Always push with the branch named: `git push -u origin <your-branch>`. A bare `git push`, `git push origin` or `... HEAD` is denied, because it can't be told apart from a push to `main`.
-- **Stage is the handshake** ([issue-structure.md §3](docs/issue-structure.md#3-issue-fields)). `Stage` is an org issue field. Find work with the GitHub MCP `list_issues` and `field_filters: [{field_name: "Stage", value: "Ready"}]`; GitHub search can't filter on it, and an empty list means nothing is `Ready`. Set it with `issue_write` and `issue_fields: [{field_name: "Stage", field_option_name: "Working"}]`. Start only on `Ready`, or on an issue I name in the session; set `Working` when you start. If you stop for any reason other than done, set `Asking` and say in a comment what I must do. When the PR is complete, set `In validation`. Never set `Ready`: that one is mine.
+- **Stage is the handshake** ([issue-structure.md §3](docs/issue-structure.md#3-issue-fields)). `Stage` is an org issue field, read and set over REST with `gh api`. Start only on `Ready`, or on an issue I name in the session; set `Working` when you start. If you stop for any reason other than done, set `Asking` and say in a comment what I must do. When the PR is complete, set `In validation`. Never set `Ready`: that one is mine. Nothing technical stops a write of `Ready`; the rule does ([Decide: should the deny floor block GitHub writes that get around the owner?](https://github.com/ferrarolabs/agent-kit/issues/194)).
+  - **Find work.** It prints the number of each open issue whose Stage is the value after `--arg s`. GitHub search can't filter on fields, but the issues list carries them. No output means nothing is in that Stage. An error means the list came back without fields: read one issue's `issue-field-values` and recover.
+
+    ```sh
+    gh api "repos/ferrarolabs/<repo>/issues?state=open&per_page=100" --paginate --slurp | jq -r --arg s Ready 'add | map(select(.pull_request | not)) | if all(.[]; (.issue_field_values // []) | all(.issue_field_name != "Stage")) then "no open issue has a Stage: the list returned no fields\n" | halt_error(1) else .[] | select(any(.issue_field_values[]; .issue_field_name == "Stage" and .single_select_option.name == $s)) | .number end'
+    ```
+
+  - **Set it** to `Working`, `Asking` or `In validation`. `49499967` is Stage's id, as `GET …/issue-field-values` shows it; sessions can't list the org's fields. The other fields are kept.
+
+    ```sh
+    echo '{"issue_field_values":[{"field_id":49499967,"value":"Working"}]}' \
+      | gh api -X POST repos/ferrarolabs/<repo>/issues/<n>/issue-field-values --input -
+    gh api repos/ferrarolabs/<repo>/issues/<n>/issue-field-values \
+      --jq '.[] | select(.issue_field_name == "Stage") | .single_select_option.name'
+    ```
+
+    The second command must print the value you set. Anything else is a failed write: recover, don't go on.
 - **The work flow** ([guide](docs/guides/work-flow.md), ADR 0023). Plan on the issue first, refuted by parallel agents unless it's Effort S and green, with a review level set by a separate agent. Post it, set `Asking`, stop. Resume when I set `Ready` again, and do what my last comment says: go, or change the plan and ask again. Open the PR only when every requirement and Done when is validated and you've used the result as a user would; no "Elia's steps" in it. On the PR, an independent agent sets the PR's `Review level` field ([§2.7](docs/guides/work-flow.md#27-the-pr)).
 - **Every issue is written with the [writing-issues skill](.claude/skills/writing-issues/SKILL.md)** (ADR 0030): new, rewritten or split, whether I asked for it or you opened it on your own. Alone, park what only I can answer under Open questions. Never set Stage `Ready`.
 - **Blocked or a product question → ask on the issue, not in a PR.** If the issue doesn't settle a choice that is mine (scope, what the kit should do, a trade-off between principles in `docs/PLAN.md`), or only I can unblock it, don't guess: comment on the issue with the problem and the one thing I must do, set `Asking`, and stop. No partial PR.
